@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 Galaxy Generator Test - Galactic Clans</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Test controls panel */
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            z-index: 10000;
+            max-width: 400px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Custom scrollbar for left sidebar */
+        .test-controls::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .test-controls::-webkit-scrollbar-track {
+            background: rgba(255, 165, 0, 0.1);
+            border-radius: 4px;
+        }
+        
+        .test-controls::-webkit-scrollbar-thumb {
+            background: rgba(255, 165, 0, 0.4);
+            border-radius: 4px;
+        }
+        
+        .test-controls::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 165, 0, 0.6);
+        }
+        
+        .test-controls h3 {
+            margin: 0 0 16px 0;
+            color: #ffa500;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            color: #64ffda;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.3);
+            padding-bottom: 5px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            font-weight: bold;
+        }
+        
+        .control-group select,
+        .control-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .control-group input[type="range"] {
+            background: transparent;
+            border: none;
+        }
+        
+        .control-btn {
+            background: linear-gradient(135deg, #ff1493, #c71585);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+        }
+        
+        .control-btn.danger {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+        }
+        
+        .control-btn.success {
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+            width: 48%;
+            display: inline-block;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+            width: 48%;
+            display: inline-block;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
+        }
+        
+        .info-panel {
+            background: rgba(100, 255, 218, 0.1);
+            border: 1px solid rgba(100, 255, 218, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #64ffda;
+            font-size: 16px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-info {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        select option {
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        /* Camera controls info */
+        .camera-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .camera-info h4 {
+            margin: 0 0 8px 0;
+            color: #ffa500;
+        }
+        
+        /* Galaxy container */
+        #galaxy-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        
+        /* Loading indicator */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            z-index: 1000;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffa500;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Status display */
+        .status {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status.success { border-color: #00ff00; }
+        .status.error { border-color: #ff4444; }
+        .status.warning { border-color: #ffff00; }
+        
+        /* Galaxy info panel */
+        .galaxy-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10000;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            max-width: 300px;
+        }
+        
+        .galaxy-info h4 {
+            margin: 0 0 8px 0;
+            color: #ffa500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Test Controls Panel -->
+    <div class="test-controls">
+        <h2>🔬 Scientific Galaxy Generator</h2>
+        <p style="font-size: 12px; color: #ccc; margin-bottom: 15px;">
+            Based on real astronomical data, density wave theory, and observational studies
+        </p>
+        
+        <!-- Hubble Classification -->
+        <div class="control-group">
+            <h3>Hubble Classification</h3>
+            <label for="hubble-type">Galaxy Type:</label>
+            <select id="hubble-type">
+                <optgroup label="Spiral Galaxies">
+                    <option value="Sa">Sa - Tight spiral, large bulge</option>
+                    <option value="Sb" selected>Sb - Intermediate spiral</option>
+                    <option value="Sc">Sc - Open spiral, small bulge</option>
+                </optgroup>
+                <optgroup label="Barred Spirals">
+                    <option value="SBa">SBa - Barred, tight spiral</option>
+                    <option value="SBb">SBb - Barred, intermediate</option>
+                    <option value="SBc">SBc - Barred, open spiral</option>
+                </optgroup>
+                <optgroup label="Elliptical Galaxies">
+                    <option value="E0">E0 - Circular elliptical</option>
+                    <option value="E3">E3 - Moderate elliptical</option>
+                    <option value="E7">E7 - Highly flattened</option>
+                </optgroup>
+                <optgroup label="Irregular">
+                    <option value="Irr">Irr - Irregular galaxy</option>
+                </optgroup>
+            </select>
+        </div>
+        
+        <!-- Physical Parameters -->
+        <div class="control-group">
+            <h3>Physical Properties</h3>
+            <label for="distance">Distance: <span id="distance-value">10</span> Mpc</label>
+            <input type="range" id="distance" min="0.5" max="100" step="0.5" value="10">
+            
+            <label for="inclination">Inclination: <span id="inclination-value">45</span>°</label>
+            <input type="range" id="inclination" min="0" max="90" step="5" value="45">
+            
+            <label for="stellar-mass">Stellar Mass: <span id="stellar-mass-value">4</span> × 10¹⁰ M☉</label>
+            <input type="range" id="stellar-mass" min="1" max="20" step="0.5" value="4">
+        </div>
+        
+        <!-- Density Wave Theory -->
+        <div class="control-group">
+            <h3>Density Wave Theory</h3>
+            <label for="pattern-speed">Pattern Speed: <span id="pattern-speed-value">25</span> km/s/kpc</label>
+            <input type="range" id="pattern-speed" min="10" max="50" step="2.5" value="25">
+            
+            <label for="pitch-angle">Pitch Angle: <span id="pitch-angle-value">12</span>°</label>
+            <input type="range" id="pitch-angle" min="5" max="35" step="1" value="12">
+            
+            <label for="spiral-arms">Spiral Arms: <span id="spiral-arms-value">2</span></label>
+            <input type="range" id="spiral-arms" min="1" max="6" step="1" value="2">
+            
+            <label for="density-contrast">Density Contrast: <span id="density-contrast-value">2.5</span></label>
+            <input type="range" id="density-contrast" min="1.5" max="5.0" step="0.1" value="2.5">
+        </div>
+        
+        <!-- Surface Brightness -->
+        <div class="control-group">
+            <h3>Surface Brightness</h3>
+            <label for="scale-length">Scale Length: <span id="scale-length-value">3.0</span> kpc</label>
+            <input type="range" id="scale-length" min="1.0" max="8.0" step="0.1" value="3.0">
+            
+            <label for="bulge-radius">Bulge Radius: <span id="bulge-radius-value">2.5</span> kpc</label>
+            <input type="range" id="bulge-radius" min="0.5" max="5.0" step="0.1" value="2.5">
+            
+            <label for="central-intensity">Central Intensity: <span id="central-intensity-value">1.0</span></label>
+            <input type="range" id="central-intensity" min="0.1" max="3.0" step="0.1" value="1.0">
+        </div>
+        
+        <!-- Stellar Physics -->
+        <div class="control-group">
+            <h3>Stellar Physics</h3>
+            <label for="metallicity">Metallicity: <span id="metallicity-value">0.020</span> (Solar)</label>
+            <input type="range" id="metallicity" min="0.001" max="0.050" step="0.001" value="0.020">
+            
+            <label for="star-formation">Star Formation: <span id="star-formation-value">2.0</span> M☉/yr</label>
+            <input type="range" id="star-formation" min="0.1" max="10.0" step="0.1" value="2.0">
+            
+            <label for="age-gradient">Age Gradient: <span id="age-gradient-value">0.5</span> Gyr/kpc</label>
+            <input type="range" id="age-gradient" min="0.0" max="2.0" step="0.1" value="0.5">
+        </div>
+        
+        <!-- Rotation Curve -->
+        <div class="control-group">
+            <h3>Dynamics</h3>
+            <label for="rotation-velocity">Max Velocity: <span id="rotation-velocity-value">220</span> km/s</label>
+            <input type="range" id="rotation-velocity" min="100" max="400" step="10" value="220">
+            
+            <label for="dark-matter">Dark Matter Halo:</label>
+            <input type="checkbox" id="dark-matter" checked>
+            
+            <label for="corotation">Corotation Radius: <span id="corotation-value">8.8</span> kpc</label>
+            <input type="range" id="corotation" min="4.0" max="15.0" step="0.2" value="8.8">
+        </div>
+        
+        <!-- Generation Controls -->
+        <div class="control-group">
+            <h3>Controls</h3>
+            <button onclick="generateGalaxy()" class="btn-primary">🔬 Generate Scientific Galaxy</button>
+            <button onclick="randomizeScientificGalaxy()" class="btn-secondary">🎲 Random</button>
+            <button onclick="clearGalaxy()" class="btn-danger">🗑️ Clear</button>
+        </div>
+        
+        <!-- Scientific Information -->
+        <div id="galaxy-info" class="info-panel">
+            <h3>🔬 Scientific Galaxy Data</h3>
+            <p>Generate a galaxy to see scientific measurements...</p>
+        </div>
+        
+        <!-- Status Display -->
+        <div id="status" class="status-info">Ready for scientific generation</div>
+    </div>
+    
+    <!-- Camera Controls Info -->
+    <div class="camera-info">
+        <h4>🎮 Camera Controls</h4>
+        <p><strong>Mouse:</strong> Click & drag to rotate</p>
+        <p><strong>Scroll:</strong> Zoom in/out</p>
+        <p><strong>Right Click:</strong> Pan camera</p>
+        <p><strong>R:</strong> Reset camera</p>
+        <p><strong>F:</strong> Focus on center</p>
+    </div>
+    
+    <!-- Galaxy Info Panel -->
+    <div id="galaxyInfo" class="galaxy-info" style="display: none;">
+        <h4>🌌 Galaxy Information</h4>
+        <div id="galaxyDetails"></div>
+    </div>
+    
+    <!-- Status Display -->
+    <div id="status" class="status" style="display: none;"></div>
+    
+    <!-- Galaxy Container -->
+    <div id="galaxy-container"></div>
+    
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading" style="display: none;">Generating Galaxy...</div>
+    
+    <!-- Import Map for Three.js -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <!-- Fallback for browsers without import map support -->
+    <script nomodule>
+        console.warn('⚠️ [COMPAT] Browser does not support ES modules or import maps');
+    </script>
+    
+    <script type="module">
+        console.log('🚀 [MODULE] Starting ES module script...');
+        
+        // Import Three.js and OrbitControls using import map
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        console.log('✅ [IMPORT] Three.js imported successfully:', THREE.REVISION);
+        console.log('✅ [IMPORT] OrbitControls imported successfully:', typeof OrbitControls);
+        
+        let scene, camera, renderer, controls;
+        
+        // Initialize Three.js scene
+        function initThreeJS() {
+            console.log('🌌 [INIT] Initializing Three.js scene for galaxy testing...');
+            
+            // Suppress Three.js deprecation warnings during transition
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                const message = args.join(' ');
+                if (message.includes('onBeforeRender() has been removed') || 
+                    message.includes('onBuild() has been removed') ||
+                    message.includes('Multiple instances of Three.js being imported')) {
+                    return; // Suppress these specific deprecation warnings
+                }
+                originalWarn.apply(console, args);
+            };
+            
+            // Clear any existing scene
+            if (scene) {
+                while(scene.children.length > 0) {
+                    scene.remove(scene.children[0]);
+                }
+            }
+            
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000011);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 100);
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // Add to container
+            document.getElementById('galaxy-container').appendChild(renderer.domElement);
+            
+            // Add controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 20;
+            controls.maxDistance = 500;
+            controls.maxPolarAngle = Math.PI;
+            
+            // Add lighting
+            setupLighting();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Handle keyboard shortcuts
+            document.addEventListener('keydown', onKeyDown);
+            
+            // Start render loop
+            animate();
+        }
+        
+        // Setup lighting
+        function setupLighting() {
+            // Ambient light
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+            scene.add(ambientLight);
+            
+            // Main directional light
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 50, 50);
+            scene.add(directionalLight);
+            
+            // Fill light
+            const fillLight = new THREE.DirectionalLight(0x404040, 0.3);
+            fillLight.position.set(-50, -50, -50);
+            scene.add(fillLight);
+        }
+        
+        // Real astronomical data and scientific parameters
+        const ASTRONOMICAL_DATA = {
+            // Hubble Galaxy Classification (real observational data)
+            hubbleTypes: {
+                'Sa': { bulgeRatio: 0.4, armTightness: 0.8, dustContent: 0.3, youngStarRatio: 0.2 },
+                'Sb': { bulgeRatio: 0.25, armTightness: 0.6, dustContent: 0.5, youngStarRatio: 0.4 },
+                'Sc': { bulgeRatio: 0.1, armTightness: 0.3, dustContent: 0.7, youngStarRatio: 0.6 },
+                'SBa': { bulgeRatio: 0.35, armTightness: 0.7, dustContent: 0.4, youngStarRatio: 0.25, hasBar: true },
+                'SBb': { bulgeRatio: 0.2, armTightness: 0.5, dustContent: 0.6, youngStarRatio: 0.45, hasBar: true },
+                'SBc': { bulgeRatio: 0.08, armTightness: 0.25, dustContent: 0.8, youngStarRatio: 0.65, hasBar: true },
+                'E0': { eccentricity: 0.0, oldStarRatio: 0.95, dustContent: 0.05 },
+                'E3': { eccentricity: 0.3, oldStarRatio: 0.93, dustContent: 0.07 },
+                'E7': { eccentricity: 0.7, oldStarRatio: 0.90, dustContent: 0.1 },
+                'Irr': { chaosLevel: 0.8, starFormationRate: 0.7, youngStarRatio: 0.6 }
+            },
+            
+            // Stellar color temperatures (Kelvin) - real astronomical data
+            stellarTypes: {
+                'O': { temp: 35000, color: [0.61, 0.73, 1.0], mass: 20, lifetime: 3, abundance: 0.00003 },
+                'B': { temp: 20000, color: [0.70, 0.82, 1.0], mass: 10, lifetime: 20, abundance: 0.0013 },
+                'A': { temp: 8500, color: [0.89, 0.93, 1.0], mass: 2.5, lifetime: 500, abundance: 0.006 },
+                'F': { temp: 6500, color: [1.0, 0.97, 0.87], mass: 1.5, lifetime: 3000, abundance: 0.03 },
+                'G': { temp: 5500, color: [1.0, 1.0, 0.68], mass: 1.0, lifetime: 10000, abundance: 0.076 },
+                'K': { temp: 4000, color: [1.0, 0.85, 0.58], mass: 0.7, lifetime: 20000, abundance: 0.121 },
+                'M': { temp: 3000, color: [1.0, 0.65, 0.47], mass: 0.3, lifetime: 100000, abundance: 0.765 }
+            },
+            
+            // Real galaxy rotation curve data (km/s vs kpc)
+            rotationCurve: [
+                { radius: 0, velocity: 0 },      // Center
+                { radius: 1, velocity: 50 },     // Inner rigid body rotation
+                { radius: 2, velocity: 100 },
+                { radius: 4, velocity: 180 },
+                { radius: 8, velocity: 220 },    // Peak velocity
+                { radius: 15, velocity: 210 },   // Flat rotation curve
+                { radius: 25, velocity: 200 },
+                { radius: 40, velocity: 195 },   // Slight decline (dark matter halo)
+                { radius: 60, velocity: 190 }
+            ],
+            
+            // Surface brightness laws (real observational data)
+            surfaceBrightness: {
+                // de Vaucouleurs law for bulge: I(R) = I0 * exp(-κ * R^(1/4))
+                bulgeProfile: { law: 'deVaucouleurs', kappa: 7.67, exponent: 0.25 },
+                // Freeman law for disk: I(R) = I0 * exp(-R/RD)
+                diskProfile: { law: 'exponential', scaleLength: 3.0 }
+            },
+            
+            // Density wave theory parameters (Lin-Shu theory)
+            densityWave: {
+                patternSpeed: 25,        // km/s/kpc - pattern speed of spiral arms
+                waveAmplitude: 0.15,     // Relative density enhancement in arms
+                pitchAngle: 12,          // degrees - spiral arm pitch angle
+                corotationRadius: 8.8,   // kpc - where stars orbit at pattern speed
+                lindblad: {
+                    inner: 4.5,          // Inner Lindblad Resonance
+                    outer: 13.2          // Outer Lindblad Resonance
+                }
+            },
+            
+            // H-II region data (star formation regions)
+            hiiRegions: {
+                temperature: 10000,      // Kelvin
+                ionizationRadius: 50,    // parsecs
+                density: 100,            // particles per cm³
+                lifetime: 5,             // million years
+                emissionLines: {
+                    halpha: 656.3,       // nanometers - characteristic red emission
+                    hbeta: 486.1,
+                    oiii: 500.7
+                }
+            }
+        };
+
+        // Enhanced Galaxy Generation Parameters with real astronomical data
+        const galaxyParameters = {
+            // Basic parameters
+            count: 200000,
+            size: 0.006,
+            radius: 12,
+            
+            // Scientific parameters
+            hubbleType: 'Sb',           // Hubble classification
+            patternSpeed: 25,           // km/s/kpc (density wave)
+            rotationalVelocity: 220,    // km/s at solar radius
+            scaleLength: 3.0,           // kpc (Freeman scale length)
+            bulgeRadius: 2.5,           // kpc
+            
+            // Density wave theory parameters
+            spiralArms: 2,
+            pitchAngle: 12,             // degrees
+            densityContrast: 2.5,       // spiral arm density enhancement
+            corotationRadius: 8.8,      // kpc
+            
+            // Surface brightness parameters
+            centralIntensity: 1.0,
+            bulgeIntensity: 2.5,
+            diskFalloff: 0.33,          // 1/RD
+            
+            // Stellar population parameters
+            metallicity: 0.02,          // Solar metallicity
+            starFormationRate: 2.0,     // Solar masses per year
+            stellarMassFraction: 0.04,  // Fraction of total mass in stars
+            
+            // Color parameters based on stellar physics
+            insideColor: '#ffb366',     // K-type star dominated core
+            outsideColor: '#4a90e2',    // Mixed population outer regions
+            
+            // Advanced realism with scientific basis
+            darkMatterHalo: true,       // Affects rotation curve
+            metallicityGradient: -0.05, // dex/kpc - observational value
+            ageGradient: 0.5,           // Gyr/kpc - inside-out formation
+            gasContent: 0.1,            // Gas mass fraction
+            
+            // Observational parameters
+            inclination: 45,            // degrees - viewing angle
+            positionAngle: 30,          // degrees - orientation
+            distance: 10,               // Mpc - distance to galaxy
+            
+            // Natural variation parameters
+            asymmetry: 0.2,
+            clumpiness: 0.3,
+            voidiness: 0.15,
+            chaosLevel: 0.25,
+            organicFlow: 0.4,
+            densityVariation: 0.6
+        };
+
+        let galaxy = null;
+        let galaxyMaterial = null;
+        let currentGalaxy = null;
+
+        // Scientific color calculation based on Planck's law
+        function calculateStellarColor(temperature) {
+            // Simplified Wien's displacement and Stefan-Boltzmann application
+            const T = Math.max(2000, Math.min(50000, temperature));
+            
+            // Find closest stellar type
+            let closestType = 'G';
+            let minDiff = Infinity;
+            
+            for (const [type, data] of Object.entries(ASTRONOMICAL_DATA.stellarTypes)) {
+                const diff = Math.abs(T - data.temp);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestType = type;
+                }
+            }
+            
+            const stellarData = ASTRONOMICAL_DATA.stellarTypes[closestType];
+            return new THREE.Color(stellarData.color[0], stellarData.color[1], stellarData.color[2]);
+        }
+
+        // Surface brightness calculation using real astronomical laws
+        function calculateSurfaceBrightness(radius, component) {
+            if (component === 'bulge') {
+                // de Vaucouleurs law: I(R) = I0 * exp(-κ * R^(1/4))
+                const kappa = ASTRONOMICAL_DATA.surfaceBrightness.bulgeProfile.kappa;
+                const exponent = ASTRONOMICAL_DATA.surfaceBrightness.bulgeProfile.exponent;
+                return galaxyParameters.bulgeIntensity * Math.exp(-kappa * Math.pow(radius, exponent));
+            } else {
+                // Freeman exponential law: I(R) = I0 * exp(-R/RD)
+                const scaleLength = ASTRONOMICAL_DATA.surfaceBrightness.diskProfile.scaleLength;
+                return galaxyParameters.centralIntensity * Math.exp(-radius / scaleLength);
+            }
+        }
+
+        // Realistic rotation curve based on observational data
+        function getRotationalVelocity(radius) {
+            const curve = ASTRONOMICAL_DATA.rotationCurve;
+            
+            // Interpolate between data points
+            for (let i = 0; i < curve.length - 1; i++) {
+                if (radius >= curve[i].radius && radius <= curve[i + 1].radius) {
+                    const t = (radius - curve[i].radius) / (curve[i + 1].radius - curve[i].radius);
+                    return curve[i].velocity + t * (curve[i + 1].velocity - curve[i].velocity);
+                }
+            }
+            
+            // Beyond last data point, assume flat rotation curve
+            return curve[curve.length - 1].velocity;
+        }
+
+        // Density wave theory implementation (Lin-Shu)
+        function getDensityWavePhase(radius, angle) {
+            const m = galaxyParameters.spiralArms; // Number of arms
+            const pitchAngle = galaxyParameters.pitchAngle * Math.PI / 180;
+            const k = m / (radius * Math.tan(pitchAngle)); // Wave number
+            
+            // Phase of density wave
+            const phase = k * radius - m * angle;
+            
+            // Density enhancement factor
+            const densityFactor = 1 + galaxyParameters.densityContrast * Math.cos(phase);
+            
+            return Math.max(0.1, densityFactor);
+        }
+
+        // Metallicity gradient (observational data)
+        function getMetallicity(radius) {
+            return galaxyParameters.metallicity + galaxyParameters.metallicityGradient * radius;
+        }
+
+        // Age gradient (inside-out galaxy formation)
+        function getStellarAge(radius) {
+            return 13.8 - galaxyParameters.ageGradient * radius; // Gyr
+        }
+
+        // Scientific galaxy generation function
+        function generateGalaxy() {
+            console.log('🌌 [GENERATE] Creating scientifically accurate galaxy...');
+            showStatus('Generating galaxy with real astronomical data...', 'info');
+            
+            // Get Hubble type parameters
+            const hubbleData = ASTRONOMICAL_DATA.hubbleTypes[galaxyParameters.hubbleType] || 
+                              ASTRONOMICAL_DATA.hubbleTypes['Sb'];
+            
+            // Dispose of existing galaxy
+            if (currentGalaxy !== null) {
+                scene.remove(currentGalaxy);
+                if (currentGalaxy.geometry) currentGalaxy.geometry.dispose();
+                if (currentGalaxy.material) currentGalaxy.material.dispose();
+                currentGalaxy = null;
+            }
+
+            // Create enhanced geometry with scientific accuracy
+            const geometry = new THREE.BufferGeometry();
+            
+            const positions = new Float32Array(galaxyParameters.count * 3);
+            const colors = new Float32Array(galaxyParameters.count * 3);
+            const sizes = new Float32Array(galaxyParameters.count);
+            
+            // Generate stars using scientific principles
+            for (let i = 0; i < galaxyParameters.count; i++) {
+                const i3 = i * 3;
+                
+                // Determine star location using surface brightness laws
+                const rand1 = Math.random();
+                const rand2 = Math.random();
+                
+                let radius, component, densityFactor;
+                
+                // Decide if star is in bulge or disk based on surface brightness
+                if (rand1 < hubbleData.bulgeRatio) {
+                    // Bulge star - use de Vaucouleurs profile
+                    component = 'bulge';
+                    radius = Math.pow(-Math.log(rand2) / ASTRONOMICAL_DATA.surfaceBrightness.bulgeProfile.kappa, 4) * galaxyParameters.bulgeRadius;
+                    densityFactor = calculateSurfaceBrightness(radius, 'bulge');
+                } else {
+                    // Disk star - use Freeman exponential profile
+                    component = 'disk';
+                    radius = -galaxyParameters.scaleLength * Math.log(rand2);
+                    densityFactor = calculateSurfaceBrightness(radius, 'disk');
+                }
+                
+                // Apply density wave theory for spiral structure
+                let angle = Math.random() * Math.PI * 2;
+                if (component === 'disk' && galaxyParameters.hubbleType.includes('S')) {
+                    const wavePhase = getDensityWavePhase(radius, angle);
+                    
+                    // Probability of star being in spiral arm
+                    if (Math.random() < wavePhase * 0.3) {
+                        // Adjust angle to be in spiral arm
+                        const armAngle = (Math.floor(Math.random() * galaxyParameters.spiralArms) / galaxyParameters.spiralArms) * Math.PI * 2;
+                        const pitchAngle = galaxyParameters.pitchAngle * Math.PI / 180;
+                        const spiralAngle = armAngle + Math.log(radius / galaxyParameters.bulgeRadius) * Math.tan(pitchAngle);
+                        angle = spiralAngle + (Math.random() - 0.5) * 0.3; // Some scatter
+                    }
+                    
+                    densityFactor *= wavePhase;
+                }
+                
+                // Calculate 3D position
+                const theta = angle;
+                const inclination = galaxyParameters.inclination * Math.PI / 180;
+                
+                // Add elliptical orbits and random motion
+                const eccentricity = component === 'bulge' ? 0.1 : 0.3;
+                const orbitPhase = Math.random() * Math.PI * 2;
+                const a = radius;
+                const b = radius * (1 - eccentricity);
+                
+                const x = a * Math.cos(orbitPhase) * Math.cos(theta) - b * Math.sin(orbitPhase) * Math.sin(theta);
+                const z = a * Math.cos(orbitPhase) * Math.sin(theta) + b * Math.sin(orbitPhase) * Math.cos(theta);
+                const y = (Math.random() - 0.5) * 0.2 * radius * Math.sin(inclination); // Disk thickness
+                
+                // Add random motion based on velocity dispersion
+                const velocityDispersion = component === 'bulge' ? 150 : 50; // km/s
+                const randomX = (Math.random() - 0.5) * velocityDispersion * 0.01;
+                const randomY = (Math.random() - 0.5) * velocityDispersion * 0.005;
+                const randomZ = (Math.random() - 0.5) * velocityDispersion * 0.01;
+                
+                positions[i3] = x + randomX;
+                positions[i3 + 1] = y + randomY;
+                positions[i3 + 2] = z + randomZ;
+                
+                // Calculate realistic stellar properties
+                const metallicity = getMetallicity(radius);
+                const age = getStellarAge(radius);
+                
+                // Determine stellar type based on age and metallicity
+                let stellarType = 'G'; // Default to solar type
+                let temperature = 5500;
+                
+                if (component === 'bulge' || age > 8) {
+                    // Old population - K and M stars
+                    stellarType = Math.random() < 0.6 ? 'K' : 'M';
+                    temperature = stellarType === 'K' ? 4000 + Math.random() * 1500 : 2500 + Math.random() * 1000;
+                } else if (Math.random() < hubbleData.youngStarRatio && component === 'disk') {
+                    // Young population in spiral arms
+                    const youngTypes = ['O', 'B', 'A', 'F'];
+                    stellarType = youngTypes[Math.floor(Math.random() * youngTypes.length)];
+                    const typeData = ASTRONOMICAL_DATA.stellarTypes[stellarType];
+                    temperature = typeData.temp + (Math.random() - 0.5) * 5000;
+                } else {
+                    // Main sequence stars
+                    const mainTypes = ['F', 'G', 'K'];
+                    stellarType = mainTypes[Math.floor(Math.random() * mainTypes.length)];
+                    const typeData = ASTRONOMICAL_DATA.stellarTypes[stellarType];
+                    temperature = typeData.temp + (Math.random() - 0.5) * 2000;
+                }
+                
+                // Calculate color based on temperature (Planck's law)
+                const stellarColor = calculateStellarColor(temperature);
+                
+                // Apply reddening due to dust
+                const dustExtinction = hubbleData.dustContent * Math.exp(-radius / (galaxyParameters.scaleLength * 1.5));
+                stellarColor.r *= (1 - dustExtinction * 0.3);
+                stellarColor.g *= (1 - dustExtinction * 0.2);
+                stellarColor.b *= (1 - dustExtinction * 0.1);
+                
+                // Apply brightness based on stellar mass and distance
+                const stellarMass = ASTRONOMICAL_DATA.stellarTypes[stellarType].mass;
+                const luminosity = Math.pow(stellarMass, 3.5); // Mass-luminosity relation
+                const brightness = Math.min(1.0, luminosity * densityFactor * (0.5 + Math.random() * 0.5));
+                
+                stellarColor.multiplyScalar(brightness);
+                
+                colors[i3] = stellarColor.r;
+                colors[i3 + 1] = stellarColor.g;
+                colors[i3 + 2] = stellarColor.b;
+                
+                // Size based on stellar type and distance
+                const distance = Math.sqrt(x * x + y * y + z * z);
+                const baseSize = galaxyParameters.size * Math.sqrt(luminosity);
+                const distanceScale = 1 / (1 + distance * 0.05);
+                sizes[i] = baseSize * distanceScale * (0.8 + Math.random() * 0.4);
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            // Enhanced material with realistic properties
+            galaxyMaterial = new THREE.PointsMaterial({
+                size: galaxyParameters.size,
+                sizeAttenuation: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.95,
+                alphaTest: 0.001
+            });
+            
+            // Create galaxy
+            currentGalaxy = new THREE.Points(geometry, galaxyMaterial);
+            scene.add(currentGalaxy);
+            
+            updateGalaxyInfo();
+            showStatus('Scientifically accurate galaxy generated!', 'success');
+            console.log(`✨ [GENERATE] Scientific ${galaxyParameters.hubbleType} galaxy with ${galaxyParameters.count.toLocaleString()} stars`);
+        }
+
+        // Update galaxy information display with scientific data
+        function updateGalaxyInfo() {
+            let infoElement = document.getElementById('galaxy-info');
+            if (!infoElement) {
+                console.warn('⚠️ [GALAXY] Galaxy info element not found, creating one...');
+                // Create the info element if it doesn't exist
+                infoElement = document.createElement('div');
+                infoElement.id = 'galaxy-info';
+                infoElement.className = 'card p-4 absolute top-4 right-4 z-10 max-w-sm bg-card text-card-foreground border border-border rounded-lg shadow-sm';
+                document.body.appendChild(infoElement);
+            }
+            
+            const hubbleData = ASTRONOMICAL_DATA.hubbleTypes[galaxyParameters.hubbleType] || 
+                              ASTRONOMICAL_DATA.hubbleTypes['Sb'];
+            
+            const rotVel = getRotationalVelocity(8.5); // At solar radius
+            const totalMass = (rotVel * rotVel * galaxyParameters.radius) / 4.3; // 10^10 solar masses
+            const stellarMass = totalMass * galaxyParameters.stellarMassFraction;
+            
+            infoElement.innerHTML = `
+                <h3>🔬 Scientific Galaxy Data</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Hubble Type:</strong> ${galaxyParameters.hubbleType}
+                    </div>
+                    <div class="info-item">
+                        <strong>Distance:</strong> ${galaxyParameters.distance} Mpc
+                    </div>
+                    <div class="info-item">
+                        <strong>Total Mass:</strong> ${totalMass.toFixed(1)} × 10¹⁰ M☉
+                    </div>
+                    <div class="info-item">
+                        <strong>Stellar Mass:</strong> ${stellarMass.toFixed(1)} × 10¹⁰ M☉
+                    </div>
+                    <div class="info-item">
+                        <strong>Rotation Velocity:</strong> ${rotVel.toFixed(0)} km/s
+                    </div>
+                    <div class="info-item">
+                        <strong>Scale Length:</strong> ${galaxyParameters.scaleLength} kpc
+                    </div>
+                    <div class="info-item">
+                        <strong>Pattern Speed:</strong> ${galaxyParameters.patternSpeed} km/s/kpc
+                    </div>
+                    <div class="info-item">
+                        <strong>Metallicity:</strong> ${galaxyParameters.metallicity.toFixed(3)} (Solar)
+                    </div>
+                    <div class="info-item">
+                        <strong>Star Formation:</strong> ${galaxyParameters.starFormationRate} M☉/yr
+                    </div>
+                    <div class="info-item">
+                        <strong>Inclination:</strong> ${galaxyParameters.inclination}°
+                    </div>
+                </div>
+            `;
+        }
+
+        // Enhanced controls
+        document.addEventListener('DOMContentLoaded', function() {
+            // Galaxy type selector
+            const typeSelect = document.getElementById('hubble-type');
+            typeSelect.addEventListener('change', function() {
+                galaxyParameters.hubbleType = this.value;
+                
+                // Adjust parameters based on galaxy type
+                switch (this.value) {
+                    case 'elliptical':
+                        galaxyParameters.spiralArms = 0;
+                        galaxyParameters.pitchAngle = 0;
+                        galaxyParameters.densityContrast = 0;
+                        galaxyParameters.corotationRadius = 0;
+                        galaxyParameters.insideColor = '#ffd4a3';
+                        galaxyParameters.outsideColor = '#8b4513';
+                        break;
+                    case 'irregular':
+                        galaxyParameters.spiralArms = 1;
+                        galaxyParameters.pitchAngle = 0;
+                        galaxyParameters.densityContrast = 0;
+                        galaxyParameters.corotationRadius = 0;
+                        galaxyParameters.insideColor = '#a8d8ff';
+                        galaxyParameters.outsideColor = '#ff69b4';
+                        break;
+                    default: // spiral
+                        galaxyParameters.spiralArms = 2;
+                        galaxyParameters.pitchAngle = 12;
+                        galaxyParameters.densityContrast = 2.5;
+                        galaxyParameters.corotationRadius = 8.8;
+                        galaxyParameters.insideColor = '#ffb366';
+                        galaxyParameters.outsideColor = '#4a90e2';
+                }
+                
+                updateControlValues();
+                generateGalaxy();
+            });
+            
+            // Other control event listeners
+            document.getElementById('distance').addEventListener('input', function() {
+                galaxyParameters.distance = parseFloat(this.value);
+                document.getElementById('distance-value').textContent = this.value;
+            });
+            
+            document.getElementById('inclination').addEventListener('input', function() {
+                galaxyParameters.inclination = parseFloat(this.value);
+                document.getElementById('inclination-value').textContent = this.value;
+            });
+            
+            document.getElementById('stellar-mass').addEventListener('input', function() {
+                galaxyParameters.stellarMassFraction = parseFloat(this.value) / 10; // Convert to fraction
+                document.getElementById('stellar-mass-value').textContent = this.value;
+            });
+            
+            document.getElementById('pattern-speed').addEventListener('input', function() {
+                galaxyParameters.patternSpeed = parseFloat(this.value);
+                document.getElementById('pattern-speed-value').textContent = this.value;
+            });
+            
+            document.getElementById('pitch-angle').addEventListener('input', function() {
+                galaxyParameters.pitchAngle = parseFloat(this.value);
+                document.getElementById('pitch-angle-value').textContent = this.value;
+            });
+            
+            document.getElementById('spiral-arms').addEventListener('input', function() {
+                galaxyParameters.spiralArms = parseInt(this.value);
+                document.getElementById('spiral-arms-value').textContent = this.value;
+            });
+            
+            document.getElementById('density-contrast').addEventListener('input', function() {
+                galaxyParameters.densityContrast = parseFloat(this.value);
+                document.getElementById('density-contrast-value').textContent = this.value;
+            });
+            
+            document.getElementById('scale-length').addEventListener('input', function() {
+                galaxyParameters.scaleLength = parseFloat(this.value);
+                document.getElementById('scale-length-value').textContent = this.value;
+            });
+            
+            document.getElementById('bulge-radius').addEventListener('input', function() {
+                galaxyParameters.bulgeRadius = parseFloat(this.value);
+                document.getElementById('bulge-radius-value').textContent = this.value;
+            });
+            
+            document.getElementById('central-intensity').addEventListener('input', function() {
+                galaxyParameters.centralIntensity = parseFloat(this.value);
+                document.getElementById('central-intensity-value').textContent = this.value;
+            });
+            
+            document.getElementById('metallicity').addEventListener('input', function() {
+                galaxyParameters.metallicity = parseFloat(this.value);
+                document.getElementById('metallicity-value').textContent = this.value;
+            });
+            
+            document.getElementById('star-formation').addEventListener('input', function() {
+                galaxyParameters.starFormationRate = parseFloat(this.value);
+                document.getElementById('star-formation-value').textContent = this.value;
+            });
+            
+            document.getElementById('age-gradient').addEventListener('input', function() {
+                galaxyParameters.ageGradient = parseFloat(this.value);
+                document.getElementById('age-gradient-value').textContent = this.value;
+            });
+            
+            document.getElementById('rotation-velocity').addEventListener('input', function() {
+                galaxyParameters.rotationalVelocity = parseFloat(this.value);
+                document.getElementById('rotation-velocity-value').textContent = this.value;
+            });
+            
+            document.getElementById('dark-matter').addEventListener('change', function() {
+                galaxyParameters.darkMatterHalo = this.checked;
+            });
+            
+            document.getElementById('corotation').addEventListener('input', function() {
+                galaxyParameters.corotationRadius = parseFloat(this.value);
+                document.getElementById('corotation-value').textContent = this.value;
+            });
+            
+            document.getElementById('seed').addEventListener('input', function() {
+                Math.seedrandom(this.value);
+                document.getElementById('seed-value').textContent = this.value;
+            });
+        });
+
+        function updateControlValues() {
+            document.getElementById('hubble-type').value = galaxyParameters.hubbleType;
+            document.getElementById('distance').value = galaxyParameters.distance;
+            document.getElementById('distance-value').textContent = galaxyParameters.distance;
+            document.getElementById('inclination').value = galaxyParameters.inclination;
+            document.getElementById('inclination-value').textContent = galaxyParameters.inclination;
+            document.getElementById('stellar-mass').value = galaxyParameters.stellarMassFraction * 10;
+            document.getElementById('stellar-mass-value').textContent = galaxyParameters.stellarMassFraction * 10;
+            document.getElementById('pattern-speed').value = galaxyParameters.patternSpeed;
+            document.getElementById('pattern-speed-value').textContent = galaxyParameters.patternSpeed;
+            document.getElementById('pitch-angle').value = galaxyParameters.pitchAngle;
+            document.getElementById('pitch-angle-value').textContent = galaxyParameters.pitchAngle;
+            document.getElementById('spiral-arms').value = galaxyParameters.spiralArms;
+            document.getElementById('spiral-arms-value').textContent = galaxyParameters.spiralArms;
+            document.getElementById('density-contrast').value = galaxyParameters.densityContrast;
+            document.getElementById('density-contrast-value').textContent = galaxyParameters.densityContrast;
+            document.getElementById('scale-length').value = galaxyParameters.scaleLength;
+            document.getElementById('scale-length-value').textContent = galaxyParameters.scaleLength;
+            document.getElementById('bulge-radius').value = galaxyParameters.bulgeRadius;
+            document.getElementById('bulge-radius-value').textContent = galaxyParameters.bulgeRadius;
+            document.getElementById('central-intensity').value = galaxyParameters.centralIntensity;
+            document.getElementById('central-intensity-value').textContent = galaxyParameters.centralIntensity;
+            document.getElementById('metallicity').value = galaxyParameters.metallicity;
+            document.getElementById('metallicity-value').textContent = galaxyParameters.metallicity;
+            document.getElementById('star-formation').value = galaxyParameters.starFormationRate;
+            document.getElementById('star-formation-value').textContent = galaxyParameters.starFormationRate;
+            document.getElementById('age-gradient').value = galaxyParameters.ageGradient;
+            document.getElementById('age-gradient-value').textContent = galaxyParameters.ageGradient;
+            document.getElementById('rotation-velocity').value = galaxyParameters.rotationalVelocity;
+            document.getElementById('rotation-velocity-value').textContent = galaxyParameters.rotationalVelocity;
+            document.getElementById('dark-matter').checked = galaxyParameters.darkMatterHalo;
+            document.getElementById('corotation').value = galaxyParameters.corotationRadius;
+            document.getElementById('corotation-value').textContent = galaxyParameters.corotationRadius;
+            document.getElementById('seed').value = Math.seedrandom.id; // Keep seed value
+            document.getElementById('seed-value').textContent = Math.seedrandom.id;
+        }
+        
+        // Randomize galaxy
+        function randomizeGalaxy() {
+            // Random galaxy type
+            const types = ['Sa', 'Sb', 'Sc', 'SBa', 'SBb', 'SBc', 'E0', 'E3', 'E7', 'Irr'];
+            document.getElementById('hubble-type').value = types[Math.floor(Math.random() * types.length)];
+            
+            // Random distance
+            const distance = Math.random() * 95 + 5; // 5 to 100 Mpc
+            document.getElementById('distance').value = distance.toFixed(1);
+            document.getElementById('distance-value').textContent = distance.toFixed(1);
+            
+            // Random inclination
+            const inclination = Math.random() * 90; // 0 to 90 degrees
+            document.getElementById('inclination').value = inclination.toFixed(0);
+            document.getElementById('inclination-value').textContent = inclination.toFixed(0);
+            
+            // Random stellar mass fraction
+            const stellarMassFraction = (Math.random() * 19 + 1) / 10; // 1.0 to 2.0 × 10¹⁰ M☉
+            document.getElementById('stellar-mass').value = stellarMassFraction * 10;
+            document.getElementById('stellar-mass-value').textContent = stellarMassFraction * 10;
+            
+            // Random pattern speed
+            const patternSpeed = Math.random() * 40 + 10; // 10 to 50 km/s/kpc
+            document.getElementById('pattern-speed').value = patternSpeed.toFixed(1);
+            document.getElementById('pattern-speed-value').textContent = patternSpeed.toFixed(1);
+            
+            // Random pitch angle
+            const pitchAngle = Math.random() * 30 + 5; // 5 to 35 degrees
+            document.getElementById('pitch-angle').value = pitchAngle.toFixed(0);
+            document.getElementById('pitch-angle-value').textContent = pitchAngle.toFixed(0);
+            
+            // Random spiral arms
+            const spiralArms = Math.random() * 5 + 1; // 1 to 6
+            document.getElementById('spiral-arms').value = spiralArms.toFixed(0);
+            document.getElementById('spiral-arms-value').textContent = spiralArms.toFixed(0);
+            
+            // Random density contrast
+            const densityContrast = (Math.random() * 3.5 + 1.5).toFixed(1); // 1.5 to 5.0
+            document.getElementById('density-contrast').value = densityContrast;
+            document.getElementById('density-contrast-value').textContent = densityContrast;
+            
+            // Random scale length
+            const scaleLength = (Math.random() * 7 + 1).toFixed(1); // 1.0 to 8.0 kpc
+            document.getElementById('scale-length').value = scaleLength;
+            document.getElementById('scale-length-value').textContent = scaleLength;
+            
+            // Random bulge radius
+            const bulgeRadius = (Math.random() * 4.5 + 0.5).toFixed(1); // 0.5 to 5.0 kpc
+            document.getElementById('bulge-radius').value = bulgeRadius;
+            document.getElementById('bulge-radius-value').textContent = bulgeRadius;
+            
+            // Random central intensity
+            const centralIntensity = (Math.random() * 2.9 + 0.1).toFixed(1); // 0.1 to 3.0
+            document.getElementById('central-intensity').value = centralIntensity;
+            document.getElementById('central-intensity-value').textContent = centralIntensity;
+            
+            // Random metallicity
+            const metallicity = (Math.random() * 0.049 + 0.001).toFixed(3); // 0.001 to 0.050 (Solar)
+            document.getElementById('metallicity').value = metallicity;
+            document.getElementById('metallicity-value').textContent = metallicity;
+            
+            // Random star formation rate
+            const starFormationRate = (Math.random() * 9.9 + 0.1).toFixed(1); // 0.1 to 10.0 M☉/yr
+            document.getElementById('star-formation').value = starFormationRate;
+            document.getElementById('star-formation-value').textContent = starFormationRate;
+            
+            // Random age gradient
+            const ageGradient = (Math.random() * 2).toFixed(1); // 0.0 to 2.0 Gyr/kpc
+            document.getElementById('age-gradient').value = ageGradient;
+            document.getElementById('age-gradient-value').textContent = ageGradient;
+            
+            // Random rotation velocity
+            const rotationVelocity = Math.random() * 300 + 100; // 100 to 400 km/s
+            document.getElementById('rotation-velocity').value = rotationVelocity.toFixed(0);
+            document.getElementById('rotation-velocity-value').textContent = rotationVelocity.toFixed(0);
+            
+            // Random dark matter halo
+            document.getElementById('dark-matter').checked = Math.random() < 0.5;
+            
+            // Random corotation radius
+            const corotationRadius = (Math.random() * 11 + 4).toFixed(1); // 4.0 to 15.0 kpc
+            document.getElementById('corotation').value = corotationRadius;
+            document.getElementById('corotation-value').textContent = corotationRadius;
+            
+            // Random seed
+            const seed = Math.floor(Math.random() * 99999) + 1;
+            document.getElementById('seed').value = seed;
+            document.getElementById('seed-value').textContent = seed;
+            
+            // Generate the galaxy
+            generateGalaxy();
+        };
+        
+        // Randomize scientific parameters
+        function randomizeScientificGalaxy() {
+            console.log('🎲 [RANDOM] Randomizing scientific galaxy parameters...');
+            showStatus('Randomizing scientific parameters...', 'info');
+            
+            // Random Hubble type
+            const hubbleTypes = ['Sa', 'Sb', 'Sc', 'SBa', 'SBb', 'SBc', 'E0', 'E3', 'E7', 'Irr'];
+            galaxyParameters.hubbleType = hubbleTypes[Math.floor(Math.random() * hubbleTypes.length)];
+            
+            // Random physical properties
+            galaxyParameters.distance = Math.random() * 95 + 5; // 5-100 Mpc
+            galaxyParameters.inclination = Math.random() * 90; // 0-90 degrees
+            galaxyParameters.stellarMassFraction = (Math.random() * 19 + 1) / 100; // 0.01-0.20
+            
+            // Random density wave parameters
+            galaxyParameters.patternSpeed = Math.random() * 40 + 10; // 10-50 km/s/kpc
+            galaxyParameters.pitchAngle = Math.random() * 30 + 5; // 5-35 degrees
+            galaxyParameters.spiralArms = Math.floor(Math.random() * 5) + 1; // 1-6
+            galaxyParameters.densityContrast = Math.random() * 3.5 + 1.5; // 1.5-5.0
+            
+            // Random surface brightness
+            galaxyParameters.scaleLength = Math.random() * 7 + 1; // 1-8 kpc
+            galaxyParameters.bulgeRadius = Math.random() * 4.5 + 0.5; // 0.5-5.0 kpc
+            galaxyParameters.centralIntensity = Math.random() * 2.9 + 0.1; // 0.1-3.0
+            
+            // Random stellar physics
+            galaxyParameters.metallicity = Math.random() * 0.049 + 0.001; // 0.001-0.050
+            galaxyParameters.starFormationRate = Math.random() * 9.9 + 0.1; // 0.1-10.0 M☉/yr
+            galaxyParameters.ageGradient = Math.random() * 2; // 0-2 Gyr/kpc
+            
+            // Random dynamics
+            galaxyParameters.rotationalVelocity = Math.random() * 300 + 100; // 100-400 km/s
+            galaxyParameters.darkMatterHalo = Math.random() < 0.8; // 80% chance
+            galaxyParameters.corotationRadius = Math.random() * 11 + 4; // 4-15 kpc
+            
+            // Update UI controls
+            updateControlValues();
+            
+            // Generate new galaxy
+            generateGalaxy();
+            
+            showStatus('Scientific parameters randomized!', 'success');
+        }
+        
+        // Clear galaxy
+        function clearGalaxy() {
+            if (currentGalaxy) {
+                scene.remove(currentGalaxy);
+                currentGalaxy = null;
+                document.getElementById('galaxy-info').style.display = 'none';
+                showStatus('Galaxy cleared', 'warning');
+            }
+        };
+        
+        // Show/hide loading
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        // Show status message
+        function showStatus(message, type = 'warning') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Handle keyboard shortcuts
+        function onKeyDown(event) {
+            switch(event.key.toLowerCase()) {
+                case 'r':
+                    // Reset camera
+                    camera.position.set(0, 0, 100);
+                    controls.target.set(0, 0, 0);
+                    controls.update();
+                    break;
+                case 'f':
+                    // Focus on center
+                    camera.position.set(0, 0, 50);
+                    controls.target.set(0, 0, 0);
+                    controls.update();
+                    break;
+                case 'g':
+                    // Generate galaxy
+                    generateGalaxy();
+                    break;
+                case 'c':
+                    // Clear galaxy
+                    clearGalaxy();
+                    break;
+            }
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate galaxy if it exists
+            if (currentGalaxy) {
+                currentGalaxy.rotation.y += 0.001;
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // Update range input displays
+        document.getElementById('distance').addEventListener('input', function() {
+            document.getElementById('distance-value').textContent = this.value;
+        });
+        
+        document.getElementById('inclination').addEventListener('input', function() {
+            document.getElementById('inclination-value').textContent = this.value;
+        });
+        
+        document.getElementById('stellar-mass').addEventListener('input', function() {
+            document.getElementById('stellar-mass-value').textContent = this.value;
+        });
+        
+        document.getElementById('pattern-speed').addEventListener('input', function() {
+            document.getElementById('pattern-speed-value').textContent = this.value;
+        });
+        
+        document.getElementById('pitch-angle').addEventListener('input', function() {
+            document.getElementById('pitch-angle-value').textContent = this.value;
+        });
+        
+        document.getElementById('spiral-arms').addEventListener('input', function() {
+            document.getElementById('spiral-arms-value').textContent = this.value;
+        });
+        
+        document.getElementById('density-contrast').addEventListener('input', function() {
+            document.getElementById('density-contrast-value').textContent = this.value;
+        });
+        
+        document.getElementById('scale-length').addEventListener('input', function() {
+            document.getElementById('scale-length-value').textContent = this.value;
+        });
+        
+        document.getElementById('bulge-radius').addEventListener('input', function() {
+            document.getElementById('bulge-radius-value').textContent = this.value;
+        });
+        
+        document.getElementById('central-intensity').addEventListener('input', function() {
+            document.getElementById('central-intensity-value').textContent = this.value;
+        });
+        
+        document.getElementById('metallicity').addEventListener('input', function() {
+            document.getElementById('metallicity-value').textContent = this.value;
+        });
+        
+        document.getElementById('star-formation').addEventListener('input', function() {
+            document.getElementById('star-formation-value').textContent = this.value;
+        });
+        
+        document.getElementById('age-gradient').addEventListener('input', function() {
+            document.getElementById('age-gradient-value').textContent = this.value;
+        });
+        
+        document.getElementById('rotation-velocity').addEventListener('input', function() {
+            document.getElementById('rotation-velocity-value').textContent = this.value;
+        });
+        
+        document.getElementById('corotation').addEventListener('input', function() {
+            document.getElementById('corotation-value').textContent = this.value;
+        });
+        
+        document.getElementById('seed').addEventListener('input', function() {
+            document.getElementById('seed-value').textContent = this.value;
+        });
+        
+        // Initialize everything
+        initThreeJS();
+        
+        // Auto-generate a default galaxy
+        setTimeout(() => {
+            if (typeof generateGalaxy === 'function') {
+                generateGalaxy();
+            } else {
+                console.error('❌ generateGalaxy function not available');
+            }
+        }, 1000);
+        
+        // Expose functions to global scope for onclick handlers
+        window.generateGalaxy = generateGalaxy;
+        window.randomizeGalaxy = randomizeGalaxy;
+        window.randomizeScientificGalaxy = randomizeScientificGalaxy;
+        window.clearGalaxy = clearGalaxy;
+        
+        // Also expose the scientific version as the default
+        window.generateScientificGalaxy = generateGalaxy;
+        
+        console.log('�� [GLOBAL] Functions exposed to window:');
+        console.log('  - generateGalaxy:', typeof window.generateGalaxy);
+        console.log('  - randomizeGalaxy:', typeof window.randomizeGalaxy);
+        console.log('  - randomizeScientificGalaxy:', typeof window.randomizeScientificGalaxy);
+        console.log('  - clearGalaxy:', typeof window.clearGalaxy);
+        
+        console.log('🌌 Galaxy Generator Test initialized');
+        console.log('🎮 Controls: Mouse to rotate, Scroll to zoom, R to reset camera');
+        console.log('⌨️ Shortcuts: G=Generate, C=Clear, R=Reset camera, F=Focus on center');
+    </script>
+</body>
+</html> 

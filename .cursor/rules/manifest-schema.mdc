@@ -1,0 +1,32 @@
+---
+alwaysApply: true
+globs: "manifest.json"
+description: "Defines the structure and required fields for the `manifest.json` file."
+---
+
+# `manifest.json` Schema
+
+The `manifest.json` file is used for the Progressive Web App (PWA) configuration.
+
+Refer to the existing [manifest.json](mdc:manifest.json) as a template.
+
+## Required Properties
+
+-   **`name`**: The full name of the application.
+-   **`short_name`**: A shorter name for the application.
+-   **`description`**: A short description of the application.
+-   **`start_url`**: The entry point for the application.
+-   **`display`**: The display mode (e.g., `fullscreen`, `standalone`).
+-   **`theme_color`**: The primary theme color for the UI.
+-   **`background_color`**: The background color of the splash screen.
+-   **`icons`**: An array of icon objects for different resolutions.
+
+## Icon Object Properties
+
+-   **`src`**: The path to the icon image.
+-   **`sizes`**: The dimensions of the icon (e.g., `192x192`).
+-   **`type`**: The MIME type of the icon (e.g., `image/png`).
+description:
+globs:
+alwaysApply: false
+---

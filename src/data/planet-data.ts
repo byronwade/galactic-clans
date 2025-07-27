@@ -1,0 +1,182 @@
+import type { PlanetData } from "../components/ui/planet-info-panel";
+
+export const samplePlanets: Record<string, PlanetData> = {
+	"kepler-442b": {
+		name: "Kepler-442b",
+		type: "Super Earth",
+		class: "M-Class",
+		atmosphere: "Oxygen-Rich",
+		temperature: "Temperate (15°C)",
+		gravity: "1.3x Earth",
+		population: 2400000,
+		resources: {
+			minerals: 85,
+			energy: 72,
+			water: 95,
+			rare_elements: 34,
+		},
+		habitability: 92,
+		threat_level: "Low",
+		discovery_date: "2387.3.15",
+		coordinates: "Sector 7G-Alpha",
+		description: "A lush world with vast oceans and dense forests. Perfect atmospheric conditions support a thriving ecosystem. Rich mineral deposits make this an ideal colony world.",
+		moons: 2,
+		orbital_period: "365.7 Earth days",
+		radius: 7890,
+	},
+
+	"proxima-centauri-c": {
+		name: "Proxima Centauri c",
+		type: "Rocky Planet",
+		class: "L-Class",
+		atmosphere: "Thin Nitrogen",
+		temperature: "Cold (-45°C)",
+		gravity: "0.8x Earth",
+		population: 850000,
+		resources: {
+			minerals: 95,
+			energy: 45,
+			water: 15,
+			rare_elements: 78,
+		},
+		habitability: 45,
+		threat_level: "Moderate",
+		discovery_date: "2365.8.22",
+		coordinates: "Alpha Centauri System",
+		description: "A harsh but mineral-rich world with extensive underground mining operations. Rare element deposits are among the richest ever discovered. Requires environmental suits for surface operations.",
+		moons: 0,
+		orbital_period: "145.2 Earth days",
+		radius: 5430,
+	},
+
+	"gliese-667cc": {
+		name: "Gliese 667Cc",
+		type: "Ocean World",
+		class: "O-Class",
+		atmosphere: "Dense Water Vapor",
+		temperature: "Tropical (28°C)",
+		gravity: "1.1x Earth",
+		population: 1650000,
+		resources: {
+			minerals: 35,
+			energy: 88,
+			water: 100,
+			rare_elements: 42,
+		},
+		habitability: 88,
+		threat_level: "Low",
+		discovery_date: "2378.11.09",
+		coordinates: "Gliese 667 System",
+		description: "An oceanic paradise with floating cities and underwater colonies. Abundant geothermal energy sources power advanced civilization. Storm systems can be intense but predictable.",
+		moons: 3,
+		orbital_period: "278.4 Earth days",
+		radius: 8120,
+	},
+
+	"wolf-1061c": {
+		name: "Wolf 1061c",
+		type: "Desert World",
+		class: "D-Class",
+		atmosphere: "Arid Carbon Dioxide",
+		temperature: "Hot (65°C)",
+		gravity: "1.4x Earth",
+		population: 425000,
+		resources: {
+			minerals: 78,
+			energy: 92,
+			water: 8,
+			rare_elements: 67,
+		},
+		habitability: 35,
+		threat_level: "High",
+		discovery_date: "2371.4.18",
+		coordinates: "Wolf 1061 System",
+		description: "A harsh desert world with extreme solar radiation. Rich in energy-producing crystals and rare metals. Frequent dust storms and dangerous wildlife make surface operations hazardous.",
+		moons: 1,
+		orbital_period: "178.9 Earth days",
+		radius: 6890,
+	},
+
+	"tau-ceti-e": {
+		name: "Tau Ceti e",
+		type: "Garden World",
+		class: "M-Class",
+		atmosphere: "Breathable Nitrogen-Oxygen",
+		temperature: "Perfect (22°C)",
+		gravity: "1.0x Earth",
+		population: 5200000,
+		resources: {
+			minerals: 68,
+			energy: 75,
+			water: 85,
+			rare_elements: 23,
+		},
+		habitability: 98,
+		threat_level: "Minimal",
+		discovery_date: "2341.7.03",
+		coordinates: "Tau Ceti System",
+		description: "The crown jewel of human expansion. Perfect climate, diverse biomes, and peaceful native species. This world represents humanity's greatest terraforming achievement.",
+		moons: 1,
+		orbital_period: "394.1 Earth days",
+		radius: 7650,
+	},
+
+	"hd-40307g": {
+		name: "HD 40307g",
+		type: "Ice Giant",
+		class: "P-Class",
+		atmosphere: "Hydrogen-Helium",
+		temperature: "Frozen (-180°C)",
+		gravity: "2.1x Earth",
+		population: 120000,
+		resources: {
+			minerals: 45,
+			energy: 35,
+			water: 90,
+			rare_elements: 95,
+		},
+		habitability: 15,
+		threat_level: "Extreme",
+		discovery_date: "2389.12.11",
+		coordinates: "HD 40307 System",
+		description: "A frozen giant with extreme gravitational fields. Orbital mining stations extract incredibly rare quantum materials from the upper atmosphere. Only the most experienced pilots venture here.",
+		moons: 8,
+		orbital_period: "820.3 Earth days",
+		radius: 12340,
+	},
+
+	"trappist-1e": {
+		name: "TRAPPIST-1e",
+		type: "Tidally Locked",
+		class: "Y-Class",
+		atmosphere: "Variable Zones",
+		temperature: "Extreme Gradients",
+		gravity: "0.9x Earth",
+		population: 680000,
+		resources: {
+			minerals: 82,
+			energy: 95,
+			water: 55,
+			rare_elements: 88,
+		},
+		habitability: 65,
+		threat_level: "High",
+		discovery_date: "2384.9.14",
+		coordinates: "TRAPPIST-1 System",
+		description: "A world of extremes where one side faces eternal day and the other eternal night. The twilight zone between them harbors unique crystalline formations that generate massive energy.",
+		moons: 0,
+		orbital_period: "6.1 Earth days",
+		radius: 6420,
+	},
+};
+
+export function getRandomPlanet(): PlanetData {
+	const planetKeys = Object.keys(samplePlanets) as (keyof typeof samplePlanets)[];
+	const randomIndex = Math.floor(Math.random() * planetKeys.length);
+	const randomKey = planetKeys[randomIndex]!;
+	return samplePlanets[randomKey]!;
+}
+
+export function getPlanetById(id: string): PlanetData | null {
+	return samplePlanets[id] || null;
+}

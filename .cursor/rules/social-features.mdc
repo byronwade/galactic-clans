@@ -1,0 +1,50 @@
+---
+alwaysApply: true
+---
+
+# Social Features Design
+
+Beyond the clan system, **Galactic Clans** will include several features to encourage social interaction and community building.
+
+## Core Social Features
+
+-   **Global & Regional Chat**: Public chat channels for all players, with options for regional channels to facilitate communication in different languages.
+-   **Private Messaging**: Players can send direct, private messages to others.
+-   **Friends List**: Players can add up to 200 friends.
+    -   See their online status.
+    -   Visit their home solar system.
+    -   Quickly invite them to a clan.
+-   **In-Game Mail System**: An asynchronous messaging system used for:
+    -   Sending and receiving clan invitations.
+    -   Receiving system notifications (e.g., "Your building has finished upgrading").
+    -   Distributing event rewards.
+
+## Player Profiles
+
+Every player will have a public profile that others can view. It will display:
+
+-   Player Name & Level
+-   Clan Name & Badge
+-   Total Accomplishment Points
+-   Current Army Composition
+-   A customizable "Bio" section.
+
+## Social Interaction Flow
+
+```mermaid
+graph TD
+    subgraph Player A
+        A[Views Player B's Profile]
+    end
+    subgraph Player B
+        B[Profile Page]
+    end
+    
+    A --> C{Add Friend};
+    A --> D{Send Private Message};
+    A --> E{Invite to Clan};
+    
+    C --> F[Friend Request sent to B];
+    D --> G[Message appears in B's Inbox];
+    E --> H[Clan Invite appears in B's Mail];
+```

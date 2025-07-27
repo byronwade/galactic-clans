@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Professional Controller Test Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(var(--popover))",
+                            foreground: "hsl(var(--popover-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        :root {
+            --background: 222.2 84% 4.9%;
+            --foreground: 210 40% 98%;
+            --card: 222.2 84% 4.9%;
+            --card-foreground: 210 40% 98%;
+            --popover: 222.2 84% 4.9%;
+            --popover-foreground: 210 40% 98%;
+            --primary: 210 40% 98%;
+            --primary-foreground: 222.2 84% 4.9%;
+            --secondary: 217.2 32.6% 17.5%;
+            --secondary-foreground: 210 40% 98%;
+            --muted: 217.2 32.6% 17.5%;
+            --muted-foreground: 215 20.2% 65.1%;
+            --accent: 217.2 32.6% 17.5%;
+            --accent-foreground: 210 40% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 217.2 32.6% 17.5%;
+            --input: 217.2 32.6% 17.5%;
+            --ring: 212.7 26.8% 83.9%;
+            --radius: 0.5rem;
+        }
+
+        .btn {
+            @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+        }
+
+        .btn-primary {
+            @apply bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4;
+        }
+
+        .btn-secondary {
+            @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 py-2 px-4;
+        }
+
+        .btn-destructive {
+            @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 py-2 px-4;
+        }
+
+        .card {
+            @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+        }
+
+        .input {
+            @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+        }
+
+        .badge {
+            @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+        }
+
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: hsl(var(--muted)) transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: hsl(var(--muted));
+            border-radius: 3px;
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+
+        .bounce {
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+            50% { transform: none; animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+        }
+
+        .controller-button {
+            transition: all 0.1s ease-in-out;
+        }
+
+        .controller-button.active {
+            transform: scale(0.95);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .stick-indicator {
+            transition: all 0.05s ease-out;
+        }
+
+        .connection-status {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .vibration-test {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-background text-foreground">
+    <!-- Header -->
+    <header class="border-b border-border bg-card/50 backdrop-blur-sm">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-gamepad text-primary-foreground text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">Professional Controller Test Suite</h1>
+                        <p class="text-muted-foreground text-sm">Real-time controller diagnostics & calibration</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleTheme()" class="btn btn-secondary">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div id="connection-status" class="connection-status badge bg-destructive text-destructive-foreground">
+                        <i class="fas fa-times-circle mr-1"></i>
+                        No Controller
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Controller Visualization -->
+            <div class="lg:col-span-2">
+                <div class="card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold">🎮 Controller Visualization</h2>
+                        <div class="flex items-center space-x-2">
+                            <span id="controller-type" class="badge bg-secondary text-secondary-foreground">Unknown</span>
+                            <span id="controller-id" class="text-sm text-muted-foreground">ID: --</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Controller Layout -->
+                    <div class="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 border border-border">
+                        <!-- Xbox Layout -->
+                        <div id="xbox-layout" class="controller-layout hidden">
+                            <!-- Left Stick -->
+                            <div class="absolute left-8 top-16 w-16 h-16">
+                                <div class="w-full h-full bg-gray-700 rounded-full border-2 border-gray-600 relative">
+                                    <div id="left-stick" class="stick-indicator absolute w-4 h-4 bg-blue-500 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                                </div>
+                                <div class="text-center mt-2 text-xs text-muted-foreground">Left Stick</div>
+                            </div>
+                            
+                            <!-- Right Stick -->
+                            <div class="absolute right-8 top-16 w-16 h-16">
+                                <div class="w-full h-full bg-gray-700 rounded-full border-2 border-gray-600 relative">
+                                    <div id="right-stick" class="stick-indicator absolute w-4 h-4 bg-green-500 rounded-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                                </div>
+                                <div class="text-center mt-2 text-xs text-muted-foreground">Right Stick</div>
+                            </div>
+                            
+                            <!-- D-Pad -->
+                            <div class="absolute left-8 top-40 w-12 h-12">
+                                <div class="grid grid-cols-3 grid-rows-3 gap-1">
+                                    <div></div>
+                                    <button id="dpad-up" class="controller-button w-4 h-4 bg-gray-600 rounded-sm hover:bg-gray-500"></button>
+                                    <div></div>
+                                    <button id="dpad-left" class="controller-button w-4 h-4 bg-gray-600 rounded-sm hover:bg-gray-500"></button>
+                                    <div class="w-4 h-4 bg-gray-700 rounded-sm"></div>
+                                    <button id="dpad-right" class="controller-button w-4 h-4 bg-gray-600 rounded-sm hover:bg-gray-500"></button>
+                                    <div></div>
+                                    <button id="dpad-down" class="controller-button w-4 h-4 bg-gray-600 rounded-sm hover:bg-gray-500"></button>
+                                    <div></div>
+                                </div>
+                                <div class="text-center mt-2 text-xs text-muted-foreground">D-Pad</div>
+                            </div>
+                            
+                            <!-- Face Buttons -->
+                            <div class="absolute right-8 top-40 w-12 h-12">
+                                <div class="grid grid-cols-2 grid-rows-2 gap-2">
+                                    <button id="button-y" class="controller-button w-5 h-5 bg-yellow-600 rounded-full hover:bg-yellow-500 text-xs font-bold text-white">Y</button>
+                                    <button id="button-b" class="controller-button w-5 h-5 bg-red-600 rounded-full hover:bg-red-500 text-xs font-bold text-white">B</button>
+                                    <button id="button-x" class="controller-button w-5 h-5 bg-blue-600 rounded-full hover:bg-blue-500 text-xs font-bold text-white">X</button>
+                                    <button id="button-a" class="controller-button w-5 h-5 bg-green-600 rounded-full hover:bg-green-500 text-xs font-bold text-white">A</button>
+                                </div>
+                                <div class="text-center mt-2 text-xs text-muted-foreground">Face Buttons</div>
+                            </div>
+                            
+                            <!-- Shoulder Buttons -->
+                            <div class="absolute left-4 top-4 w-20 h-6">
+                                <button id="button-lb" class="controller-button w-full h-full bg-gray-600 rounded-t-lg hover:bg-gray-500 text-xs text-white">LB</button>
+                            </div>
+                            <div class="absolute right-4 top-4 w-20 h-6">
+                                <button id="button-rb" class="controller-button w-full h-full bg-gray-600 rounded-t-lg hover:bg-gray-500 text-xs text-white">RB</button>
+                            </div>
+                            
+                            <!-- Triggers -->
+                            <div class="absolute left-4 bottom-4 w-20 h-8">
+                                <button id="trigger-lt" class="controller-button w-full h-full bg-gray-600 rounded-b-lg hover:bg-gray-500 text-xs text-white">LT</button>
+                            </div>
+                            <div class="absolute right-4 bottom-4 w-20 h-8">
+                                <button id="trigger-rt" class="controller-button w-full h-full bg-gray-600 rounded-b-lg hover:bg-gray-500 text-xs text-white">RT</button>
+                            </div>
+                            
+                            <!-- Menu Buttons -->
+                            <div class="absolute left-1/2 top-4 transform -translate-x-1/2 flex space-x-4">
+                                <button id="button-start" class="controller-button w-8 h-6 bg-gray-600 rounded hover:bg-gray-500 text-xs text-white">Start</button>
+                                <button id="button-back" class="controller-button w-8 h-6 bg-gray-600 rounded hover:bg-gray-500 text-xs text-white">Back</button>
+                            </div>
+                            
+                            <!-- Center Button -->
+                            <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                <button id="button-center" class="controller-button w-8 h-8 bg-gray-600 rounded-full hover:bg-gray-500 text-xs text-white">X</button>
+                            </div>
+                        </div>
+                        
+                        <!-- PlayStation Layout -->
+                        <div id="playstation-layout" class="controller-layout hidden">
+                            <!-- Similar structure but with PlayStation button layout -->
+                            <div class="text-center text-muted-foreground">PlayStation Layout (Coming Soon)</div>
+                        </div>
+                        
+                        <!-- Generic Layout -->
+                        <div id="generic-layout" class="controller-layout">
+                            <div class="text-center text-muted-foreground">
+                                <i class="fas fa-gamepad text-4xl mb-4"></i>
+                                <p>Connect a controller to see real-time visualization</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Real-time Data -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                        <div class="card p-4">
+                            <div class="text-sm text-muted-foreground">Left Stick</div>
+                            <div id="left-stick-data" class="text-lg font-mono">0.00, 0.00</div>
+                        </div>
+                        <div class="card p-4">
+                            <div class="text-sm text-muted-foreground">Right Stick</div>
+                            <div id="right-stick-data" class="text-lg font-mono">0.00, 0.00</div>
+                        </div>
+                        <div class="card p-4">
+                            <div class="text-sm text-muted-foreground">Left Trigger</div>
+                            <div id="lt-data" class="text-lg font-mono">0.00</div>
+                        </div>
+                        <div class="card p-4">
+                            <div class="text-sm text-muted-foreground">Right Trigger</div>
+                            <div id="rt-data" class="text-lg font-mono">0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Control Panel -->
+            <div class="space-y-6">
+                <!-- Connection Status -->
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold mb-4">🔗 Connection Status</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Status:</span>
+                            <span id="status-badge" class="badge bg-destructive text-destructive-foreground">Disconnected</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Type:</span>
+                            <span id="type-display" class="text-sm font-mono">--</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Index:</span>
+                            <span id="index-display" class="text-sm font-mono">--</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Connected:</span>
+                            <span id="connected-display" class="text-sm font-mono">--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vibration Test -->
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold mb-4">📳 Vibration Test</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm font-medium">Left Motor Intensity</label>
+                            <input type="range" id="left-vibration" min="0" max="1" step="0.1" value="0.5" class="w-full mt-1">
+                            <div class="flex justify-between text-xs text-muted-foreground">
+                                <span>0%</span>
+                                <span id="left-vibration-value">50%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium">Right Motor Intensity</label>
+                            <input type="range" id="right-vibration" min="0" max="1" step="0.1" value="0.5" class="w-full mt-1">
+                            <div class="flex justify-between text-xs text-muted-foreground">
+                                <span>0%</span>
+                                <span id="right-vibration-value">50%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium">Pattern</label>
+                            <select id="vibration-pattern" class="input w-full mt-1">
+                                <option value="constant">Constant</option>
+                                <option value="pulse">Pulse</option>
+                                <option value="wave">Wave</option>
+                                <option value="random">Random</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium">Duration (ms)</label>
+                            <input type="number" id="vibration-duration" min="100" max="5000" value="1000" class="input w-full mt-1">
+                        </div>
+                        <button id="test-vibration" class="btn btn-primary w-full vibration-test">
+                            <i class="fas fa-vibration mr-2"></i>
+                            Test Vibration
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Calibration -->
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold mb-4">🎯 Calibration</h3>
+                    <div class="space-y-3">
+                        <button id="start-calibration" class="btn btn-secondary w-full">
+                            <i class="fas fa-crosshairs mr-2"></i>
+                            Start Calibration
+                        </button>
+                        <button id="reset-calibration" class="btn btn-destructive w-full">
+                            <i class="fas fa-undo mr-2"></i>
+                            Reset Calibration
+                        </button>
+                        <div class="text-xs text-muted-foreground">
+                            Calibration helps fix stick drift and improve accuracy
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analytics & Event Log -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- Real-time Analytics -->
+            <div class="card p-6">
+                <h3 class="text-lg font-semibold mb-4">📊 Real-time Analytics</h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="card p-3">
+                            <div class="text-sm text-muted-foreground">Input Latency</div>
+                            <div id="latency-display" class="text-lg font-mono">-- ms</div>
+                        </div>
+                        <div class="card p-3">
+                            <div class="text-sm text-muted-foreground">Button Response</div>
+                            <div id="response-display" class="text-lg font-mono">-- ms</div>
+                        </div>
+                        <div class="card p-3">
+                            <div class="text-sm text-muted-foreground">Stick Accuracy</div>
+                            <div id="accuracy-display" class="text-lg font-mono">-- %</div>
+                        </div>
+                        <div class="card p-3">
+                            <div class="text-sm text-muted-foreground">Trigger Sensitivity</div>
+                            <div id="sensitivity-display" class="text-lg font-mono">-- %</div>
+                        </div>
+                    </div>
+                    <div class="card p-3">
+                        <div class="text-sm text-muted-foreground mb-2">Performance Score</div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div id="performance-bar" class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div id="performance-score" class="text-center mt-1 text-sm font-mono">0/100</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Event Log -->
+            <div class="card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">📝 Event Log</h3>
+                    <button id="clear-log" class="btn btn-secondary text-xs">
+                        <i class="fas fa-trash mr-1"></i>
+                        Clear
+                    </button>
+                </div>
+                <div id="event-log" class="bg-muted rounded-md p-3 h-64 overflow-y-auto custom-scrollbar text-xs font-mono space-y-1">
+                    <div class="text-muted-foreground">Waiting for controller events...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        // Controller Test System
+        class ControllerTestSystem {
+            constructor() {
+                this.gamepads = [];
+                this.connectedGamepads = new Map();
+                this.analytics = {
+                    latency: [],
+                    response: [],
+                    accuracy: [],
+                    sensitivity: []
+                };
+                this.calibration = {
+                    leftStick: { center: { x: 0, y: 0 }, deadzone: 0.1 },
+                    rightStick: { center: { x: 0, y: 0 }, deadzone: 0.1 }
+                };
+                this.vibrationInterval = null;
+                this.isCalibrating = false;
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.startPolling();
+                this.logEvent('System initialized', 'info');
+            }
+            
+            setupEventListeners() {
+                // Vibration controls
+                document.getElementById('left-vibration').addEventListener('input', (e) => {
+                    document.getElementById('left-vibration-value').textContent = Math.round(e.target.value * 100) + '%';
+                });
+                
+                document.getElementById('right-vibration').addEventListener('input', (e) => {
+                    document.getElementById('right-vibration-value').textContent = Math.round(e.target.value * 100) + '%';
+                });
+                
+                document.getElementById('test-vibration').addEventListener('click', () => {
+                    this.testVibration();
+                });
+                
+                // Calibration
+                document.getElementById('start-calibration').addEventListener('click', () => {
+                    this.startCalibration();
+                });
+                
+                document.getElementById('reset-calibration').addEventListener('click', () => {
+                    this.resetCalibration();
+                });
+                
+                // Clear log
+                document.getElementById('clear-log').addEventListener('click', () => {
+                    this.clearEventLog();
+                });
+                
+                // Window events
+                window.addEventListener('gamepadconnected', (e) => {
+                    this.handleGamepadConnected(e);
+                });
+                
+                window.addEventListener('gamepaddisconnected', (e) => {
+                    this.handleGamepadDisconnected(e);
+                });
+            }
+            
+            startPolling() {
+                setInterval(() => {
+                    this.pollGamepads();
+                }, 16); // ~60fps
+            }
+            
+            pollGamepads() {
+                this.gamepads = navigator.getGamepads();
+                
+                for (let i = 0; i < this.gamepads.length; i++) {
+                    const gamepad = this.gamepads[i];
+                    if (gamepad) {
+                        this.updateGamepadDisplay(gamepad);
+                        this.updateAnalytics(gamepad);
+                    }
+                }
+            }
+            
+            handleGamepadConnected(event) {
+                const gamepad = event.gamepad;
+                this.connectedGamepads.set(gamepad.index, gamepad);
+                this.updateConnectionStatus(true, gamepad);
+                this.logEvent(`Controller ${gamepad.index} connected: ${gamepad.id}`, 'success');
+                
+                // Determine controller type
+                const controllerType = this.determineControllerType(gamepad);
+                this.showControllerLayout(controllerType);
+            }
+            
+            handleGamepadDisconnected(event) {
+                const gamepad = event.gamepad;
+                this.connectedGamepads.delete(gamepad.index);
+                this.updateConnectionStatus(false);
+                this.logEvent(`Controller ${gamepad.index} disconnected`, 'warning');
+                
+                if (this.connectedGamepads.size === 0) {
+                    this.showControllerLayout('generic');
+                }
+            }
+            
+            determineControllerType(gamepad) {
+                const id = gamepad.id.toLowerCase();
+                
+                if (id.includes('xbox') || id.includes('xinput')) {
+                    return 'xbox';
+                } else if (id.includes('playstation') || id.includes('dualshock') || id.includes('dualsense')) {
+                    return 'playstation';
+                } else if (id.includes('nintendo') || id.includes('switch')) {
+                    return 'nintendo';
+                } else {
+                    return 'generic';
+                }
+            }
+            
+            showControllerLayout(type) {
+                // Hide all layouts
+                document.querySelectorAll('.controller-layout').forEach(layout => {
+                    layout.classList.add('hidden');
+                });
+                
+                // Show appropriate layout
+                const layoutElement = document.getElementById(`${type}-layout`);
+                if (layoutElement) {
+                    layoutElement.classList.remove('hidden');
+                }
+                
+                document.getElementById('controller-type').textContent = type.charAt(0).toUpperCase() + type.slice(1);
+            }
+            
+            updateGamepadDisplay(gamepad) {
+                // Update connection info
+                document.getElementById('controller-id').textContent = `ID: ${gamepad.index}`;
+                document.getElementById('type-display').textContent = this.determineControllerType(gamepad);
+                document.getElementById('index-display').textContent = gamepad.index;
+                document.getElementById('connected-display').textContent = gamepad.connected ? 'Yes' : 'No';
+                
+                // Update sticks
+                if (gamepad.axes.length >= 4) {
+                    const leftX = gamepad.axes[0];
+                    const leftY = gamepad.axes[1];
+                    const rightX = gamepad.axes[2];
+                    const rightY = gamepad.axes[3];
+                    
+                    // Apply calibration
+                    const calibratedLeft = this.applyCalibration({ x: leftX, y: leftY }, this.calibration.leftStick);
+                    const calibratedRight = this.applyCalibration({ x: rightX, y: rightY }, this.calibration.rightStick);
+                    
+                    // Update stick visualization
+                    this.updateStickPosition('left-stick', calibratedLeft);
+                    this.updateStickPosition('right-stick', calibratedRight);
+                    
+                    // Update data display
+                    document.getElementById('left-stick-data').textContent = `${calibratedLeft.x.toFixed(2)}, ${calibratedLeft.y.toFixed(2)}`;
+                    document.getElementById('right-stick-data').textContent = `${calibratedRight.x.toFixed(2)}, ${calibratedRight.y.toFixed(2)}`;
+                }
+                
+                // Update triggers
+                if (gamepad.axes.length >= 6) {
+                    const lt = (gamepad.axes[4] + 1) / 2; // Convert from [-1,1] to [0,1]
+                    const rt = (gamepad.axes[5] + 1) / 2;
+                    
+                    document.getElementById('lt-data').textContent = lt.toFixed(2);
+                    document.getElementById('rt-data').textContent = rt.toFixed(2);
+                }
+                
+                // Update buttons
+                gamepad.buttons.forEach((button, index) => {
+                    this.updateButtonState(index, button.pressed, button.value);
+                });
+            }
+            
+            updateStickPosition(stickId, position) {
+                const stick = document.getElementById(stickId);
+                if (stick) {
+                    const maxOffset = 20; // Maximum pixel offset from center
+                    const x = position.x * maxOffset;
+                    const y = position.y * maxOffset;
+                    
+                    stick.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                    
+                    // Add visual feedback for movement
+                    if (Math.abs(position.x) > 0.1 || Math.abs(position.y) > 0.1) {
+                        stick.classList.add('pulse');
+                    } else {
+                        stick.classList.remove('pulse');
+                    }
+                }
+            }
+            
+            updateButtonState(buttonIndex, pressed, value) {
+                const buttonMap = {
+                    0: 'button-a', 1: 'button-b', 2: 'button-x', 3: 'button-y',
+                    4: 'button-lb', 5: 'button-rb', 6: 'trigger-lt', 7: 'trigger-rt',
+                    8: 'button-back', 9: 'button-start', 10: 'button-center',
+                    12: 'dpad-up', 13: 'dpad-down', 14: 'dpad-left', 15: 'dpad-right'
+                };
+                
+                const buttonId = buttonMap[buttonIndex];
+                if (buttonId) {
+                    const button = document.getElementById(buttonId);
+                    if (button) {
+                        if (pressed) {
+                            button.classList.add('active');
+                            button.style.backgroundColor = '#10b981';
+                        } else {
+                            button.classList.remove('active');
+                            button.style.backgroundColor = '';
+                        }
+                    }
+                }
+            }
+            
+            updateConnectionStatus(connected, gamepad = null) {
+                const statusElement = document.getElementById('connection-status');
+                const statusBadge = document.getElementById('status-badge');
+                
+                if (connected && gamepad) {
+                    statusElement.className = 'connection-status badge bg-green-600 text-white';
+                    statusElement.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Connected';
+                    statusBadge.className = 'badge bg-green-600 text-white';
+                    statusBadge.textContent = 'Connected';
+                } else {
+                    statusElement.className = 'connection-status badge bg-destructive text-destructive-foreground';
+                    statusElement.innerHTML = '<i class="fas fa-times-circle mr-1"></i>No Controller';
+                    statusBadge.className = 'badge bg-destructive text-destructive-foreground';
+                    statusBadge.textContent = 'Disconnected';
+                }
+            }
+            
+            testVibration() {
+                const leftIntensity = parseFloat(document.getElementById('left-vibration').value);
+                const rightIntensity = parseFloat(document.getElementById('right-vibration').value);
+                const pattern = document.getElementById('vibration-pattern').value;
+                const duration = parseInt(document.getElementById('vibration-duration').value);
+                
+                this.logEvent(`Testing vibration: ${pattern} pattern, ${Math.round(leftIntensity * 100)}%/${Math.round(rightIntensity * 100)}%, ${duration}ms`, 'info');
+                
+                // Get the first connected gamepad
+                const gamepad = this.gamepads.find(gp => gp && gp.connected);
+                if (!gamepad) {
+                    this.logEvent('No controller connected for vibration test', 'error');
+                    return;
+                }
+                
+                // Clear any existing vibration
+                if (this.vibrationInterval) {
+                    clearInterval(this.vibrationInterval);
+                }
+                
+                const startTime = Date.now();
+                
+                switch (pattern) {
+                    case 'constant':
+                        this.vibrateGamepad(gamepad, leftIntensity, rightIntensity);
+                        setTimeout(() => this.stopVibration(gamepad), duration);
+                        break;
+                        
+                    case 'pulse':
+                        this.vibrationInterval = setInterval(() => {
+                            const elapsed = Date.now() - startTime;
+                            if (elapsed >= duration) {
+                                this.stopVibration(gamepad);
+                                clearInterval(this.vibrationInterval);
+                                return;
+                            }
+                            
+                            const pulse = Math.sin(elapsed * 0.01) > 0 ? 1 : 0;
+                            this.vibrateGamepad(gamepad, leftIntensity * pulse, rightIntensity * pulse);
+                        }, 50);
+                        break;
+                        
+                    case 'wave':
+                        this.vibrationInterval = setInterval(() => {
+                            const elapsed = Date.now() - startTime;
+                            if (elapsed >= duration) {
+                                this.stopVibration(gamepad);
+                                clearInterval(this.vibrationInterval);
+                                return;
+                            }
+                            
+                            const wave = (Math.sin(elapsed * 0.005) + 1) / 2;
+                            this.vibrateGamepad(gamepad, leftIntensity * wave, rightIntensity * wave);
+                        }, 16);
+                        break;
+                        
+                    case 'random':
+                        this.vibrationInterval = setInterval(() => {
+                            const elapsed = Date.now() - startTime;
+                            if (elapsed >= duration) {
+                                this.stopVibration(gamepad);
+                                clearInterval(this.vibrationInterval);
+                                return;
+                            }
+                            
+                            const random = Math.random();
+                            this.vibrateGamepad(gamepad, leftIntensity * random, rightIntensity * random);
+                        }, 100);
+                        break;
+                }
+            }
+            
+            vibrateGamepad(gamepad, leftIntensity, rightIntensity) {
+                if (gamepad.vibrationActuator) {
+                    gamepad.vibrationActuator.playEffect('dual-rumble', {
+                        duration: 100,
+                        strongMagnitude: leftIntensity,
+                        weakMagnitude: rightIntensity
+                    });
+                }
+            }
+            
+            stopVibration(gamepad) {
+                if (gamepad.vibrationActuator) {
+                    gamepad.vibrationActuator.playEffect('dual-rumble', {
+                        duration: 0,
+                        strongMagnitude: 0,
+                        weakMagnitude: 0
+                    });
+                }
+            }
+            
+            startCalibration() {
+                this.isCalibrating = true;
+                this.logEvent('Starting controller calibration...', 'info');
+                
+                // Show calibration instructions
+                this.logEvent('Please center all sticks and don\'t touch any buttons', 'info');
+                this.logEvent('Calibration will begin in 3 seconds...', 'info');
+                
+                setTimeout(() => {
+                    this.performCalibration();
+                }, 3000);
+            }
+            
+            performCalibration() {
+                const gamepad = this.gamepads.find(gp => gp && gp.connected);
+                if (!gamepad) {
+                    this.logEvent('No controller found for calibration', 'error');
+                    this.isCalibrating = false;
+                    return;
+                }
+                
+                // Calibrate sticks
+                if (gamepad.axes.length >= 4) {
+                    this.calibration.leftStick.center = {
+                        x: gamepad.axes[0],
+                        y: gamepad.axes[1]
+                    };
+                    this.calibration.rightStick.center = {
+                        x: gamepad.axes[2],
+                        y: gamepad.axes[3]
+                    };
+                }
+                
+                this.logEvent('Calibration completed successfully', 'success');
+                this.isCalibrating = false;
+            }
+            
+            resetCalibration() {
+                this.calibration = {
+                    leftStick: { center: { x: 0, y: 0 }, deadzone: 0.1 },
+                    rightStick: { center: { x: 0, y: 0 }, deadzone: 0.1 }
+                };
+                this.logEvent('Calibration reset to defaults', 'info');
+            }
+            
+            applyCalibration(position, calibration) {
+                const x = position.x - calibration.center.x;
+                const y = position.y - calibration.center.y;
+                
+                const magnitude = Math.sqrt(x * x + y * y);
+                if (magnitude < calibration.deadzone) {
+                    return { x: 0, y: 0 };
+                }
+                
+                const normalizedMagnitude = (magnitude - calibration.deadzone) / (1 - calibration.deadzone);
+                return {
+                    x: (x / magnitude) * normalizedMagnitude,
+                    y: (y / magnitude) * normalizedMagnitude
+                };
+            }
+            
+            updateAnalytics(gamepad) {
+                const now = performance.now();
+                
+                // Calculate input latency
+                if (gamepad.timestamp) {
+                    const latency = now - gamepad.timestamp;
+                    this.analytics.latency.push(latency);
+                    if (this.analytics.latency.length > 60) this.analytics.latency.shift();
+                    
+                    const avgLatency = this.analytics.latency.reduce((a, b) => a + b, 0) / this.analytics.latency.length;
+                    document.getElementById('latency-display').textContent = `${avgLatency.toFixed(1)} ms`;
+                }
+                
+                // Calculate stick accuracy
+                if (gamepad.axes.length >= 4) {
+                    const leftAccuracy = this.calculateStickAccuracy(gamepad.axes[0], gamepad.axes[1]);
+                    const rightAccuracy = this.calculateStickAccuracy(gamepad.axes[2], gamepad.axes[3]);
+                    const avgAccuracy = (leftAccuracy + rightAccuracy) / 2;
+                    
+                    this.analytics.accuracy.push(avgAccuracy);
+                    if (this.analytics.accuracy.length > 60) this.analytics.accuracy.shift();
+                    
+                    const finalAccuracy = this.analytics.accuracy.reduce((a, b) => a + b, 0) / this.analytics.accuracy.length;
+                    document.getElementById('accuracy-display').textContent = `${(finalAccuracy * 100).toFixed(1)}%`;
+                }
+                
+                // Calculate trigger sensitivity
+                if (gamepad.axes.length >= 6) {
+                    const ltSensitivity = this.calculateTriggerSensitivity(gamepad.axes[4]);
+                    const rtSensitivity = this.calculateTriggerSensitivity(gamepad.axes[5]);
+                    const avgSensitivity = (ltSensitivity + rtSensitivity) / 2;
+                    
+                    this.analytics.sensitivity.push(avgSensitivity);
+                    if (this.analytics.sensitivity.length > 60) this.analytics.sensitivity.shift();
+                    
+                    const finalSensitivity = this.analytics.sensitivity.reduce((a, b) => a + b, 0) / this.analytics.sensitivity.length;
+                    document.getElementById('sensitivity-display').textContent = `${(finalSensitivity * 100).toFixed(1)}%`;
+                }
+                
+                // Update performance score
+                this.updatePerformanceScore();
+            }
+            
+            calculateStickAccuracy(x, y) {
+                const magnitude = Math.sqrt(x * x + y * y);
+                return Math.min(1, magnitude);
+            }
+            
+            calculateTriggerSensitivity(trigger) {
+                return (trigger + 1) / 2; // Convert from [-1,1] to [0,1]
+            }
+            
+            updatePerformanceScore() {
+                const latency = parseFloat(document.getElementById('latency-display').textContent) || 0;
+                const accuracy = parseFloat(document.getElementById('accuracy-display').textContent) || 0;
+                const sensitivity = parseFloat(document.getElementById('sensitivity-display').textContent) || 0;
+                
+                // Calculate score (lower latency = higher score, higher accuracy/sensitivity = higher score)
+                const latencyScore = Math.max(0, 100 - latency * 2);
+                const accuracyScore = accuracy;
+                const sensitivityScore = sensitivity;
+                
+                const totalScore = Math.round((latencyScore + accuracyScore + sensitivityScore) / 3);
+                
+                document.getElementById('performance-score').textContent = `${totalScore}/100`;
+                document.getElementById('performance-bar').style.width = `${totalScore}%`;
+                
+                // Update color based on score
+                const bar = document.getElementById('performance-bar');
+                if (totalScore >= 80) {
+                    bar.className = 'bg-green-500 h-2 rounded-full transition-all duration-300';
+                } else if (totalScore >= 60) {
+                    bar.className = 'bg-yellow-500 h-2 rounded-full transition-all duration-300';
+                } else {
+                    bar.className = 'bg-red-500 h-2 rounded-full transition-all duration-300';
+                }
+            }
+            
+            logEvent(message, type = 'info') {
+                const log = document.getElementById('event-log');
+                const timestamp = new Date().toLocaleTimeString();
+                
+                const typeColors = {
+                    info: 'text-blue-400',
+                    success: 'text-green-400',
+                    warning: 'text-yellow-400',
+                    error: 'text-red-400'
+                };
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = typeColors[type] || 'text-gray-400';
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                
+                log.appendChild(logEntry);
+                log.scrollTop = log.scrollHeight;
+                
+                // Keep only last 100 entries
+                while (log.children.length > 100) {
+                    log.removeChild(log.firstChild);
+                }
+            }
+            
+            clearEventLog() {
+                const log = document.getElementById('event-log');
+                log.innerHTML = '<div class="text-muted-foreground">Event log cleared...</div>';
+            }
+        }
+        
+        // Initialize the controller test system
+        const controllerTest = new ControllerTestSystem();
+        
+        // Global functions for external access
+        window.controllerTest = controllerTest;
+        window.toggleTheme = function() {
+            document.documentElement.classList.toggle('dark');
+        };
+        
+        // Log system initialization
+        console.log('🎮 Professional Controller Test Suite initialized');
+        console.log('📊 Features: Real-time visualization, vibration testing, calibration, analytics');
+        console.log('🔗 Connect any controller to begin testing');
+    </script>
+</body>
+</html> 

@@ -1,0 +1,308 @@
+# Networking & Multiplayer Error Handling
+
+Specialized error handling for WebSocket connections, multiplayer synchronization, and network-related failures.
+
+## Network Error Categories
+
+```typescript
+enum NetworkErrorType {
+    CONNECTION_LOST = "CONNECTION_LOST",
+    CONNECTION_TIMEOUT = "CONNECTION_TIMEOUT", 
+    MESSAGE_PARSING = "MESSAGE_PARSING",
+    SYNC_DESYNC = "SYNC_DESYNC",
+    SERVER_OVERLOAD = "SERVER_OVERLOAD",
+    INVALID_MESSAGE = "INVALID_MESSAGE",
+    RATE_LIMIT = "RATE_LIMIT",
+    AUTH_FAILURE = "AUTH_FAILURE",
+    VERSION_MISMATCH = "VERSION_MISMATCH"
+}
+```
+
+## Connection Management
+
+All network components MUST implement robust connection handling:
+
+```typescript
+class NetworkManager {
+    private reconnectAttempts = 0;
+    private maxReconnectAttempts = 5;
+    private reconnectDelay = 1000; // Start with 1 second
+
+    private setupConnectionMonitoring(): void {
+        this.websocket.addEventListener('open', () => {
+            console.log(`🌐 [NETWORK:INFO] Connected to server at ${this.serverUrl}`);
+            this.reconnectAttempts = 0;
+            this.reconnectDelay = 1000;
+            this.onConnectionRestored();
+        });
+
+        this.websocket.addEventListener('close', (event) => {
+            console.error(`🌐 [NETWORK:HIGH] Connection closed:
+                Code: ${event.code}
+                Reason: ${event.reason}
+                Clean: ${event.wasClean}
+                Attempts: ${this.reconnectAttempts}/${this.maxReconnectAttempts}
+                Next Retry: ${this.reconnectDelay}ms`);
+            
+            this.handleConnectionLoss(event);
+        });
+
+        this.websocket.addEventListener('error', (error) => {
+            console.error(`🌐 [NETWORK:CRITICAL] WebSocket error:
+                Error: ${error}
+                State: ${this.getConnectionState()}
+                Last Message: ${this.lastMessageTime}
+                Recovery: ${this.determineRecoveryStrategy()}`);
+            
+            this.handleNetworkError(error);
+        });
+    }
+
+    private handleConnectionLoss(event: CloseEvent): void {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            console.warn(`🌐 [NETWORK:MEDIUM] Attempting reconnection ${this.reconnectAttempts + 1}/${this.maxReconnectAttempts}...`);
+            
+            setTimeout(() => {
+                this.attemptReconnection();
+            }, this.reconnectDelay);
+            
+            this.reconnectAttempts++;
+            this.reconnectDelay *= 2; // Exponential backoff
+        } else {
+            console.error(`🌐 [NETWORK:CRITICAL] Max reconnection attempts reached - switching to offline mode`);
+            this.switchToOfflineMode();
+        }
+    }
+}
+```
+
+## Message Validation and Error Recovery
+
+Implement comprehensive message validation with fallbacks:
+
+```typescript
+private processMessage(rawMessage: string): void {
+    const startTime = performance.now();
+    
+    try {
+        // Parse message
+        const message = this.parseMessage(rawMessage);
+        
+        // Validate message structure
+        this.validateMessage(message);
+        
+        // Process message based on type
+        this.routeMessage(message);
+        
+        // Update connection health
+        this.updateConnectionHealth('healthy');
+        
+    } catch (error) {
+        this.handleMessageError(error, rawMessage, startTime);
+    }
+}
+
+private handleMessageError(error: Error, rawMessage: string, startTime: number): void {
+    const processingTime = performance.now() - startTime;
+    
+    console.error(`🌐 [NETWORK:MEDIUM] Message processing failed:
+        ❌ Error: ${error.message}
+        📦 Message: ${rawMessage.substring(0, 100)}...
+        📏 Size: ${rawMessage.length} bytes
+        ⏱️ Processing Time: ${processingTime.toFixed(2)}ms
+        🔍 Parse Error: ${this.getParseErrorDetails(error)}
+        🛡️ Validation: ${this.getValidationDetails(error)}
+        🔄 Recovery: Requesting message resend...`);
+    
+    // Request message resend if possible
+    if (this.canRequestResend()) {
+        this.requestMessageResend();
+    }
+    
+    // Update connection health
+    this.updateConnectionHealth('degraded');
+}
+
+private validateMessage(message: any): void {
+    if (!message.type) {
+        throw new Error('Message missing type field');
+    }
+    
+    if (!message.timestamp || Date.now() - message.timestamp > 30000) {
+        throw new Error('Message timestamp invalid or too old');
+    }
+    
+    if (!this.isValidMessageType(message.type)) {
+        throw new Error(`Unknown message type: ${message.type}`);
+    }
+    
+    // Validate payload based on message type
+    this.validateMessagePayload(message);
+}
+```
+
+## Synchronization Error Handling
+
+Handle multiplayer state synchronization issues:
+
+```typescript
+class GameStateSync {
+    private syncErrors = 0;
+    private lastSyncTime = 0;
+    private syncThreshold = 100; // ms
+
+    public validateSync(serverState: GameState, clientState: GameState): boolean {
+        try {
+            const discrepancies = this.findDiscrepancies(serverState, clientState);
+            
+            if (discrepancies.length > 0) {
+                console.warn(`🌐 [NETWORK:MEDIUM] Sync discrepancies found:
+                    Count: ${discrepancies.length}
+                    Types: ${discrepancies.map(d => d.type).join(', ')}
+                    Severity: ${this.calculateSyncSeverity(discrepancies)}
+                    Client Drift: ${Date.now() - this.lastSyncTime}ms
+                    Recovery: ${this.getSyncRecoveryStrategy(discrepancies)}`);
+                
+                this.handleSyncDiscrepancies(discrepancies);
+                return false;
+            }
+            
+            this.syncErrors = 0;
+            return true;
+            
+        } catch (error) {
+            console.error(`🌐 [NETWORK:HIGH] Sync validation failed:
+                Error: ${error.message}
+                Client State: ${this.summarizeState(clientState)}
+                Server State: ${this.summarizeState(serverState)}
+                Sync Errors: ${++this.syncErrors}
+                Recovery: Requesting full state sync...`);
+            
+            this.requestFullStateSync();
+            return false;
+        }
+    }
+
+    private handleSyncDiscrepancies(discrepancies: SyncDiscrepancy[]): void {
+        for (const discrepancy of discrepancies) {
+            switch (discrepancy.severity) {
+                case 'critical':
+                    // Force immediate resync
+                    this.forceResync(discrepancy.entity);
+                    break;
+                case 'high':
+                    // Queue for priority resync
+                    this.queuePriorityResync(discrepancy.entity);
+                    break;
+                case 'medium':
+                    // Interpolate to server state
+                    this.interpolateToServerState(discrepancy);
+                    break;
+                case 'low':
+                    // Log and continue
+                    console.log(`🌐 [NETWORK:DEBUG] Minor sync issue: ${discrepancy.description}`);
+                    break;
+            }
+        }
+    }
+}
+```
+
+## Network Performance Monitoring
+
+Monitor network performance and adjust accordingly:
+
+```typescript
+private monitorNetworkPerformance(): void {
+    setInterval(() => {
+        const metrics = this.getNetworkMetrics();
+        
+        // Check latency
+        if (metrics.latency > this.latencyThreshold) {
+            console.warn(`🌐 [NETWORK:MEDIUM] High latency detected:
+                Current: ${metrics.latency}ms
+                Threshold: ${this.latencyThreshold}ms
+                Packet Loss: ${metrics.packetLoss}%
+                Bandwidth: ${metrics.bandwidth}kbps
+                Action: Reducing update frequency...`);
+            
+            this.adjustUpdateFrequency(metrics.latency);
+        }
+        
+        // Check bandwidth usage
+        if (metrics.bandwidth < this.minBandwidth) {
+            console.warn(`🌐 [NETWORK:MEDIUM] Low bandwidth detected:
+                Current: ${metrics.bandwidth}kbps
+                Minimum: ${this.minBandwidth}kbps
+                Action: Enabling data compression...`);
+            
+            this.enableDataCompression();
+        }
+        
+        // Check for connection stability
+        if (metrics.disconnections > this.disconnectionThreshold) {
+            console.error(`🌐 [NETWORK:HIGH] Connection instability:
+                Disconnections: ${metrics.disconnections}
+                Duration: ${metrics.connectionDuration}ms
+                Quality: ${metrics.connectionQuality}
+                Action: Switching to offline mode preparation...`);
+            
+            this.prepareOfflineMode();
+        }
+    }, 5000);
+}
+```
+
+## Offline Mode Fallbacks
+
+Implement comprehensive offline mode with state preservation:
+
+```typescript
+class OfflineMode {
+    private pendingActions: GameAction[] = [];
+    private offlineState: GameState;
+
+    public switchToOfflineMode(): void {
+        console.warn(`🌐 [NETWORK:HIGH] Switching to offline mode:
+            Pending Actions: ${this.pendingActions.length}
+            Last Sync: ${Date.now() - this.lastSyncTime}ms ago
+            State Preservation: ${this.getStatePreservationStatus()}
+            Expected Reconnection: ${this.getReconnectionEstimate()}`);
+        
+        // Preserve current game state
+        this.offlineState = this.cloneGameState(this.currentGameState);
+        
+        // Queue all subsequent actions
+        this.startActionQueuing();
+        
+        // Switch UI to offline mode
+        this.notifyOfflineMode();
+    }
+
+    public attemptReconnection(): Promise<boolean> {
+        return new Promise((resolve) => {
+            console.log(`🌐 [NETWORK:INFO] Attempting reconnection...
+                Queued Actions: ${this.pendingActions.length}
+                Offline Duration: ${this.getOfflineDuration()}ms
+                State Changes: ${this.getStateChangeCount()}`);
+            
+            this.createConnection()
+                .then(() => {
+                    console.log(`🌐 [NETWORK:INFO] Reconnection successful - synchronizing state...`);
+                    this.synchronizeOfflineChanges();
+                    resolve(true);
+                })
+                .catch((error) => {
+                    console.error(`🌐 [NETWORK:MEDIUM] Reconnection failed: ${error.message}`);
+                    resolve(false);
+                });
+        });
+    }
+}
+```
+
+This networking error handling system ensures reliable multiplayer functionality with comprehensive fallbacks and detailed diagnostics for quick issue resolution.
+description:
+globs:
+alwaysApply: true
+---

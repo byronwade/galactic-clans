@@ -1,0 +1,32 @@
+---
+alwaysApply: true
+description: "Outlines the core software, libraries, and tools required to build and develop Galactic Clans."
+---
+
+# Technology Stack & Build Tools
+
+This document outlines the core technologies and software required for the development of **Galactic Clans**. Adhering to this stack ensures consistency and maintainability.
+
+## Core Technologies
+
+-   **Runtime**: [Node.js](https://nodejs.org/) (v18+) is required for the server and build tools.
+-   **Language**: [TypeScript](https://www.typescriptlang.org/) is the primary language for all code.
+-   **Build Tool**: [Vite](https://vitejs.dev/) is used for the frontend development server and build pipeline.
+-   **Rendering Engine**: [Three.js](https://threejs.org/) is used for all 3D rendering.
+-   **Physics Engine**: [cannon-es](https://github.com/pmndrs/cannon-es) is used for physics simulations.
+-   **ECS Library**: An Entity-Component-System library like [BiteCS](https://github.com/NateTheGreatt/bit-ecs) should be used for game architecture.
+-   **Networking**: [Colyseus](https://www.colyseus.io/) or a custom WebSocket server for real-time multiplayer.
+
+## Development Tools
+
+-   **Version Control**: [Git](https://git-scm.com/) is used for source control. [Git-LFS](https://git-lfs.github.com/) should be used for managing large binary assets.
+-   **Code Editor**: [Visual Studio Code](https://code.visualstudio.com/) is recommended, with extensions for ESLint and Prettier.
+-   **Linter**: [ESLint](https://eslint.org/) for identifying and reporting on patterns in JavaScript/TypeScript.
+-   **Formatter**: [Prettier](https://prettier.io/) for consistent code formatting.
+
+## Asset Creation
+
+-   **3D Modeling**: Any 3D modeling software that can export to `.glb` format is acceptable (e.g., [Blender](https://www.blender.org/)).
+-   **Texture Editing**: Any image editor capable of creating texture atlases (e.g., [GIMP](https://www.gimp.org/), [Photoshop](https://www.adobe.com/products/photoshop.html)).
+
+This rule is based on the project's established tech stack as defined in the [README.md](mdc:README.md) and [ARCHITECTURE.md](mdc:ARCHITECTURE.md).

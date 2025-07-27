@@ -1,0 +1,24 @@
+---
+alwaysApply: true
+description: "Guidelines for writing and maintaining project documentation, including code comments, READMEs, and architectural documents."
+---
+
+# Documentation Rules
+
+Clear and comprehensive documentation is essential for maintaining a large and complex project. All contributions must adhere to these documentation standards.
+
+## Code-Level Documentation
+
+-   **File Headers**: Every file must begin with a header comment that describes the file's purpose, author, and creation date.
+-   **Function and Class Headers**: All public functions and classes must have a header comment that explains what the function or class does, its parameters, and what it returns.
+-   **Inline Comments**: Use inline comments to explain complex or non-obvious sections of code.
+
+## Project-Level Documentation
+
+-   **README.md Files**: Every major directory must contain a `README.md` file that provides an overview of the directory's contents and purpose.
+-   **Architecture Document**: The `ARCHITECTURE.md` file must be kept up to date. Any significant changes to the project's architecture must be reflected in this document.
+-   **Design Documents**: For major new features, a design document must be created. This document should outline the feature's requirements, design, and implementation plan.
+
+## API Documentation
+
+-   **JSDoc**: All public APIs must be documented using JSDoc. This allows for the automatic generation of a comprehensive API reference.

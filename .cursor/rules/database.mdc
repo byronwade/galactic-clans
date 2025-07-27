@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+description: "Guidelines for data management, using fake data with a clear path to a real database (Supabase)."
+---
+
+# Database Rules
+
+This document outlines the rules for managing game data. We will start with a fake data implementation that can be easily migrated to Supabase in the future.
+
+## Data Modeling
+
+-   **Clear Data Models**: All game data must be defined in clear and consistent data models. These models should be designed with a relational database in mind.
+-   **Schema Definition**: The database schema must be defined in a dedicated file. This schema will be the single source of truth for all data models.
+
+## Data Access
+
+-   **Abstract Data Layer**: All data access must go through an abstract data layer. This will allow us to easily switch from the fake data implementation to Supabase without changing the game logic.
+-   **API Endpoints**: The data access layer should expose a clear and consistent set of API endpoints for creating, reading, updating, and deleting data.
+
+## Fake Data
+
+-   **Use Faker.js**: Use a library like Faker.js to generate realistic fake data for development and testing.
+-   **Consistent Data Generation**: The fake data generation should be consistent and reproducible. Use a seed for the fake data generator.
+-   **Data Integrity**: The fake data must maintain data integrity. For example, if a player has an inventory of items, those items must exist in the fake items table.
+
+-   **Consistent Data Generation**: The fake data generation should be consistent and reproducible. Use a seed for the fake data generator.
+-   **Data Integrity**: The fake data must maintain data integrity. For example, if a player has an inventory of items, those items must exist in the fake items table.

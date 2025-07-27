@@ -1,0 +1,499 @@
+---
+alwaysApply: true
+description: This rule ensures **EXTREME PERFORMANCE** optimization throughout Galactic Clans. Every system, component, and feature must be built with performance-first mindset and continuous monitoring.
+---
+
+# Performance & Memory Monitoring - Always Active
+
+This rule ensures **EXTREME PERFORMANCE** optimization throughout Galactic Clans. Every system, component, and feature must be built with performance-first mindset and continuous monitoring.
+
+## 🎯 Performance Targets (Non-Negotiable)
+
+### Frame Rate Requirements
+- **Target**: 60 FPS minimum at all times
+- **Critical Threshold**: Never drop below 45 FPS
+- **Ideal Target**: 120 FPS for high-refresh displays
+- **VR Ready**: 90 FPS minimum for future VR support
+
+### Memory Limits
+- **Total Memory Usage**: < 4GB RAM maximum
+- **JavaScript Heap**: < 512MB during gameplay
+- **GPU Memory**: < 2GB VRAM usage
+- **Asset Memory**: < 1GB for all loaded assets
+
+### Network Performance
+- **Latency**: < 100ms for multiplayer actions
+- **Bandwidth**: < 50KB/s during normal gameplay
+- **Connection Recovery**: < 2 seconds for reconnection
+
+## 🔍 Mandatory Performance Monitoring
+
+### 1. Frame Rate Monitoring
+Every system must include FPS monitoring:
+
+```typescript
+class PerformanceMonitor {
+    private frameCount = 0;
+    private lastTime = performance.now();
+    private fps = 60;
+    private fpsHistory: number[] = [];
+    
+    public measureFPS(): number {
+        const currentTime = performance.now();
+        this.frameCount++;
+        
+        if (currentTime - this.lastTime >= 1000) {
+            this.fps = this.frameCount;
+            this.fpsHistory.push(this.fps);
+            
+            // Keep only last 60 seconds of data
+            if (this.fpsHistory.length > 60) {
+                this.fpsHistory.shift();
+            }
+            
+            // Alert if FPS drops below threshold
+            if (this.fps < 45) {
+                console.warn(`🚨 [PERFORMANCE:CRITICAL] FPS dropped to ${this.fps}`);
+                this.triggerPerformanceRecovery();
+            }
+            
+            this.frameCount = 0;
+            this.lastTime = currentTime;
+        }
+        
+        return this.fps;
+    }
+    
+    private triggerPerformanceRecovery(): void {
+        // Implement automatic quality reduction
+        // Disable non-essential visual effects
+        // Reduce particle count
+        // Lower texture quality temporarily
+    }
+}
+```
+
+### 2. Memory Usage Monitoring
+All systems must track memory usage:
+
+```typescript
+class MemoryMonitor {
+    private memoryThresholds = {
+        warning: 0.7,    // 70% of limit
+        critical: 0.85,  // 85% of limit
+        emergency: 0.95  // 95% of limit
+    };
+    
+    public checkMemoryUsage(): MemoryInfo {
+        const memory = (performance as any).memory;
+        if (!memory) return this.getFallbackMemory();
+        
+        const usage = {
+            used: memory.usedJSHeapSize,
+            total: memory.totalJSHeapSize,
+            limit: memory.jsHeapSizeLimit,
+            percentage: memory.usedJSHeapSize / memory.jsHeapSizeLimit
+        };
+        
+        // Check thresholds
+        if (usage.percentage >= this.memoryThresholds.emergency) {
+            console.error(`🚨 [MEMORY:EMERGENCY] ${(usage.percentage * 100).toFixed(1)}% memory usage`);
+            this.emergencyCleanup();
+        } else if (usage.percentage >= this.memoryThresholds.critical) {
+            console.warn(`⚠️ [MEMORY:CRITICAL] ${(usage.percentage * 100).toFixed(1)}% memory usage`);
+            this.criticalCleanup();
+        } else if (usage.percentage >= this.memoryThresholds.warning) {
+            console.warn(`📊 [MEMORY:WARNING] ${(usage.percentage * 100).toFixed(1)}% memory usage`);
+            this.preventiveCleanup();
+        }
+        
+        return usage;
+    }
+    
+    private emergencyCleanup(): void {
+        // Force garbage collection if available
+        if (window.gc) window.gc();
+        
+        // Clear all caches
+        this.clearAllCaches();
+        
+        // Unload non-essential assets
+        this.unloadNonEssentialAssets();
+        
+        // Reduce quality to minimum
+        this.setMinimumQuality();
+    }
+}
+```
+
+### 3. CPU Performance Monitoring
+Track CPU usage and execution time:
+
+```typescript
+class CPUMonitor {
+    private taskTimes = new Map<string, number[]>();
+    private cpuThreshold = 16.67; // 60 FPS = 16.67ms per frame
+    
+    public measureTask<T>(taskName: string, task: () => T): T {
+        const startTime = performance.now();
+        
+        try {
+            const result = task();
+            const duration = performance.now() - startTime;
+            
+            this.recordTaskTime(taskName, duration);
+            
+            if (duration > this.cpuThreshold) {
+                console.warn(`⏱️ [CPU:SLOW] ${taskName} took ${duration.toFixed(2)}ms (> ${this.cpuThreshold}ms)`);
+            }
+            
+            return result;
+        } catch (error) {
+            const duration = performance.now() - startTime;
+            console.error(`💥 [CPU:ERROR] ${taskName} failed after ${duration.toFixed(2)}ms`, error);
+            throw error;
+        }
+    }
+    
+    public async measureAsyncTask<T>(taskName: string, task: () => Promise<T>): Promise<T> {
+        const startTime = performance.now();
+        
+        try {
+            const result = await task();
+            const duration = performance.now() - startTime;
+            
+            this.recordTaskTime(taskName, duration);
+            
+            if (duration > 100) { // Async tasks should complete within 100ms
+                console.warn(`⏱️ [ASYNC:SLOW] ${taskName} took ${duration.toFixed(2)}ms`);
+            }
+            
+            return result;
+        } catch (error) {
+            const duration = performance.now() - startTime;
+            console.error(`💥 [ASYNC:ERROR] ${taskName} failed after ${duration.toFixed(2)}ms`, error);
+            throw error;
+        }
+    }
+}
+```
+
+## 📊 Required Performance Metrics
+
+### System Health Dashboard
+Every major system must report these metrics:
+
+```typescript
+interface SystemPerformanceMetrics {
+    // Timing Metrics
+    averageFrameTime: number;        // milliseconds
+    worstFrameTime: number;          // milliseconds  
+    frameTimeVariance: number;       // consistency metric
+    
+    // Memory Metrics
+    memoryUsage: number;             // bytes
+    memoryGrowthRate: number;        // bytes per second
+    garbageCollectionFrequency: number; // collections per minute
+    
+    // CPU Metrics
+    cpuUsagePercentage: number;      // 0-100%
+    taskExecutionTimes: Map<string, number>; // task name -> avg time
+    
+    // GPU Metrics (if available)
+    drawCalls: number;               // per frame
+    trianglesRendered: number;       // per frame
+    textureMemoryUsage: number;      // bytes
+    
+    // Network Metrics
+    latency: number;                 // milliseconds
+    bandwidthUsage: number;          // bytes per second
+    packetLoss: number;              // percentage
+    
+    // Quality Metrics
+    currentQualityLevel: number;     // 0-10 scale
+    qualityAdjustments: number;      // automatic adjustments made
+}
+```
+
+### Automatic Performance Profiling
+All systems must include profiling hooks:
+
+```typescript
+// MANDATORY: Wrap all performance-critical functions
+function profiledFunction<T extends any[], R>(
+    name: string, 
+    fn: (...args: T) => R
+): (...args: T) => R {
+    return (...args: T): R => {
+        const monitor = CPUMonitor.getInstance();
+        return monitor.measureTask(name, () => fn(...args));
+    };
+}
+
+// MANDATORY: Wrap all async functions
+function profiledAsyncFunction<T extends any[], R>(
+    name: string, 
+    fn: (...args: T) => Promise<R>
+): (...args: T) => Promise<R> {
+    return async (...args: T): Promise<R> => {
+        const monitor = CPUMonitor.getInstance();
+        return await monitor.measureAsyncTask(name, () => fn(...args));
+    };
+}
+
+// Usage Examples:
+const optimizedRender = profiledFunction('render', originalRenderFunction);
+const optimizedLoadAsset = profiledAsyncFunction('loadAsset', originalLoadAssetFunction);
+```
+
+## 🚀 Performance Optimization Strategies
+
+### 1. Automatic Quality Adjustment
+```typescript
+class QualityManager {
+    private qualityLevels = [
+        { name: 'Ultra',    particles: 1000, shadows: true,  antialiasing: 4 },
+        { name: 'High',     particles: 500,  shadows: true,  antialiasing: 2 },
+        { name: 'Medium',   particles: 250,  shadows: false, antialiasing: 1 },
+        { name: 'Low',      particles: 100,  shadows: false, antialiasing: 0 },
+        { name: 'Minimal', particles: 50,   shadows: false, antialiasing: 0 }
+    ];
+    
+    public adjustQualityBasedOnPerformance(fps: number, memoryUsage: number): void {
+        let targetQuality = this.currentQuality;
+        
+        // Reduce quality if performance is poor
+        if (fps < 45 || memoryUsage > 0.85) {
+            targetQuality = Math.max(0, targetQuality - 1);
+        }
+        // Increase quality if performance is good
+        else if (fps > 55 && memoryUsage < 0.6 && this.stableFor > 30) {
+            targetQuality = Math.min(this.qualityLevels.length - 1, targetQuality + 1);
+        }
+        
+        if (targetQuality !== this.currentQuality) {
+            this.setQualityLevel(targetQuality);
+        }
+    }
+}
+```
+
+### 2. Asset Streaming and LOD
+```typescript
+class AssetManager {
+    private loadedAssets = new Map<string, any>();
+    private assetPriorities = new Map<string, number>();
+    
+    public async loadAssetWithPriority(url: string, priority: number): Promise<any> {
+        // Higher priority assets load first
+        this.assetPriorities.set(url, priority);
+        
+        // Unload low priority assets if memory is full
+        if (this.memoryMonitor.getUsage() > 0.8) {
+            await this.unloadLowPriorityAssets();
+        }
+        
+        return this.loadAsset(url);
+    }
+    
+    private async unloadLowPriorityAssets(): Promise<void> {
+        const sortedAssets = Array.from(this.assetPriorities.entries())
+            .sort((a, b) => a[1] - b[1])
+            .slice(0, Math.floor(this.loadedAssets.size * 0.3));
+        
+        for (const [url] of sortedAssets) {
+            this.unloadAsset(url);
+        }
+    }
+}
+```
+
+### 3. Object Pooling
+```typescript
+class ObjectPool<T> {
+    private pool: T[] = [];
+    private createFn: () => T;
+    private resetFn: (obj: T) => void;
+    
+    constructor(createFn: () => T, resetFn: (obj: T) => void, initialSize: number = 10) {
+        this.createFn = createFn;
+        this.resetFn = resetFn;
+        
+        // Pre-populate pool
+        for (let i = 0; i < initialSize; i++) {
+            this.pool.push(createFn());
+        }
+    }
+    
+    public acquire(): T {
+        if (this.pool.length > 0) {
+            return this.pool.pop()!;
+        }
+        
+        // Log if we need to create new objects (potential memory issue)
+        console.warn(`📊 [POOL:EXPAND] Creating new object, pool exhausted`);
+        return this.createFn();
+    }
+    
+    public release(obj: T): void {
+        this.resetFn(obj);
+        this.pool.push(obj);
+        
+        // Prevent pool from growing too large
+        if (this.pool.length > 100) {
+            this.pool.splice(50); // Keep only 50 objects
+        }
+    }
+}
+```
+
+## ⚡ Performance Testing Requirements
+
+### 1. Automated Performance Tests
+Every system must include performance tests:
+
+```typescript
+describe('System Performance Tests', () => {
+    it('should maintain 60 FPS during heavy load', async () => {
+        const monitor = new PerformanceMonitor();
+        const startTime = performance.now();
+        
+        // Simulate heavy load for 5 seconds
+        while (performance.now() - startTime < 5000) {
+            // Perform intensive operations
+            await performHeavyOperation();
+            
+            const fps = monitor.measureFPS();
+            expect(fps).toBeGreaterThan(45); // Never drop below 45 FPS
+        }
+    });
+    
+    it('should not exceed memory limits', async () => {
+        const memoryMonitor = new MemoryMonitor();
+        const initialMemory = memoryMonitor.checkMemoryUsage();
+        
+        // Perform memory-intensive operations
+        await loadAllAssets();
+        await createManyObjects();
+        
+        const finalMemory = memoryMonitor.checkMemoryUsage();
+        expect(finalMemory.percentage).toBeLessThan(0.85); // Stay under 85%
+    });
+});
+```
+
+### 2. Continuous Monitoring
+```typescript
+class ContinuousMonitor {
+    private interval: number;
+    private metrics: SystemPerformanceMetrics[] = [];
+    
+    public startMonitoring(): void {
+        this.interval = setInterval(() => {
+            const metrics = this.collectAllMetrics();
+            this.metrics.push(metrics);
+            
+            // Keep only last hour of data
+            if (this.metrics.length > 3600) {
+                this.metrics.shift();
+            }
+            
+            this.analyzePerformanceTrends();
+            this.reportIssues(metrics);
+        }, 1000); // Check every second
+    }
+    
+    private analyzePerformanceTrends(): void {
+        if (this.metrics.length < 60) return; // Need at least 1 minute of data
+        
+        const recent = this.metrics.slice(-60); // Last minute
+        const avgFPS = recent.reduce((sum, m) => sum + (1000 / m.averageFrameTime), 0) / recent.length;
+        const memoryTrend = this.calculateMemoryTrend(recent);
+        
+        if (avgFPS < 50) {
+            console.warn(`📉 [TREND:FPS] Average FPS dropping: ${avgFPS.toFixed(1)}`);
+        }
+        
+        if (memoryTrend > 0.01) {
+            console.warn(`📈 [TREND:MEMORY] Memory usage increasing: ${(memoryTrend * 100).toFixed(2)}%/min`);
+        }
+    }
+}
+```
+
+## 🔧 Implementation Requirements
+
+### Mandatory Performance Code Patterns
+
+1. **Every render loop must include FPS monitoring**
+2. **All asset loading must include memory checks**
+3. **Every network operation must include latency measurement**
+4. **All heavy computations must use Web Workers when possible**
+5. **Every system must implement graceful degradation**
+
+### Forbidden Performance Anti-Patterns
+
+❌ **NEVER** create objects in render loops
+❌ **NEVER** perform DOM queries in tight loops  
+❌ **NEVER** load assets synchronously
+❌ **NEVER** ignore memory cleanup
+❌ **NEVER** block the main thread for > 16ms
+
+### Required Optimizations
+
+✅ Use `requestAnimationFrame` for all animations
+✅ Implement object pooling for frequently created objects
+✅ Use Web Workers for heavy computations
+✅ Implement proper asset streaming and unloading
+✅ Use efficient data structures (TypedArrays when possible)
+✅ Implement proper event listener cleanup
+✅ Use `passive` event listeners where appropriate
+
+## 📈 Performance Dashboard Integration
+
+Every system must report to the central performance dashboard:
+
+```typescript
+class PerformanceDashboard {
+    public static reportMetrics(systemName: string, metrics: SystemPerformanceMetrics): void {
+        // Send to central monitoring
+        this.centralMonitor.record(systemName, metrics);
+        
+        // Update real-time dashboard
+        this.updateDashboard(systemName, metrics);
+        
+        // Check for alerts
+        this.checkAlerts(systemName, metrics);
+    }
+    
+    private static checkAlerts(systemName: string, metrics: SystemPerformanceMetrics): void {
+        const alerts: string[] = [];
+        
+        if (metrics.averageFrameTime > 16.67) {
+            alerts.push(`${systemName}: Frame time too high (${metrics.averageFrameTime.toFixed(2)}ms)`);
+        }
+        
+        if (metrics.memoryUsage > 512 * 1024 * 1024) {
+            alerts.push(`${systemName}: Memory usage too high (${(metrics.memoryUsage / 1024 / 1024).toFixed(1)}MB)`);
+        }
+        
+        if (alerts.length > 0) {
+            console.warn(`🚨 [ALERTS:${systemName}]`, alerts);
+        }
+    }
+}
+```
+
+## 🎯 Performance Enforcement
+
+This rule is **ALWAYS ACTIVE** and **NON-NEGOTIABLE**. Every:
+
+- Function must be performance-conscious
+- System must include monitoring
+- Feature must degrade gracefully
+- Component must clean up resources
+- Operation must respect performance budgets
+
+**Failure to follow these performance standards will result in immediate optimization requirements.**
+
+Remember: **A slow game is a failed game.** Performance is not optional—it's the foundation of great gameplay!

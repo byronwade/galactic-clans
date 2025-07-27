@@ -1,0 +1,35 @@
+---
+# Monetization Strategy
+
+This document outlines the monetization strategy for **Galactic Clans**. Our goal is to create a fair and enjoyable experience for all players, whether they choose to spend money or not. We will focus on providing value and enhancing the gameplay experience, rather than creating "pay-to-win" mechanics.
+
+## Core Principles
+
+-   **Player-Friendly**: Our monetization strategy will always prioritize the player's experience. We will avoid aggressive or predatory monetization tactics.
+-   **Value-Oriented**: All purchases will offer clear and fair value to the player.
+-   **Transparency**: We will be transparent with our players about how monetization works in the game.
+
+## Monetization Streams
+
+1.  **Cosmetic Items**:
+    -   **Skins & Themes**: Players can purchase unique skins for their planets, ships, and characters to customize their empire.
+    -   **UI Themes**: Custom UI themes that allow players to change the look and feel of the game's interface.
+
+2.  **Convenience & Time-Savers**:
+    -   **Resource Boosts**: Players can purchase temporary boosts to their resource production rates.
+    -   **Build Queue Slots**: Additional slots in the build queue to allow for more concurrent construction.
+    -   **"Stabilize All" Button**: A convenience feature that allows players to stabilize all their planets with a single click.
+
+3.  **Battle Pass / Seasonal Content**:
+    -   **Free & Premium Tiers**: A seasonal Battle Pass with both free and premium tiers. The premium tier will offer exclusive cosmetic rewards and convenience items.
+    -   **Engaging Challenges**: The Battle Pass will feature a variety of challenges that encourage players to engage with all aspects of the game.
+
+## What We Will NOT Do
+
+-   **No Pay-to-Win**: We will not sell any items that provide a direct competitive advantage in PvP combat.
+-   **No Loot Boxes**: We will not use loot boxes or any other randomized reward mechanics that rely on chance.
+-   **No "Hard" Paywalls**: All core gameplay content will be accessible to all players without requiring a purchase.
+description:
+globs:
+alwaysApply: true
+---

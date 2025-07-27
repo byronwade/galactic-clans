@@ -1,0 +1,46 @@
+{
+  "name": "cosmic",
+  "module": "src/main.ts",
+  "scripts": {
+    "dev": "next dev -p 5173",
+    "build": "next build",
+    "start": "next start -p 5173",
+    "lint": "next lint",
+    "build:css": "bunx tailwindcss -i src/styles/styles.css -o src/styles/output.css --watch",
+    "tauri": "tauri",
+    "legacy:dev": "PORT=5173 bun --hot server.ts",
+    "legacy:start": "bun run src/main.ts",
+    "setup:audio": "node scripts/setup-audio-directories.js"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "@tauri-apps/cli": "^2.7.1",
+    "@types/bun": "latest",
+    "@types/three": "^0.166.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.6.1",
+    "@react-three/fiber": "^9.2.0",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@tauri-apps/api": "^2.7.0",
+    "bitecs": "^0.3.40",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.9",
+    "lucide-react": "^0.525.0",
+    "next": "^15.4.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "simplex-noise": "^4.0.3",
+    "tailwind-merge": "^3.3.1",
+    "three": "^0.166.1",
+    "zustand": "^5.0.6"
+  }
+}

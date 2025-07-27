@@ -1,0 +1,41 @@
+---
+# Player Onboarding & Tutorial
+
+The first-time user experience (FTUE) is critical for player retention. This document outlines the plan for onboarding new players into the world of **Galactic Clans**. The goal is to guide players through the core mechanics without overwhelming them.
+
+## Onboarding Principles
+
+-   **Guided, Not Forced**: The tutorial should guide players, but allow for exploration.
+-   **Contextual Learning**: Introduce concepts when the player needs them.
+-   **Reward Progression**: Completing tutorial steps should grant small resource rewards to reinforce positive actions.
+
+## Tutorial Flow
+
+The tutorial will be a series of quests presented by an AI companion, "COSMOS."
+
+```mermaid
+graph TD
+    A[Start Game] --> B(Welcome to Galactic Clans!<br/>Let's build your first Mine.);
+    B --> C{Player builds a Mine};
+    C --> D(Great! Now collect<br/>your first Minerals.);
+    D --> E{Player collects Minerals};
+    E --> F(Build a Barracks<br/>to train your first troops.);
+    F --> G{Player builds Barracks};
+    G --> H(Train a squad of Grunts.);
+    H --> I{Player trains Grunts};
+    I --> J(Let's try a simulated raid!<br/>Attack the nearby Rogue Drone.);
+    J --> K{Player completes simulated raid};
+    K --> L(Congratulations, Commander!<br/>You are now ready to explore the galaxy.<br/>**Tutorial Complete**);
+```
+
+## Post-Tutorial
+
+-   **Guided Goals**: After the main tutorial, COSMOS will offer optional quests that guide the player toward mid-game goals, such as:
+    -   "Join or Create a Clan"
+    -   "Upgrade your Town Hall to Level 3"
+    -   "Scout a Neighboring System"
+-   **Help Menu**: A comprehensive, searchable in-game guide will be available at all times for players who want to learn more about specific features.
+description:
+globs:
+alwaysApply: true
+---

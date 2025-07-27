@@ -1,0 +1,701 @@
+# Performance Error Handling
+
+Comprehensive performance monitoring and optimization with predictive error prevention and resource management.
+
+## Performance Error Categories
+
+```typescript
+enum PerformanceErrorType {
+    MEMORY_LEAK = "MEMORY_LEAK",
+    CPU_SPIKE = "CPU_SPIKE", 
+    FRAME_DROP = "FRAME_DROP",
+    RESOURCE_EXHAUSTION = "RESOURCE_EXHAUSTION",
+    GARBAGE_COLLECTION_PRESSURE = "GARBAGE_COLLECTION_PRESSURE",
+    THREAD_BLOCKING = "THREAD_BLOCKING",
+    CACHE_MISS_RATE = "CACHE_MISS_RATE",
+    NETWORK_CONGESTION = "NETWORK_CONGESTION",
+    DISK_IO_BOTTLENECK = "DISK_IO_BOTTLENECK"
+}
+
+enum PerformanceErrorSeverity {
+    CRITICAL_LAG = "CRITICAL_LAG",          // Severe performance impact, user experience degraded
+    NOTICEABLE_SLOWDOWN = "NOTICEABLE_SLOWDOWN", // Performance degradation, still usable
+    OPTIMIZATION_OPPORTUNITY = "OPTIMIZATION_OPPORTUNITY", // Performance could be improved
+    WITHIN_ACCEPTABLE_RANGE = "WITHIN_ACCEPTABLE_RANGE"    // Performance is acceptable
+}
+```
+
+## Memory Management Error Handling
+
+Implement comprehensive memory tracking with leak detection and automatic cleanup:
+
+```typescript
+class MemoryManager {
+    private memoryThresholds = {
+        warning: 0.7,    // 70% of available memory
+        critical: 0.85,  // 85% of available memory
+        emergency: 0.95  // 95% of available memory
+    };
+    private memoryHistory: MemorySnapshot[] = [];
+    private leakDetectionEnabled = true;
+    private gcForceThreshold = 0.9;
+
+    public monitorMemoryUsage(): void {
+        setInterval(() => {
+            try {
+                const snapshot = this.takeMemorySnapshot();
+                this.analyzeMemoryUsage(snapshot);
+                this.detectMemoryLeaks();
+                this.enforceMemoryLimits(snapshot);
+            } catch (error) {
+                console.error(`🧠 [MEMORY:HIGH] Memory monitoring failed: ${error.message}`);
+            }
+        }, 5000); // Check every 5 seconds
+    }
+
+    private takeMemorySnapshot(): MemorySnapshot {
+        const snapshot: MemorySnapshot = {
+            timestamp: Date.now(),
+            jsHeapUsed: 0,
+            jsHeapTotal: 0,
+            jsHeapLimit: 0,
+            webglMemory: this.estimateWebGLMemory(),
+            audioBuffers: this.estimateAudioMemory(),
+            gameObjects: this.countGameObjects(),
+            textureMemory: this.estimateTextureMemory()
+        };
+
+        // Get JS heap information if available
+        if ('memory' in performance && (performance as any).memory) {
+            const mem = (performance as any).memory;
+            snapshot.jsHeapUsed = mem.usedJSHeapSize;
+            snapshot.jsHeapTotal = mem.totalJSHeapSize;
+            snapshot.jsHeapLimit = mem.jsHeapSizeLimit;
+        }
+
+        this.memoryHistory.push(snapshot);
+        
+        // Keep only recent history (last 1000 snapshots)
+        if (this.memoryHistory.length > 1000) {
+            this.memoryHistory.shift();
+        }
+
+        return snapshot;
+    }
+
+    private analyzeMemoryUsage(snapshot: MemorySnapshot): void {
+        const totalMemoryUsed = snapshot.jsHeapUsed + snapshot.webglMemory + 
+                               snapshot.audioBuffers + snapshot.textureMemory;
+        const memoryUtilization = totalMemoryUsed / snapshot.jsHeapLimit;
+
+        if (memoryUtilization > this.memoryThresholds.emergency) {
+            this.handleEmergencyMemoryCondition(snapshot);
+        } else if (memoryUtilization > this.memoryThresholds.critical) {
+            this.handleCriticalMemoryCondition(snapshot);
+        } else if (memoryUtilization > this.memoryThresholds.warning) {
+            this.handleWarningMemoryCondition(snapshot);
+        }
+
+        // Log memory usage trends
+        if (this.memoryHistory.length > 10) {
+            const trend = this.calculateMemoryTrend();
+            if (trend > 0.1) { // Growing by 10% per minute
+                console.warn(`🧠 [MEMORY:MEDIUM] Increasing memory usage trend detected: +${(trend * 100).toFixed(1)}%/min`);
+            }
+        }
+    }
+
+    private detectMemoryLeaks(): void {
+        if (!this.leakDetectionEnabled || this.memoryHistory.length < 20) return;
+
+        const recentSnapshots = this.memoryHistory.slice(-20);
+        const memoryGrowth = this.calculateSustainedGrowth(recentSnapshots);
+        
+        if (memoryGrowth > 0.05) { // 5% sustained growth
+            console.error(`🧠 [MEMORY:HIGH] Potential memory leak detected:
+                Sustained Growth: +${(memoryGrowth * 100).toFixed(2)}%
+                Current Usage: ${(recentSnapshots[recentSnapshots.length - 1].jsHeapUsed / 1024 / 1024).toFixed(1)}MB
+                Game Objects: ${recentSnapshots[recentSnapshots.length - 1].gameObjects}
+                Recommendation: Review object lifecycle management`);
+            
+            this.executeLeakMitigation();
+        }
+    }
+
+    private calculateSustainedGrowth(snapshots: MemorySnapshot[]): number {
+        if (snapshots.length < 10) return 0;
+        
+        const firstHalf = snapshots.slice(0, Math.floor(snapshots.length / 2));
+        const secondHalf = snapshots.slice(Math.floor(snapshots.length / 2));
+        
+        const firstAvg = firstHalf.reduce((sum, s) => sum + s.jsHeapUsed, 0) / firstHalf.length;
+        const secondAvg = secondHalf.reduce((sum, s) => sum + s.jsHeapUsed, 0) / secondHalf.length;
+        
+        return (secondAvg - firstAvg) / firstAvg;
+    }
+
+    private handleEmergencyMemoryCondition(snapshot: MemorySnapshot): void {
+        console.error(`🧠 [MEMORY:CRITICAL] Emergency memory condition:
+            Usage: ${(snapshot.jsHeapUsed / 1024 / 1024).toFixed(1)}MB / ${(snapshot.jsHeapLimit / 1024 / 1024).toFixed(1)}MB
+            Utilization: ${((snapshot.jsHeapUsed / snapshot.jsHeapLimit) * 100).toFixed(1)}%
+            Action: Emergency cleanup initiated`);
+        
+        // Immediate aggressive cleanup
+        this.executeEmergencyCleanup();
+        
+        // Force garbage collection
+        this.forceGarbageCollection();
+        
+        // Disable non-essential features
+        this.disableMemoryIntensiveFeatures();
+    }
+
+    private executeEmergencyCleanup(): void {
+        // Clear all caches
+        this.clearAllCaches();
+        
+        // Remove distant/inactive game objects
+        this.cullDistantObjects();
+        
+        // Reduce texture quality
+        this.reduceTextureQuality();
+        
+        // Clear audio buffers for non-playing sounds
+        this.clearUnusedAudioBuffers();
+        
+        // Clear geometry buffers for LOD objects
+        this.clearLODGeometries();
+    }
+
+    private executeLeakMitigation(): void {
+        // Analyze object retention
+        this.analyzeObjectRetention();
+        
+        // Clear weak references
+        this.clearWeakReferences();
+        
+        // Reset object pools
+        this.resetObjectPools();
+        
+        // Clear event listeners that might be holding references
+        this.clearStaleEventListeners();
+    }
+
+    private forceGarbageCollection(): void {
+        if ('gc' in window && typeof (window as any).gc === 'function') {
+            try {
+                (window as any).gc();
+                console.log('🧠 [MEMORY:DEBUG] Forced garbage collection');
+            } catch (error) {
+                console.warn('🧠 [MEMORY:MEDIUM] Failed to force garbage collection');
+            }
+        }
+    }
+}
+```
+
+## CPU Performance Monitoring
+
+Monitor CPU usage and prevent main thread blocking:
+
+```typescript
+class CPUPerformanceMonitor {
+    private cpuThresholds = {
+        warning: 70,     // 70% CPU usage
+        critical: 85,    // 85% CPU usage
+        emergency: 95    // 95% CPU usage
+    };
+    private frameTimeHistory: number[] = [];
+    private longTaskObserver?: PerformanceObserver;
+    private workerPool: Worker[] = [];
+
+    public startCPUMonitoring(): void {
+        // Monitor long tasks that block the main thread
+        this.setupLongTaskObserver();
+        
+        // Monitor frame timing
+        this.monitorFrameTiming();
+        
+        // Monitor script execution time
+        this.monitorScriptPerformance();
+        
+        setInterval(() => {
+            this.analyzeCPUPerformance();
+            this.optimizeCPUUsage();
+        }, 3000); // Check every 3 seconds
+    }
+
+    private setupLongTaskObserver(): void {
+        if ('PerformanceObserver' in window) {
+            try {
+                this.longTaskObserver = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        if (entry.duration > 50) { // Tasks longer than 50ms
+                            this.handleLongTask(entry);
+                        }
+                    }
+                });
+                
+                this.longTaskObserver.observe({ entryTypes: ['longtask'] });
+            } catch (error) {
+                console.warn('🖥️ [CPU:MEDIUM] Long task observer not available');
+            }
+        }
+    }
+
+    private handleLongTask(entry: PerformanceEntry): void {
+        console.warn(`🖥️ [CPU:HIGH] Long task detected:
+            Duration: ${entry.duration.toFixed(2)}ms
+            Start: ${entry.startTime.toFixed(2)}ms
+            Name: ${entry.name}
+            Impact: Main thread blocked
+            Recommendation: Consider breaking into smaller chunks or using Web Workers`);
+        
+        // If we detect critical blocking tasks, take action
+        if (entry.duration > 100) {
+            this.mitigateLongTask(entry);
+        }
+    }
+
+    private mitigateLongTask(entry: PerformanceEntry): void {
+        // Implement task splitting strategies
+        if (entry.name.includes('script')) {
+            this.implementTaskSplitting();
+        }
+        
+        // Move heavy computations to workers
+        if (entry.name.includes('physics') || entry.name.includes('pathfinding')) {
+            this.scheduleWorkerTask(entry.name);
+        }
+        
+        // Reduce processing frequency temporarily
+        this.temporarilyReduceProcessingFrequency();
+    }
+
+    private monitorFrameTiming(): void {
+        let lastFrameTime = performance.now();
+        
+        const measureFrame = () => {
+            const currentTime = performance.now();
+            const frameTime = currentTime - lastFrameTime;
+            
+            this.frameTimeHistory.push(frameTime);
+            if (this.frameTimeHistory.length > 120) { // Keep 2 seconds of frame data at 60fps
+                this.frameTimeHistory.shift();
+            }
+            
+            // Check for frame drops
+            if (frameTime > 33.33) { // Slower than 30 FPS
+                this.handleFrameDrop(frameTime);
+            }
+            
+            lastFrameTime = currentTime;
+            requestAnimationFrame(measureFrame);
+        };
+        
+        requestAnimationFrame(measureFrame);
+    }
+
+    private handleFrameDrop(frameTime: number): void {
+        const fps = 1000 / frameTime;
+        
+        console.warn(`🖥️ [CPU:MEDIUM] Frame drop detected:
+            Frame Time: ${frameTime.toFixed(2)}ms
+            FPS: ${fps.toFixed(1)}
+            Target: 60 FPS (16.67ms per frame)
+            Action: Analyzing performance bottlenecks...`);
+        
+        // Analyze what caused the frame drop
+        this.analyzeFrameDropCause(frameTime);
+        
+        // Take immediate action for severe drops
+        if (frameTime > 100) { // Less than 10 FPS
+            this.handleSevereFrameDrop();
+        }
+    }
+
+    private analyzeFrameDropCause(frameTime: number): void {
+        // Check recent performance entries
+        const recentEntries = performance.getEntriesByType('measure');
+        const recentExpensiveEntries = recentEntries.filter(entry => entry.duration > 10);
+        
+        if (recentExpensiveEntries.length > 0) {
+            console.warn(`🖥️ [CPU:MEDIUM] Performance bottlenecks identified:
+                ${recentExpensiveEntries.map(entry => 
+                    `${entry.name}: ${entry.duration.toFixed(2)}ms`
+                ).join('\n                ')}`);
+        }
+        
+        // Check memory pressure
+        if ('memory' in performance && (performance as any).memory) {
+            const mem = (performance as any).memory;
+            const memoryPressure = mem.usedJSHeapSize / mem.jsHeapSizeLimit;
+            
+            if (memoryPressure > 0.8) {
+                console.warn('🖥️ [CPU:MEDIUM] High memory pressure may be causing GC pauses');
+            }
+        }
+    }
+
+    private handleSevereFrameDrop(): void {
+        console.error('🖥️ [CPU:CRITICAL] Severe frame drop detected, implementing emergency optimizations');
+        
+        // Immediate optimizations
+        this.reduceRenderQuality();
+        this.pauseNonEssentialSystems();
+        this.scheduleDeferedCleanup();
+    }
+
+    private implementTaskSplitting(): void {
+        // Implement time-slicing for heavy operations
+        console.log('🖥️ [CPU:DEBUG] Implementing task splitting for heavy operations');
+        
+        // Example: Break large operations into smaller chunks
+        // This would be implemented in specific systems
+    }
+
+    private scheduleWorkerTask(taskName: string): void {
+        if (this.workerPool.length === 0) {
+            this.initializeWorkerPool();
+        }
+        
+        // Schedule task on available worker
+        const worker = this.getAvailableWorker();
+        if (worker) {
+            console.log(`🖥️ [CPU:DEBUG] Scheduling ${taskName} on worker thread`);
+            // Implementation would depend on specific task type
+        }
+    }
+
+    private initializeWorkerPool(): void {
+        const workerCount = Math.min(navigator.hardwareConcurrency || 2, 4);
+        
+        for (let i = 0; i < workerCount; i++) {
+            try {
+                // Worker implementation would be task-specific
+                // const worker = new Worker('performance-worker.js');
+                // this.workerPool.push(worker);
+            } catch (error) {
+                console.warn('🖥️ [CPU:MEDIUM] Failed to create worker for performance optimization');
+            }
+        }
+    }
+}
+```
+
+## Resource Management Error Handling
+
+Implement comprehensive resource tracking and automatic cleanup:
+
+```typescript
+class ResourceManager {
+    private resources = new Map<string, ResourceTracker>();
+    private resourceLimits = {
+        textures: { count: 1000, memory: 512 * 1024 * 1024 }, // 512MB
+        geometries: { count: 500, memory: 256 * 1024 * 1024 }, // 256MB
+        audio: { count: 100, memory: 128 * 1024 * 1024 }, // 128MB
+        shaders: { count: 50, memory: 16 * 1024 * 1024 }, // 16MB
+        animations: { count: 200, memory: 64 * 1024 * 1024 } // 64MB
+    };
+
+    public trackResource(type: string, resource: any): string {
+        const id = crypto.randomUUID();
+        const tracker: ResourceTracker = {
+            id,
+            type,
+            resource,
+            createdAt: Date.now(),
+            lastAccessed: Date.now(),
+            accessCount: 0,
+            memoryUsage: this.estimateResourceMemory(type, resource),
+            isDisposed: false
+        };
+        
+        this.resources.set(id, tracker);
+        
+        // Check resource limits
+        this.checkResourceLimits(type);
+        
+        return id;
+    }
+
+    private checkResourceLimits(type: string): void {
+        const typeResources = Array.from(this.resources.values()).filter(r => r.type === type && !r.isDisposed);
+        const totalCount = typeResources.length;
+        const totalMemory = typeResources.reduce((sum, r) => sum + r.memoryUsage, 0);
+        
+        const limits = this.resourceLimits[type];
+        if (!limits) return;
+        
+        if (totalCount > limits.count) {
+            console.warn(`📦 [RESOURCE:HIGH] ${type} count limit exceeded: ${totalCount}/${limits.count}`);
+            this.cullLeastRecentlyUsedResources(type, totalCount - limits.count);
+        }
+        
+        if (totalMemory > limits.memory) {
+            console.warn(`📦 [RESOURCE:HIGH] ${type} memory limit exceeded: ${(totalMemory / 1024 / 1024).toFixed(1)}MB/${(limits.memory / 1024 / 1024).toFixed(1)}MB`);
+            this.cullLargestUnusedResources(type, totalMemory - limits.memory);
+        }
+    }
+
+    private cullLeastRecentlyUsedResources(type: string, countToRemove: number): void {
+        const typeResources = Array.from(this.resources.values())
+            .filter(r => r.type === type && !r.isDisposed)
+            .sort((a, b) => a.lastAccessed - b.lastAccessed);
+        
+        for (let i = 0; i < Math.min(countToRemove, typeResources.length); i++) {
+            this.disposeResource(typeResources[i].id);
+        }
+        
+        console.log(`📦 [RESOURCE:MEDIUM] Culled ${Math.min(countToRemove, typeResources.length)} least recently used ${type} resources`);
+    }
+
+    private cullLargestUnusedResources(type: string, memoryToFree: number): void {
+        const typeResources = Array.from(this.resources.values())
+            .filter(r => r.type === type && !r.isDisposed && Date.now() - r.lastAccessed > 30000) // Unused for 30+ seconds
+            .sort((a, b) => b.memoryUsage - a.memoryUsage);
+        
+        let freedMemory = 0;
+        let resourcesRemoved = 0;
+        
+        for (const resource of typeResources) {
+            if (freedMemory >= memoryToFree) break;
+            
+            freedMemory += resource.memoryUsage;
+            this.disposeResource(resource.id);
+            resourcesRemoved++;
+        }
+        
+        console.log(`📦 [RESOURCE:MEDIUM] Freed ${(freedMemory / 1024 / 1024).toFixed(1)}MB by disposing ${resourcesRemoved} ${type} resources`);
+    }
+
+    public accessResource(id: string): any {
+        const tracker = this.resources.get(id);
+        if (!tracker || tracker.isDisposed) {
+            console.warn(`📦 [RESOURCE:MEDIUM] Attempted to access disposed resource: ${id}`);
+            return null;
+        }
+        
+        tracker.lastAccessed = Date.now();
+        tracker.accessCount++;
+        
+        return tracker.resource;
+    }
+
+    public disposeResource(id: string): void {
+        const tracker = this.resources.get(id);
+        if (!tracker || tracker.isDisposed) return;
+        
+        try {
+            // Dispose the actual resource
+            if (tracker.resource && typeof tracker.resource.dispose === 'function') {
+                tracker.resource.dispose();
+            }
+            
+            tracker.isDisposed = true;
+            
+        } catch (error) {
+            console.error(`📦 [RESOURCE:HIGH] Failed to dispose resource ${id}: ${error.message}`);
+        }
+    }
+
+    public generateResourceReport(): string {
+        const resourcesByType = new Map<string, { count: number; memory: number }>();
+        
+        for (const resource of this.resources.values()) {
+            if (resource.isDisposed) continue;
+            
+            const stats = resourcesByType.get(resource.type) || { count: 0, memory: 0 };
+            stats.count++;
+            stats.memory += resource.memoryUsage;
+            resourcesByType.set(resource.type, stats);
+        }
+        
+        let report = '📦 RESOURCE USAGE REPORT\n========================\n\n';
+        
+        for (const [type, stats] of resourcesByType) {
+            const limits = this.resourceLimits[type];
+            const memoryMB = stats.memory / 1024 / 1024;
+            const limitMB = limits ? limits.memory / 1024 / 1024 : 0;
+            
+            report += `${type.toUpperCase()}:\n`;
+            report += `  Count: ${stats.count}${limits ? `/${limits.count}` : ''}\n`;
+            report += `  Memory: ${memoryMB.toFixed(1)}MB${limits ? `/${limitMB.toFixed(1)}MB` : ''}\n`;
+            report += `  Usage: ${limits ? (stats.count / limits.count * 100).toFixed(1) : 'N/A'}%\n\n`;
+        }
+        
+        return report;
+    }
+}
+```
+
+## Performance Optimization Strategies
+
+Implement dynamic performance optimization based on system conditions:
+
+```typescript
+class PerformanceOptimizer {
+    private optimizationStrategies = new Map<string, OptimizationStrategy>();
+    private currentOptimizationLevel = 0; // 0 = no optimization, 5 = maximum optimization
+    private performanceTargets = {
+        targetFPS: 60,
+        maxFrameTime: 16.67, // ms
+        maxMemoryUsage: 0.8, // 80% of available
+        maxCPUUsage: 0.7 // 70% of available
+    };
+
+    constructor() {
+        this.initializeOptimizationStrategies();
+    }
+
+    private initializeOptimizationStrategies(): void {
+        // Level 1: Minimal optimizations
+        this.optimizationStrategies.set('level1', {
+            name: 'Minimal Optimization',
+            actions: [
+                () => this.enableObjectPooling(),
+                () => this.optimizeGarbageCollection(),
+                () => this.enableRequestIdleCallback()
+            ],
+            performance: { fps: 5, memory: 0.05, cpu: 0.1 }
+        });
+
+        // Level 2: Moderate optimizations  
+        this.optimizationStrategies.set('level2', {
+            name: 'Moderate Optimization',
+            actions: [
+                () => this.reduceLODDistance(),
+                () => this.enableOcclusionCulling(),
+                () => this.reduceParticleCount()
+            ],
+            performance: { fps: 10, memory: 0.1, cpu: 0.15 }
+        });
+
+        // Level 3: Aggressive optimizations
+        this.optimizationStrategies.set('level3', {
+            name: 'Aggressive Optimization',
+            actions: [
+                () => this.reduceRenderDistance(),
+                () => this.disableNonEssentialEffects(),
+                () => this.simplifyShaders()
+            ],
+            performance: { fps: 15, memory: 0.2, cpu: 0.25 }
+        });
+
+        // Level 4: Emergency optimizations
+        this.optimizationStrategies.set('level4', {
+            name: 'Emergency Optimization',
+            actions: [
+                () => this.enableEmergencyMode(),
+                () => this.pauseNonCriticalSystems(),
+                () => this.forceMinimalQuality()
+            ],
+            performance: { fps: 25, memory: 0.3, cpu: 0.4 }
+        });
+    }
+
+    public analyzePerformanceAndOptimize(): void {
+        const metrics = this.gatherPerformanceMetrics();
+        const requiredOptimization = this.calculateRequiredOptimization(metrics);
+        
+        if (requiredOptimization !== this.currentOptimizationLevel) {
+            this.applyOptimizationLevel(requiredOptimization);
+        }
+    }
+
+    private calculateRequiredOptimization(metrics: PerformanceMetrics): number {
+        let requiredLevel = 0;
+        
+        // Check FPS
+        if (metrics.fps < this.performanceTargets.targetFPS * 0.5) {
+            requiredLevel = Math.max(requiredLevel, 4); // Emergency
+        } else if (metrics.fps < this.performanceTargets.targetFPS * 0.7) {
+            requiredLevel = Math.max(requiredLevel, 3); // Aggressive
+        } else if (metrics.fps < this.performanceTargets.targetFPS * 0.9) {
+            requiredLevel = Math.max(requiredLevel, 2); // Moderate
+        } else if (metrics.fps < this.performanceTargets.targetFPS) {
+            requiredLevel = Math.max(requiredLevel, 1); // Minimal
+        }
+        
+        // Check memory usage
+        if (metrics.memoryUsage > 0.9) {
+            requiredLevel = Math.max(requiredLevel, 4);
+        } else if (metrics.memoryUsage > 0.85) {
+            requiredLevel = Math.max(requiredLevel, 3);
+        } else if (metrics.memoryUsage > 0.8) {
+            requiredLevel = Math.max(requiredLevel, 2);
+        }
+        
+        return requiredLevel;
+    }
+
+    private applyOptimizationLevel(level: number): void {
+        // Remove previous optimizations
+        this.removeCurrentOptimizations();
+        
+        // Apply new optimization level
+        for (let i = 1; i <= level; i++) {
+            const strategy = this.optimizationStrategies.get(`level${i}`);
+            if (strategy) {
+                console.log(`🔧 [PERF:MEDIUM] Applying ${strategy.name}...`);
+                
+                for (const action of strategy.actions) {
+                    try {
+                        action();
+                    } catch (error) {
+                        console.error(`🔧 [PERF:HIGH] Optimization action failed: ${error.message}`);
+                    }
+                }
+            }
+        }
+        
+        this.currentOptimizationLevel = level;
+        
+        if (level > 0) {
+            console.log(`🔧 [PERF:MEDIUM] Performance optimization level set to ${level}/4`);
+        }
+    }
+
+    // Individual optimization implementations
+    private enableObjectPooling(): void {
+        console.log('🔧 [PERF:DEBUG] Enabled object pooling');
+        // Implementation would enable object pooling for frequently created/destroyed objects
+    }
+
+    private optimizeGarbageCollection(): void {
+        console.log('🔧 [PERF:DEBUG] Optimized garbage collection patterns');
+        // Implementation would reduce object creation in hot paths
+    }
+
+    private reduceLODDistance(): void {
+        console.log('🔧 [PERF:DEBUG] Reduced LOD distances');
+        // Implementation would reduce distance at which high-detail models are used
+    }
+
+    private enableOcclusionCulling(): void {
+        console.log('🔧 [PERF:DEBUG] Enabled occlusion culling');
+        // Implementation would enable culling of objects not visible to camera
+    }
+
+    private reduceParticleCount(): void {
+        console.log('🔧 [PERF:DEBUG] Reduced particle counts');
+        // Implementation would reduce number of particles in effects
+    }
+
+    private disableNonEssentialEffects(): void {
+        console.log('🔧 [PERF:DEBUG] Disabled non-essential visual effects');
+        // Implementation would disable bloom, motion blur, etc.
+    }
+
+    private enableEmergencyMode(): void {
+        console.error('🔧 [PERF:CRITICAL] Enabled emergency performance mode');
+        // Implementation would enable minimal graphics/physics mode
+    }
+}
+```
+
+This comprehensive performance error handling system provides proactive optimization, resource management, and emergency protocols to maintain optimal game performance under all conditions.
+description:
+globs:
+alwaysApply: true
+---

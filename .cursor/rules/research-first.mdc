@@ -1,0 +1,27 @@
+
+# Research-First Rules
+
+Before writing any code, it is essential to conduct thorough research to ensure that you are building the right solution in the right way. This research-first approach helps to avoid costly mistakes and rework later in the development process.
+
+## The Research Process
+
+1.  **Define the Problem**: Clearly articulate the problem you are trying to solve. Write down the requirements, constraints, and goals.
+2.  **Explore Existing Solutions**: Look for existing libraries, design patterns, algorithms, or other solutions that could help you solve the problem. Do not reinvent the wheel.
+3.  **Prototype and Experiment**: Create small prototypes or proofs of concept to test your ideas. This is a low-risk way to validate your approach.
+4.  **Evaluate Alternatives**: Consider multiple solutions to the problem. Create a list of pros and cons for each alternative to help you make an informed decision.
+5.  **Document Your Findings**: Document your research, including the problem definition, the solutions you explored, and the reasons for your final decision.
+
+## When to Research
+
+-   **New Features**: Before implementing any new feature.
+-   **Complex Systems**: When working on a complex system with many interacting parts.
+-   **Performance-Critical Code**: When writing code that needs to be highly performant.
+-   ** unfamiliar Technologies**: When working with a new technology or library.
+description:
+globs:
+alwaysApply: true
+---
+
+globs:
+alwaysApply: false
+---

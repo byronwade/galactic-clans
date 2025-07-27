@@ -1,0 +1,45 @@
+# Performance & Visuals
+
+To ensure a smooth and responsive experience, all development must adhere to the following performance and visual guidelines. The primary goal is to maintain a consistent 60 FPS (16.67ms/frame). The visual style is a low-poly aesthetic, which is both visually distinct and highly performant.
+
+## Modeling & Asset Design
+
+-   **Simplicity and Low Polygon Count**: Keep the polygon count as low as possible. Focus on strong, simple silhouettes and avoid unnecessary detail.
+-   **Static Assets**: The game will use static, pre-modeled planets and assets. This allows for greater artistic control and better performance.
+-   **Asset Reusability**: Create a library of modular, low-poly assets that can be combined to build a variety of planets and structures.
+
+## Texturing, Materials & Lighting
+
+-   **Vertex Colors and Texture Atlases**: Use vertex colors and texture atlases instead of large, unique textures. This is a core part of the low-poly aesthetic and is extremely performant.
+-   **Flat Shading**: Use flat shading to emphasize the geometric nature of the models.
+-   **Baked Lighting**: Use baked lighting for static scenes to achieve high-quality lighting with minimal performance cost.
+-   **Simple Real-Time Lighting**: For dynamic objects, use simple real-time lighting models.
+
+## Rendering Optimization
+
+-   **Instanced Rendering**: Use `InstancedMesh` for rendering large numbers of identical objects (buildings, units) to reduce draw calls.
+-   **Dynamic LOD**: Implement a Level of Detail (LOD) system to switch between high and low-poly models based on camera distance.
+-   **Occlusion Culling**: Use occlusion culling to avoid rendering objects that are hidden from view.
+-   **Impostors**: For very distant objects, use impostors (billboards that look like 3D objects) instead of real 3D models.
+
+## Large-Scale Universe Optimization
+
+-   **Streaming**: Implement a robust streaming system that loads and unloads solar systems and planets as the player moves through the universe.
+-   **Aggressive LOD**: At the galaxy level, entire solar systems should be represented by a single particle or a simple billboard.
+
+## Code Execution & Memory
+
+-   **Asynchronous Operations**: Offload non-critical tasks from the main game loop using `requestIdleCallback` or similar techniques.
+-   **Object Pooling**: Use object pooling for frequently created and destroyed objects to reduce garbage collection overhead.
+-   **Efficient Data Structures**: Use efficient data structures, especially within the ECS, to minimize memory usage.
+
+## Platform-Specific Performance Targets
+
+-   **Desktop**: Target 60 FPS at high settings.
+-   **Web**: Target 60 FPS on modern browsers.
+-   **Mobile**: Target 30 FPS on mid-range devices, with an option for 60 FPS on high-end devices.
+-   **Memory Usage**: Monitor memory usage on all platforms, with a particularly close eye on mobile devices.
+description:
+globs:
+alwaysApply: true
+---

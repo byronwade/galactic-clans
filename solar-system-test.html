@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☀️ Solar System Generator Test - Galactic Clans</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Test controls panel */
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            z-index: 10000;
+            max-width: 400px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Custom scrollbar for left sidebar */
+        .test-controls::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .test-controls::-webkit-scrollbar-track {
+            background: rgba(255, 165, 0, 0.1);
+            border-radius: 4px;
+        }
+        
+        .test-controls::-webkit-scrollbar-thumb {
+            background: rgba(255, 165, 0, 0.4);
+            border-radius: 4px;
+        }
+        
+        .test-controls::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 165, 0, 0.6);
+        }
+        
+        .test-controls h3 {
+            margin: 0 0 16px 0;
+            color: #ffa500;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .control-group {
+            margin-bottom: 16px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            font-weight: bold;
+        }
+        
+        .control-group select,
+        .control-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .control-group input[type="range"] {
+            background: transparent;
+            border: none;
+        }
+        
+        .control-btn {
+            background: linear-gradient(135deg, #ffa500, #ff8c00);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+        }
+        
+        .control-btn.danger {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+        }
+        
+        .control-btn.success {
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+        }
+        
+        /* Camera controls info */
+        .camera-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .camera-info h4 {
+            margin: 0 0 8px 0;
+            color: #ffa500;
+        }
+        
+        /* Solar system container */
+        #solar-system-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        
+        /* Loading indicator */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            z-index: 1000;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffa500;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Status display */
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status.success { border-color: #00ff00; }
+        .status.error { border-color: #ff4444; }
+        .status.warning { border-color: #ffff00; }
+        
+        /* System info panel */
+        .system-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10000;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            max-width: 300px;
+        }
+        
+        .system-info h4 {
+            margin: 0 0 8px 0;
+            color: #ffa500;
+        }
+        
+        .system-info .planet-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .system-info .planet-item {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* New styles for enhanced system info */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            color: #e0e0e0;
+        }
+
+        .enhanced-badge {
+            background: #ffeb3b;
+            color: #333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .habitable {
+            color: #00ff00;
+        }
+
+        .vertex-count {
+            color: #87ceeb;
+        }
+
+        .feature-count {
+            color: #ffeb3b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Test Controls Panel -->
+    <div class="test-controls">
+        <h3>☀️ Solar System Generator Test</h3>
+        
+        <div class="control-group">
+            <label>Earth Orbit Duration: <span id="orbitDurationValue">60</span>s</label>
+            <input type="range" id="orbitDuration" min="10" max="600" step="10" value="60">
+        </div>
+        
+        <div class="control-group">
+            <label>Earth Rotation Duration: <span id="rotationDurationValue">10</span>s</label>
+            <input type="range" id="rotationDuration" min="1" max="60" step="1" value="10">
+        </div>
+        
+        <div class="control-group">
+            <label>Distance Scale: <span id="distanceScaleValue">8</span> AU→units</label>
+            <input type="range" id="distanceScale" min="1" max="20" step="0.1" value="8">
+        </div>
+        
+        <div class="control-group">
+            <label>Size Scale: <span id="sizeScaleValue">0.7</span> Earth→units</label>
+            <input type="range" id="sizeScale" min="0.1" max="5" step="0.1" value="0.7">
+        </div>
+        
+        <div class="control-group">
+            <label>Subdivisions: <span id="subdivisionsValue">1</span> (0=very low-poly)</label>
+            <input type="range" id="subdivisions" min="0" max="3" step="1" value="1">
+        </div>
+        
+        <div class="control-group">
+            <label>Include Pluto:</label>
+            <input type="checkbox" id="includePluto" checked>
+        </div>
+        
+        <div class="control-group">
+            <label>Show Orbits:</label>
+            <input type="checkbox" id="showOrbits" checked>
+        </div>
+        
+        <div class="control-group">
+            <label>Show Stars:</label>
+            <input type="checkbox" id="showStars" checked>
+        </div>
+        
+        <div class="control-group">
+            <label>Realistic Physics:</label>
+            <input type="checkbox" id="realisticPhysics" checked>
+        </div>
+        
+        <div class="control-group">
+            <label>Gravitational Effects:</label>
+            <input type="checkbox" id="gravitationalEffects" checked>
+        </div>
+        
+        <div class="control-group">
+            <label>Atmospheric Scattering:</label>
+            <input type="checkbox" id="atmosphericScattering" checked>
+        </div>
+        
+        <div class="control-group">
+            <label>Tidal Forces:</label>
+            <input type="checkbox" id="tidalForces" checked>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="control-btn success" onclick="generateSolarSystem()">
+                <i class="fas fa-sun"></i> Generate System
+            </button>
+            <button class="control-btn" onclick="randomizeSystem()">
+                <i class="fas fa-dice"></i> Randomize
+            </button>
+            <button class="control-btn danger" onclick="clearSystem()">
+                <i class="fas fa-trash"></i> Clear
+            </button>
+        </div>
+    </div>
+    
+    <!-- Camera Controls Info -->
+    <div class="camera-info">
+        <h4>🎮 Camera Controls</h4>
+        <p><strong>Mouse:</strong> Click & drag to rotate</p>
+        <p><strong>Scroll:</strong> Zoom in/out</p>
+        <p><strong>Right Click:</strong> Pan camera</p>
+        <p><strong>R:</strong> Reset camera</p>
+        <p><strong>F:</strong> Focus on star</p>
+    </div>
+    
+    <!-- System Info Panel -->
+    <div id="systemInfo" class="system-info" style="display: none;">
+        <h4>☀️ System Information</h4>
+        <div id="systemDetails"></div>
+        <div class="planet-list" id="planetList"></div>
+    </div>
+    
+    <!-- Status Display -->
+    <div id="status" class="status" style="display: none;"></div>
+    
+    <!-- Solar System Container -->
+    <div id="solar-system-container"></div>
+    
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading" style="display: none;">Generating Solar System...</div>
+    
+    <!-- Import Map for Three.js -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <!-- Fallback for browsers without import map support -->
+    <script nomodule>
+        console.warn('⚠️ [COMPAT] Browser does not support ES modules or import maps');
+    </script>
+    
+    <script type="module">
+        console.log('🚀 [MODULE] Starting ES module script...');
+        
+        // Import Three.js and OrbitControls using import map
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        console.log('✅ [IMPORT] Three.js imported successfully:', THREE.REVISION);
+        console.log('✅ [IMPORT] OrbitControls imported successfully:', typeof OrbitControls);
+        
+        // Import our planet renderer
+        console.log('📦 [IMPORT] Loading PlanetRenderer...');
+        try {
+            const { PlanetRenderer } = await import('./src/shared/procgen/planet/planet-renderer.ts');
+            const { PlanetBiome } = await import('./src/shared/procgen/planet/little-planet-generator.ts');
+            console.log('✅ [IMPORT] PlanetRenderer imported successfully');
+            
+            // Make available globally for functions
+            window.PlanetRenderer = PlanetRenderer;
+            window.PlanetBiome = PlanetBiome;
+        } catch (error) {
+            console.error('❌ [IMPORT] Failed to load PlanetRenderer:', error);
+            console.warn('⚠️ [FALLBACK] Will use basic geometry for planets');
+        }
+        
+        let scene, camera, renderer, controls;
+        let planetRenderer = null;
+        let currentSystem = null;
+        
+        // Initialize planet renderer
+        function initPlanetRenderer() {
+            if (!planetRenderer && window.PlanetRenderer) {
+                planetRenderer = new window.PlanetRenderer();
+                console.log('🪐 [PLANET] PlanetRenderer initialized');
+                return true;
+            } else if (!window.PlanetRenderer) {
+                console.warn('⚠️ [PLANET] PlanetRenderer not available, using fallback');
+                return false;
+            }
+            return true;
+        }
+        
+        // Calculate habitability zone for our solar system
+        function getHabitabilityInfo(distanceAU, planetName) {
+            // Our Sun's habitable zone is approximately 0.95 to 1.37 AU
+            const HABITABLE_ZONE_INNER = 0.95; // AU
+            const HABITABLE_ZONE_OUTER = 1.37; // AU
+            
+            const isHabitable = distanceAU >= HABITABLE_ZONE_INNER && distanceAU <= HABITABLE_ZONE_OUTER;
+            const distanceFromOptimal = Math.abs(distanceAU - 1.0); // Earth is at 1 AU
+            
+            let habitabilityStatus;
+            if (distanceAU < HABITABLE_ZONE_INNER) {
+                habitabilityStatus = 'TOO_HOT';
+            } else if (distanceAU > HABITABLE_ZONE_OUTER) {
+                habitabilityStatus = 'TOO_COLD';
+            } else {
+                habitabilityStatus = 'HABITABLE';
+            }
+            
+            // Calculate temperature estimate (very simplified)
+            const earthTemp = 288; // Kelvin (15°C)
+            const estimatedTemp = earthTemp * Math.sqrt(1.0 / distanceAU);
+            const celsiusTemp = estimatedTemp - 273.15;
+            
+            return {
+                isHabitable,
+                habitabilityStatus,
+                distanceFromOptimal,
+                estimatedTempK: Math.round(estimatedTemp),
+                estimatedTempC: Math.round(celsiusTemp),
+                habitableZoneInner: HABITABLE_ZONE_INNER,
+                habitableZoneOuter: HABITABLE_ZONE_OUTER
+            };
+        }
+        
+        // Map planet types to our biomes with habitability consideration
+        function getPlanetBiome(planetName, habitabilityInfo) {
+            if (!window.PlanetBiome) {
+                console.warn('⚠️ [BIOME] PlanetBiome not available');
+                return null;
+            }
+            
+            // Smart biome selection based on habitability and planet characteristics
+            const biomeMap = {
+                'Mercury': window.PlanetBiome.BARREN,     // Too close to sun
+                'Venus': window.PlanetBiome.VOLCANIC,     // Greenhouse effect
+                'Earth': window.PlanetBiome.TEMPERATE,    // Perfect habitable zone
+                'Mars': window.PlanetBiome.DESERT,        // Was habitable, now cold
+                'Jupiter': window.PlanetBiome.TEMPERATE,  // Gas giant, neutral colors
+                'Saturn': window.PlanetBiome.DESERT,      // Gas giant, brownish
+                'Uranus': window.PlanetBiome.ARCTIC,      // Ice giant
+                'Neptune': window.PlanetBiome.OCEAN,      // Ice giant, deep blue
+                'Pluto': window.PlanetBiome.ARCTIC        // Frozen dwarf planet
+            };
+            
+            // Override with habitability-based biomes for unknown planets
+            let biome = biomeMap[planetName];
+            if (!biome) {
+                if (habitabilityInfo.habitabilityStatus === 'TOO_HOT') {
+                    biome = habitabilityInfo.estimatedTempC > 500 ? window.PlanetBiome.VOLCANIC : window.PlanetBiome.DESERT;
+                } else if (habitabilityInfo.habitabilityStatus === 'TOO_COLD') {
+                    biome = window.PlanetBiome.ARCTIC;
+                } else {
+                    biome = window.PlanetBiome.TEMPERATE;
+                }
+            }
+            
+            return biome;
+        }
+        
+        // Generate comprehensive solar system statistics
+        function generateSystemStatistics(systemData, planetsData) {
+            const stats = {
+                star: {
+                    name: systemData.name,
+                    type: systemData.type,
+                    mass: "1.0 M☉", // Solar masses
+                    radius: "696,340 km",
+                    temperature: "5,778 K",
+                    luminosity: "1.0 L☉",
+                    age: "4.6 billion years"
+                },
+                system: {
+                    totalPlanets: planetsData.length,
+                    terrestrialPlanets: planetsData.filter(p => p.type === 'TERRESTRIAL').length,
+                    gasGiants: planetsData.filter(p => p.type === 'GAS_GIANT').length,
+                    iceGiants: planetsData.filter(p => p.type === 'ICE_GIANT').length,
+                    dwarfPlanets: planetsData.filter(p => p.type === 'DWARF').length,
+                    habitablePlanets: planetsData.filter(p => p.habitability.isHabitable).length,
+                    totalSystemMass: planetsData.reduce((sum, p) => sum + (p.massEarth || 0), 0) + " M⊕",
+                    systemDiameter: Math.max(...planetsData.map(p => p.distanceAU)) * 2 + " AU",
+                    habitableZone: {
+                        inner: "0.95 AU",
+                        outer: "1.37 AU",
+                        width: "0.42 AU"
+                    }
+                },
+                planets: planetsData.map(planet => ({
+                    name: planet.name,
+                    type: planet.type,
+                    classification: planet.classification,
+                    orbital: {
+                        distanceAU: planet.distanceAU,
+                        distanceKm: Math.round(planet.distanceAU * 149597870.7) + " km",
+                        orbitalPeriod: planet.orbitalPeriod + " Earth years",
+                        orbitalVelocity: Math.round(29.78 / Math.sqrt(planet.distanceAU)) + " km/s",
+                        eccentricity: planet.eccentricity
+                    },
+                    physical: {
+                        diameter: planet.diameter + " D⊕",
+                        diameterKm: Math.round(planet.diameter * 12742) + " km",
+                        mass: (planet.massEarth || "unknown") + " M⊕",
+                        density: (planet.density || "unknown") + " g/cm³",
+                        gravity: (planet.gravity || "unknown") + " g",
+                        escapeVelocity: (planet.escapeVelocity || "unknown") + " km/s"
+                    },
+                    rotation: {
+                        period: Math.abs(planet.rotationHours) + " hours",
+                        periodDays: (Math.abs(planet.rotationHours) / 24).toFixed(2) + " Earth days",
+                        axialTilt: (planet.axialTilt || "unknown") + "°",
+                        retrograde: planet.rotationHours < 0
+                    },
+                    atmosphere: {
+                        hasAtmosphere: ['Earth', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'].includes(planet.name),
+                        composition: planet.atmosphereComposition || "unknown",
+                        pressure: planet.atmospherePressure || "unknown"
+                    },
+                    habitability: planet.habitability,
+                    biome: planet.biome,
+                    moons: planet.knownMoons || 0,
+                    rings: planet.name === 'Saturn' ? "Prominent ring system" : (planet.hasRings ? "Faint rings" : "None"),
+                    discovery: {
+                        discoveredBy: planet.discoveredBy || "Known since antiquity",
+                        discoveryDate: planet.discoveryDate || "Ancient times"
+                    },
+                    interesting_facts: planet.interestingFacts || []
+                })),
+                generation: {
+                    timestamp: new Date().toISOString(),
+                    renderSettings: {
+                        orbitDuration: systemData.orbitDuration + "s",
+                        rotationDuration: systemData.rotationDuration + "s",
+                        distanceScale: systemData.distanceScale + " AU→units",
+                        sizeScale: systemData.sizeScale + " Earth→units",
+                        detailLevel: "little_planet",
+                        proceduralGeneration: true
+                    },
+                    performance: {
+                        planetsGenerated: planetsData.length,
+                        proceduralPlanets: planetsData.filter(p => p.proceduralGeneration).length,
+                        fallbackPlanets: planetsData.filter(p => !p.proceduralGeneration).length
+                    }
+                }
+            };
+            
+            return stats;
+        }
+        let planetGroups = [];
+        let starField;
+        let animationId;
+        let clock;
+        
+        // NASA Planetary Data for realistic solar system generation
+        const PLANET_DATA = [
+            {
+                name: 'Mercury',
+                distanceAU: 0.387,
+                diameter: 0.383,
+                orbitalPeriod: 0.241,
+                rotationHours: 1407.6,
+                eccentricity: 0.206,
+                color: '#bebebe',
+                type: 'TERRESTRIAL',
+                classification: 'Rocky planet',
+                massEarth: 0.055,
+                density: 5.427,
+                gravity: 0.378,
+                escapeVelocity: 4.25,
+                axialTilt: 0.034,
+                knownMoons: 0,
+                hasRings: false,
+                atmosphereComposition: 'Trace (oxygen, sodium, hydrogen)',
+                atmospherePressure: '< 5×10⁻¹⁵ bars',
+                discoveredBy: 'Known since antiquity',
+                discoveryDate: 'Ancient times',
+                interestingFacts: [
+                    'Closest planet to the Sun',
+                    'Has extreme temperature variations (-173°C to 427°C)',
+                    'No atmosphere or moons',
+                    'One year = 88 Earth days, one day = 176 Earth days'
+                ]
+            },
+            {
+                name: 'Venus',
+                distanceAU: 0.723,
+                diameter: 0.949,
+                orbitalPeriod: 0.615,
+                rotationHours: -5832.5, // retrograde rotation
+                eccentricity: 0.007,
+                color: '#f5deb3',
+                type: 'TERRESTRIAL',
+                classification: 'Rocky planet',
+                massEarth: 0.815,
+                density: 5.243,
+                gravity: 0.907,
+                escapeVelocity: 10.36,
+                axialTilt: 177.4,
+                knownMoons: 0,
+                hasRings: false,
+                atmosphereComposition: '96.5% CO₂, 3.5% N₂',
+                atmospherePressure: '92 bars',
+                discoveredBy: 'Known since antiquity',
+                discoveryDate: 'Ancient times',
+                interestingFacts: [
+                    'Hottest planet (462°C surface temperature)',
+                    'Rotates backwards (retrograde)',
+                    'Dense toxic atmosphere',
+                    'Often called "Earth\'s twin" due to similar size'
+                ]
+            },
+            {
+                name: 'Earth',
+                distanceAU: 1.0,
+                diameter: 1.0,
+                orbitalPeriod: 1.0,
+                rotationHours: 23.9,
+                eccentricity: 0.017,
+                color: '#6aa2e7',
+                type: 'TERRESTRIAL',
+                classification: 'Rocky planet',
+                massEarth: 1.0,
+                density: 5.514,
+                gravity: 1.0,
+                escapeVelocity: 11.18,
+                axialTilt: 23.44,
+                knownMoons: 1,
+                hasRings: false,
+                atmosphereComposition: '78% N₂, 21% O₂, 1% other',
+                atmospherePressure: '1.01325 bars',
+                discoveredBy: 'Our home planet',
+                discoveryDate: 'Always known',
+                interestingFacts: [
+                    'Only known planet with life',
+                    'Perfect distance from Sun for liquid water',
+                    '71% of surface covered by oceans',
+                    'Protected by magnetic field'
+                ]
+            },
+            {
+                name: 'Mars',
+                distanceAU: 1.52,
+                diameter: 0.532,
+                orbitalPeriod: 1.88,
+                rotationHours: 24.6,
+                eccentricity: 0.094,
+                color: '#c1440e',
+                type: 'TERRESTRIAL',
+                classification: 'Rocky planet',
+                massEarth: 0.107,
+                density: 3.933,
+                gravity: 0.377,
+                escapeVelocity: 5.03,
+                axialTilt: 25.19,
+                knownMoons: 2,
+                hasRings: false,
+                atmosphereComposition: '95% CO₂, 2.8% N₂, 2% Ar',
+                atmospherePressure: '0.636 bars',
+                discoveredBy: 'Known since antiquity',
+                discoveryDate: 'Ancient times',
+                interestingFacts: [
+                    'The "Red Planet" due to iron oxide',
+                    'Has the largest volcano in the solar system (Olympus Mons)',
+                    'Evidence of ancient water flows',
+                    'Day length similar to Earth (24h 37m)'
+                ]
+            },
+            {
+                name: 'Jupiter',
+                distanceAU: 5.20,
+                diameter: 11.21,
+                orbitalPeriod: 11.9,
+                rotationHours: 9.9,
+                eccentricity: 0.049,
+                color: '#d1b186',
+                type: 'GAS_GIANT',
+                classification: 'Gas giant',
+                massEarth: 317.8,
+                density: 1.326,
+                gravity: 2.36,
+                escapeVelocity: 59.5,
+                axialTilt: 3.13,
+                knownMoons: 95,
+                hasRings: true,
+                atmosphereComposition: '89% H₂, 10% He, 1% other',
+                atmospherePressure: 'Variable (no solid surface)',
+                discoveredBy: 'Known since antiquity',
+                discoveryDate: 'Ancient times',
+                interestingFacts: [
+                    'Largest planet in our solar system',
+                    'More massive than all other planets combined',
+                    'Great Red Spot is a storm larger than Earth',
+                    'Acts as a "cosmic vacuum cleaner" protecting inner planets'
+                ]
+            },
+            {
+                name: 'Saturn',
+                distanceAU: 9.57,
+                diameter: 9.45,
+                orbitalPeriod: 29.4,
+                rotationHours: 10.7,
+                eccentricity: 0.052,
+                color: '#e3d9a4',
+                type: 'GAS_GIANT',
+                classification: 'Gas giant',
+                massEarth: 95.2,
+                density: 0.687,
+                gravity: 0.916,
+                escapeVelocity: 35.5,
+                axialTilt: 26.73,
+                knownMoons: 146,
+                hasRings: true,
+                atmosphereComposition: '96% H₂, 3% He, 1% other',
+                atmospherePressure: 'Variable (no solid surface)',
+                discoveredBy: 'Known since antiquity',
+                discoveryDate: 'Ancient times',
+                interestingFacts: [
+                    'Famous for its prominent ring system',
+                    'Less dense than water (would float!)',
+                    'Has hexagonal storm at north pole',
+                    'Moon Titan has thick atmosphere and lakes'
+                ]
+            },
+            {
+                name: 'Uranus',
+                distanceAU: 19.17,
+                diameter: 4.01,
+                orbitalPeriod: 83.7,
+                rotationHours: -17.2, // retrograde rotation
+                eccentricity: 0.047,
+                color: '#8fd8e0',
+                type: 'ICE_GIANT',
+                classification: 'Ice giant',
+                massEarth: 14.5,
+                density: 1.270,
+                gravity: 0.886,
+                escapeVelocity: 21.3,
+                axialTilt: 97.77,
+                knownMoons: 28,
+                hasRings: true,
+                atmosphereComposition: '83% H₂, 15% He, 2% CH₄',
+                atmospherePressure: 'Variable (no solid surface)',
+                discoveredBy: 'William Herschel',
+                discoveryDate: '1781',
+                interestingFacts: [
+                    'Rotates on its side (97° axial tilt)',
+                    'Coldest planetary atmosphere in solar system',
+                    'Made mostly of water, methane, and ammonia ices',
+                    'Faint ring system discovered in 1977'
+                ]
+            },
+            {
+                name: 'Neptune',
+                distanceAU: 30.18,
+                diameter: 3.88,
+                orbitalPeriod: 163.7,
+                rotationHours: 16.1,
+                eccentricity: 0.010,
+                color: '#6b73b4',
+                type: 'ICE_GIANT',
+                classification: 'Ice giant',
+                massEarth: 17.1,
+                density: 1.638,
+                gravity: 1.13,
+                escapeVelocity: 23.5,
+                axialTilt: 28.32,
+                knownMoons: 16,
+                hasRings: true,
+                atmosphereComposition: '80% H₂, 19% He, 1% CH₄',
+                atmospherePressure: 'Variable (no solid surface)',
+                discoveredBy: 'Urban Le Verrier, John Couch Adams',
+                discoveryDate: '1846',
+                interestingFacts: [
+                    'Furthest known planet from the Sun',
+                    'Predicted mathematically before being observed',
+                    'Fastest winds in solar system (up to 2,100 km/h)',
+                    'Deep blue color from methane in atmosphere'
+                ]
+            },
+            {
+                name: 'Pluto',
+                distanceAU: 39.48,
+                diameter: 0.187,
+                orbitalPeriod: 247.9,
+                rotationHours: 153.3,
+                eccentricity: 0.244,
+                color: '#c3b7ad',
+                type: 'DWARF',
+                classification: 'Dwarf planet',
+                massEarth: 0.0022,
+                density: 1.854,
+                gravity: 0.071,
+                escapeVelocity: 1.21,
+                axialTilt: 122.53,
+                knownMoons: 5,
+                hasRings: false,
+                atmosphereComposition: 'Thin: N₂, CH₄, CO',
+                atmospherePressure: '1.0 Pa',
+                discoveredBy: 'Clyde Tombaugh',
+                discoveryDate: '1930',
+                interestingFacts: [
+                    'Reclassified as dwarf planet in 2006',
+                    'Part of the Kuiper Belt',
+                    'Largest moon Charon is half its size',
+                    'One orbit around Sun takes 248 Earth years'
+                ]
+            }
+        ];
+        
+        // Initialize Three.js
+        function initThreeJS() {
+            console.log('🌌 [INIT] Initializing Three.js scene for solar system testing...');
+            
+            // Suppress Three.js deprecation warnings during transition
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                const message = args.join(' ');
+                if (message.includes('onBeforeRender() has been removed') || 
+                    message.includes('onBuild() has been removed') ||
+                    message.includes('Multiple instances of Three.js being imported')) {
+                    return; // Suppress these specific deprecation warnings
+                }
+                originalWarn.apply(console, args);
+            };
+            
+            // Clear any existing scene
+            if (scene) {
+                clearSystem();
+            }
+            
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000011);
+            console.log('🎬 Scene created with background color');
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+            camera.position.set(50, 30, 50);
+            console.log('📷 Camera created at position:', camera.position);
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            console.log('🖥️ Renderer created:', window.innerWidth, 'x', window.innerHeight);
+            
+            // Add to container
+            const container = document.getElementById('solar-system-container');
+            if (container) {
+                container.appendChild(renderer.domElement);
+                console.log('📺 Renderer canvas added to container');
+            } else {
+                console.error('❌ Container solar-system-container not found!');
+            }
+            
+            // Add controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 10;
+            controls.maxDistance = 500;
+            console.log('🎮 OrbitControls created and configured');
+            
+            // Add lighting
+            setupLighting();
+            
+            // Create clock for animation
+            clock = new THREE.Clock();
+            
+            // Create star field
+            createStarField();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Handle keyboard shortcuts
+            document.addEventListener('keydown', onKeyDown);
+            
+            // Start render loop
+            animate();
+        }
+        
+        // Setup lighting
+        function setupLighting() {
+            if (!scene) return;
+            
+            console.log('🌅 [LIGHTING] Setting up AAA-quality lighting system...');
+            
+            // Clear existing lights
+            const lightsToRemove = [];
+            scene.traverse((child) => {
+                if (child instanceof THREE.Light) {
+                    lightsToRemove.push(child);
+                }
+            });
+            lightsToRemove.forEach(light => scene.remove(light));
+            
+            // Main Sun Light - Very bright and warm
+            const sunLight = new THREE.DirectionalLight(0xffeaa7, 2.5);
+            sunLight.position.set(10, 5, 5);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 0.1;
+            sunLight.shadow.camera.far = 100;
+            sunLight.shadow.camera.left = -50;
+            sunLight.shadow.camera.right = 50;
+            sunLight.shadow.camera.top = 50;
+            sunLight.shadow.camera.bottom = -50;
+            scene.add(sunLight);
+            
+            // Ambient Light - Soft cosmic glow
+            const ambientLight = new THREE.AmbientLight(0x404080, 0.8);
+            scene.add(ambientLight);
+            
+            // Rim Light - Creates beautiful planet silhouettes
+            const rimLight = new THREE.DirectionalLight(0x74b9ff, 1.2);
+            rimLight.position.set(-8, 3, -5);
+            scene.add(rimLight);
+            
+            // Fill Light - Brightens shadow areas
+            const fillLight = new THREE.DirectionalLight(0xffeaa7, 0.6);
+            fillLight.position.set(3, -4, 8);
+            scene.add(fillLight);
+            
+            // Top Light - Illuminates polar regions
+            const topLight = new THREE.DirectionalLight(0xdda0dd, 1.0);
+            topLight.position.set(0, 12, 0);
+            scene.add(topLight);
+            
+            // Key Light - Main dramatic lighting
+            const keyLight = new THREE.DirectionalLight(0xffeb3b, 1.8);
+            keyLight.position.set(15, 8, 10);
+            scene.add(keyLight);
+            
+            // Atmospheric Scattering Light
+            const scatterLight = new THREE.DirectionalLight(0x87ceeb, 0.4);
+            scatterLight.position.set(-5, -5, -5);
+            scene.add(scatterLight);
+            
+            // Point Light at Sun position for local illumination
+            const sunPointLight = new THREE.PointLight(0xfff3cd, 3.0, 200);
+            sunPointLight.position.set(0, 0, 0);
+            scene.add(sunPointLight);
+            
+            console.log('✨ [LIGHTING] AAA lighting system configured with 8 light sources');
+        }
+        
+        // Create star field using random points on a sphere
+        function createStarField() {
+            if (!scene) return;
+            
+            const showStars = document.getElementById('showStars').checked;
+            if (!showStars) return;
+            
+            const numStars = 2000;
+            const radius = 2000;
+            const positions = new Float32Array(numStars * 3);
+            const colors = new Float32Array(numStars * 3);
+            const color = new THREE.Color();
+            
+            for (let i = 0; i < numStars; i++) {
+                // Random point on sphere
+                const u = Math.random();
+                const v = Math.random();
+                const theta = 2 * Math.PI * u;
+                const phi = Math.acos(2 * v - 1);
+                const r = radius;
+                const x = r * Math.sin(phi) * Math.cos(theta);
+                const y = r * Math.sin(phi) * Math.sin(theta);
+                const z = r * Math.cos(phi);
+                
+                positions[i * 3] = x;
+                positions[i * 3 + 1] = y;
+                positions[i * 3 + 2] = z;
+                
+                // Faint color – mostly white with subtle variance
+                color.setHSL(Math.random(), 0.0, 0.8 + Math.random() * 0.2);
+                colors[i * 3] = color.r;
+                colors[i * 3 + 1] = color.g;
+                colors[i * 3 + 2] = color.b;
+            }
+            
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const material = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                depthWrite: false,
+            });
+            
+            starField = new THREE.Points(geometry, material);
+            scene.add(starField);
+        }
+        
+        // Generate solar system using NASA data and realistic physics
+        async function generateSolarSystem() {
+            try {
+                showLoading(true);
+                showStatus('Generating realistic solar system...', 'warning');
+                
+                // Clear existing system
+                planetGroups.forEach(pg => {
+                    scene.remove(pg.group);
+                });
+                planetGroups = [];
+                
+                if (currentSystem) {
+                    scene.remove(currentSystem);
+                    currentSystem = null;
+                }
+                
+                // Get parameters
+                const orbitDuration = parseFloat(document.getElementById('orbitDuration').value);
+                const rotationDuration = parseFloat(document.getElementById('rotationDuration').value);
+                const distanceScale = parseFloat(document.getElementById('distanceScale').value);
+                const sizeScale = parseFloat(document.getElementById('sizeScale').value);
+                const subdivisions = parseInt(document.getElementById('subdivisions').value);
+                const includePluto = document.getElementById('includePluto').checked;
+                const showOrbits = document.getElementById('showOrbits').checked;
+                const realisticPhysics = document.getElementById('realisticPhysics').checked;
+                const gravitationalEffects = document.getElementById('gravitationalEffects').checked;
+                const atmosphericScattering = document.getElementById('atmosphericScattering').checked;
+                const tidalForces = document.getElementById('tidalForces').checked;
+                
+                // Create the sun with realistic effects
+                const sunRadius = sizeScale * 3;
+                console.log('🌞 Creating realistic sun with radius:', sunRadius, 'subdivisions:', subdivisions);
+                
+                // Enhanced sun geometry with more detail
+                const sunGeometry = new THREE.IcosahedronGeometry(sunRadius, Math.max(subdivisions, 2));
+                
+                // Create realistic sun material with glow effect
+                const sunMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0xffe066,
+                    emissive: 0xffa500,
+                    emissiveIntensity: 0.3
+                });
+                
+                const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+                sunMesh.name = 'Sun';
+                scene.add(sunMesh);
+                console.log('🌞 Realistic sun mesh added to scene');
+                
+                // Add enhanced point light at the sun's position
+                const pointLight = new THREE.PointLight(0xffffff, 3, 0, 2);
+                pointLight.position.set(0, 0, 0);
+                pointLight.name = 'SunLight';
+                scene.add(pointLight);
+                console.log('💡 Enhanced sun light added to scene');
+                
+                // Add atmospheric scattering effect if enabled
+                if (atmosphericScattering) {
+                    const atmosphereGeometry = new THREE.IcosahedronGeometry(sunRadius * 1.1, 1);
+                    const atmosphereMaterial = new THREE.MeshBasicMaterial({
+                        color: 0xffa500,
+                        transparent: true,
+                        opacity: 0.1,
+                        side: THREE.BackSide
+                    });
+                    const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+                    atmosphere.name = 'SunAtmosphere';
+                    scene.add(atmosphere);
+                    console.log('🌅 Sun atmosphere added for scattering effect');
+                }
+                
+                // Filter planets based on settings
+                const planetsToGenerate = includePluto ? PLANET_DATA : PLANET_DATA.filter(p => p.name !== 'Pluto');
+                
+                // Initialize planet renderer
+                const hasPlanetRenderer = initPlanetRenderer();
+                
+                // Generate all planets with optimized error handling
+                console.log(`🪐 [GENERATION] Starting generation of ${planetsToGenerate.length} planets...`);
+                
+                for (let i = 0; i < planetsToGenerate.length; i++) {
+                    try {
+                        const planet = planetsToGenerate[i];
+                        const group = new THREE.Group();
+                        
+                        // Calculate distances and sizes
+                        const radius = planet.distanceAU * distanceScale;
+                        const size = Math.max(0.1, planet.diameter * sizeScale);
+                        
+                        // Get habitability information
+                        const habitabilityInfo = getHabitabilityInfo(planet.distanceAU, planet.name);
+                        
+                        // Position planet along x-axis (will rotate around y-axis for orbit)
+                        group.position.set(radius, 0, 0);
+                        
+                        // Calculate orbital angular speed based on real orbital period
+                        const angularSpeed = (2 * Math.PI / orbitDuration) / planet.orbitalPeriod;
+                        
+                        // Add orbital group to scene (only if not already added)
+                        if (scene && !group.parent) {
+                            scene.add(group);
+                            console.log(`➕ [ORBITAL] Added ${planet.name} orbital group to scene at distance ${radius.toFixed(1)}`);
+                        }
+                        
+                        // Create orbit visualization if enabled
+                        if (showOrbits) {
+                            try {
+                                console.log(`⭕ [ORBIT] Creating orbit ring for ${planet.name} at radius ${radius.toFixed(1)}`);
+                                const orbitGeometry = new THREE.TorusGeometry(radius, 0.1, 8, 100);
+                                const orbitMaterial = new THREE.MeshBasicMaterial({ 
+                                    color: 0x444444, 
+                                    transparent: true, 
+                                    opacity: 0.3 
+                                });
+                                const orbitRing = new THREE.Mesh(orbitGeometry, orbitMaterial);
+                                orbitRing.rotation.x = Math.PI / 2;
+                                orbitRing.name = `${planet.name}_orbit`;
+                                if (scene) {
+                                    scene.add(orbitRing);
+                                }
+                            } catch (orbitError) {
+                                console.warn(`⚠️ [ORBIT] Failed to create orbit for ${planet.name}:`, orbitError);
+                            }
+                        }
+                        
+                        // Store planet data for statistics
+                        const planetData = {
+                            name: planet.name,
+                            radius: radius,
+                            size: size,
+                            type: planet.type,
+                            habitability: habitabilityInfo,
+                            biome: getPlanetBiome(planet.name, habitabilityInfo),
+                            proceduralGeneration: true, // All planets are now procedural
+                            vertices: 0, // Will be updated if enhanced generation succeeds
+                            features: {} // Will be updated if enhanced generation succeeds
+                        };
+                        
+                        // Generate enhanced planet with extreme detail
+                        const planetName = planet.name;
+                        console.log(`🪐 [GENERATE] Creating ${planet.name}: radius=${radius.toFixed(1)}, size=${size.toFixed(2)}, type=${planet.type}, habitable=${habitabilityInfo.isHabitable ? '✅' : '❌'} (${habitabilityInfo.habitabilityStatus})`);
+                        
+                        // Calculate rotation speed from real rotation period
+                        // Convert rotation period (hours) to relative Earth rotations
+                        const rotationPeriods = planet.rotationHours / 23.9;
+                        const rotationSpeed = (2 * Math.PI / rotationDuration) / rotationPeriods;
+                        
+                        // Procedural planet generation with Enhanced Planet Renderer
+                        try {
+                            console.log(`🌍 [ENHANCED] Generating detailed planet: ${planetName}`);
+                            
+                            const planetConfig = {
+                                id: `planet_${planetName.toLowerCase()}`,
+                                name: planetName,
+                                type: planet.classification === 'Terrestrial' ? 'terrestrial' : 
+                                      planet.classification === 'Gas Giant' ? 'gas_giant' : 
+                                      planet.classification === 'Ice Giant' ? 'ice_giant' : 'terrestrial',
+                                radius: size,
+                                biome: getPlanetBiome(planetName, habitabilityInfo),
+                                position: new THREE.Vector3(radius, 0, 0),
+                                seed: Math.floor(Math.random() * 1000000),
+                                detailLevel: 'high', // Use high detail for better performance
+                                atmosphere: planetName === 'Earth' || planetName === 'Venus' || planetName === 'Mars',
+                                rings: planet.hasRings || planetName === 'Saturn',
+                                moons: planet.knownMoons > 0 ? Math.min(planet.knownMoons, 3) : 0,
+                                // Add realistic physics parameters
+                                realisticPhysics: realisticPhysics,
+                                gravitationalEffects: gravitationalEffects,
+                                atmosphericScattering: atmosphericScattering,
+                                tidalForces: tidalForces,
+                                // Add orbital parameters for realistic motion
+                                orbitalPeriod: planet.orbitalPeriod,
+                                rotationPeriod: planet.rotationHours,
+                                eccentricity: planet.eccentricity,
+                                axialTilt: planet.axialTilt,
+                                mass: planet.massEarth,
+                                gravity: planet.gravity
+                            };
+
+                            showStatus(`Generating detailed ${planetName}...`);
+                            const planetResult = await planetRenderer.renderPlanet(planetConfig);
+                            
+                            if (planetResult && planetResult.group) {
+                                // Store the group as the mesh for animation
+                                const mesh = planetResult.group;
+                                mesh.userData.rotationSpeed = rotationSpeed;
+                                
+                                // Add planet group to its orbital group
+                                group.add(mesh);
+                                
+                                console.log(`✨ [ENHANCED] ${planetName} generated with ${planetResult.stats?.vertices || 0} vertices`);
+                                console.log(`🌿 [FEATURES] Trees: ${planetResult.stats?.trees || 0}, Buildings: ${planetResult.stats?.buildings || 0}, Rivers: ${planetResult.stats?.rivers || 0}`);
+                                
+                                // Update planet data with enhanced generation stats
+                                planetData.vertices = planetResult.stats?.vertices || 0;
+                                planetData.features = planetResult.stats || {};
+                                
+                                // Store detailed result for animation and info
+                                planetGroups.push({ 
+                                    group, 
+                                    mesh, 
+                                    radius, 
+                                    angularSpeed: angularSpeed, // Store orbital angular speed
+                                    planet,
+                                    planetResult: planetResult,
+                                    habitability: habitabilityInfo,
+                                    biome: getPlanetBiome(planetName, habitabilityInfo),
+                                    isEnhanced: true
+                                });
+                            } else {
+                                throw new Error('Planet generation returned null result');
+                            }
+
+                        } catch (planetError) {
+                            console.warn(`⚠️ [FALLBACK] Enhanced generation failed for ${planetName}, using fallback:`, planetError);
+                            
+                            // Fallback to basic geometry
+                            const fallbackGeometry = new THREE.IcosahedronGeometry(size, 3);
+                            const fallbackMaterial = new THREE.MeshPhongMaterial({ 
+                                color: planet.color,
+                                flatShading: true,
+                                shininess: 30
+                            });
+                            const mesh = new THREE.Mesh(fallbackGeometry, fallbackMaterial);
+                            mesh.userData.rotationSpeed = rotationSpeed;
+                            group.add(mesh);
+                            
+                            planetGroups.push({ 
+                                group, 
+                                mesh, 
+                                radius, 
+                                angularSpeed: angularSpeed, // Store orbital angular speed
+                                planet,
+                                habitability: habitabilityInfo,
+                                biome: getPlanetBiome(planetName, habitabilityInfo),
+                                isEnhanced: false
+                            });
+                        }
+                        
+                        // Add planet data to array for statistics
+                        planets.push(planetData);
+                        
+                        // Add group to scene
+                        scene.add(group);
+                        
+                        // Update progress
+                        showStatus(`Generated ${i + 1}/${planetsToGenerate.length} planets...`, 'info');
+                        
+                    } catch (planetLoopError) {
+                        console.error(`❌ [PLANET_LOOP] Critical error generating planet ${i}:`, planetLoopError);
+                        // Continue with next planet instead of breaking the entire generation
+                        continue;
+                    }
+                }
+                
+                // Update system info
+                updateSystemInfo(orbitDuration, rotationDuration, distanceScale, sizeScale, subdivisions, includePluto, showOrbits, showStars, planets);
+                
+                // Reset camera to good viewing position
+                const maxDistance = planetsToGenerate[planetsToGenerate.length - 1].distanceAU * distanceScale;
+                console.log('📍 Setting camera position - maxDistance:', maxDistance);
+                camera.position.set(0, maxDistance * 0.3, maxDistance * 0.8);
+                console.log('📷 Camera position:', camera.position);
+                if (controls) {
+                    controls.target.set(0, 0, 0);
+                    controls.update();
+                }
+                
+                // Log what was created for debugging
+                console.log('🌞 Sun created at origin with radius:', sunRadius);
+                // Generate and output comprehensive system statistics
+                const systemStats = generateSystemStatistics({
+                    name: "Sol",
+                    type: "G-type Yellow Dwarf",
+                    orbitDuration: orbitDuration,
+                    rotationDuration: rotationDuration,
+                    distanceScale: distanceScale,
+                    sizeScale: sizeScale
+                }, planets);
+                
+                // Output detailed JSON statistics
+                console.log('🌟 ===== COMPREHENSIVE SOLAR SYSTEM STATISTICS =====');
+                console.log(JSON.stringify(systemStats, null, 2));
+                
+                // Output habitability summary
+                console.log('\n🌍 ===== HABITABILITY ANALYSIS =====');
+                const habitablePlanets = planets.filter(p => p.habitability.isHabitable);
+                const tooHot = planets.filter(p => p.habitability.habitabilityStatus === 'TOO_HOT');
+                const tooCold = planets.filter(p => p.habitability.habitabilityStatus === 'TOO_COLD');
+                
+                console.log(`📊 Habitability Summary:`);
+                console.log(`  ✅ Habitable Zone (0.95-1.37 AU): ${habitablePlanets.length} planet(s)`);
+                habitablePlanets.forEach(p => {
+                    console.log(`    🌍 ${p.name}: ${p.habitability.estimatedTempC}°C, biome: ${p.biome}`);
+                });
+                
+                console.log(`  🔥 Too Hot (< 0.95 AU): ${tooHot.length} planet(s)`);
+                tooHot.forEach(p => {
+                    console.log(`    🌋 ${p.name}: ${p.habitability.estimatedTempC}°C, biome: ${p.biome}`);
+                });
+                
+                console.log(`  🧊 Too Cold (> 1.37 AU): ${tooCold.length} planet(s)`);
+                tooCold.forEach(p => {
+                    console.log(`    ❄️ ${p.name}: ${p.habitability.estimatedTempC}°C, biome: ${p.biome}`);
+                });
+                
+                console.log('\n🚀 ===== GENERATION SUMMARY =====');
+                console.log(`🪐 Planets created: ${planets.length}`);
+                console.log(`✨ Procedural planets: ${planets.filter(p => p.proceduralGeneration).length}`);
+                console.log(`🔄 Fallback planets: ${planets.filter(p => !p.proceduralGeneration).length}`);
+                planets.forEach(planet => {
+                    const procSymbol = planet.proceduralGeneration ? '✨' : '🔄';
+                    const habSymbol = planet.habitability.isHabitable ? '🌍' : (planet.habitability.habitabilityStatus === 'TOO_HOT' ? '🔥' : '🧊');
+                    console.log(`  ${procSymbol}${habSymbol} ${planet.name}: ${planet.distanceAU} AU, ${planet.diameter.toFixed(2)}⊕, ${planet.habitability.estimatedTempC}°C`);
+                });
+                
+                showStatus(`Solar system with procedural planets generated! ${planets.length} beautiful low-poly planets`, 'success');
+                console.log(`✅ Realistic solar system with ${planetGroups.length} procedural planets generated`);
+                
+            } catch (error) {
+                console.error('❌ Failed to generate solar system:', error);
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        };
+        
+        // Update system information display
+        function updateSystemInfo(orbitDuration, rotationDuration, distanceScale, sizeScale, subdivisions, includePluto, showOrbits, showStars, planets) {
+            const systemInfo = document.getElementById('systemInfo');
+            const systemDetails = document.getElementById('systemDetails');
+            const planetList = document.getElementById('planetList');
+            
+            const enhancedPlanets = planets.filter(p => p.proceduralGeneration).length;
+            const totalVertices = planets.reduce((sum, p) => sum + (p.vertices || 0), 0);
+            const totalTrees = planets.reduce((sum, p) => sum + (p.features?.trees || 0), 0);
+            const totalBuildings = planets.reduce((sum, p) => sum + (p.features?.buildings || 0), 0);
+            const totalRivers = planets.reduce((sum, p) => sum + (p.features?.rivers || 0), 0);
+            const habitablePlanets = planets.filter(p => p.habitability.isHabitable).length;
+            
+            systemInfo.innerHTML = `
+                <h3>🌟 Sol System - G-type Yellow Dwarf</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>🪐 Total Planets:</strong> ${planets.length}
+                        <span class="enhanced-badge">✨ ${enhancedPlanets} Ultra-Detailed</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>🌍 Habitable Planets:</strong> 
+                        <span class="habitable">${habitablePlanets} ${habitablePlanets > 0 ? '🌍' : '❄️'}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>🎮 Total Vertices:</strong> 
+                        <span class="vertex-count">${totalVertices.toLocaleString()}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>🌿 Procedural Features:</strong>
+                        <span class="feature-count">
+                            ${totalTrees} Trees, ${totalBuildings} Buildings, ${totalRivers} Rivers
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <strong>⭕ Habitable Zone:</strong> 0.95 - 1.37 AU
+                    </div>
+                    <div class="info-item">
+                        <strong>🔄 Earth Orbit:</strong> ${orbitDuration.toFixed(1)}s
+                    </div>
+                    <div class="info-item">
+                        <strong>🌍 Earth Rotation:</strong> ${rotationDuration.toFixed(1)}s
+                    </div>
+                    <div class="info-item">
+                        <strong>📏 Distance Scale:</strong> ${distanceScale}x
+                    </div>
+                    <div class="info-item">
+                        <strong>📐 Size Scale:</strong> ${sizeScale}x
+                    </div>
+                    <div class="info-item">
+                        <strong>🔺 Subdivisions:</strong> ${subdivisions}
+                    </div>
+                    <div class="info-item">
+                        <strong>🌌 Include Pluto:</strong> ${includePluto ? 'Yes ✅' : 'No ❌'}
+                    </div>
+                    <div class="info-item">
+                        <strong>⭕ Show Orbits:</strong> ${showOrbits ? 'Yes ✅' : 'No ❌'}
+                    </div>
+                    <div class="info-item">
+                        <strong>⭐ Show Stars:</strong> ${showStars ? 'Yes ✅' : 'No ❌'}
+                    </div>
+                    <div class="info-item">
+                        <strong>⚛️ Realistic Physics:</strong> ${realisticPhysics ? 'Yes ✅' : 'No ❌'}
+                    </div>
+                    <div class="info-item">
+                        <strong>🌌 Gravitational Effects:</strong> ${gravitationalEffects ? 'Yes ✅' : 'No ❌'}
+                    </div>
+                    <div class="info-item">
+                        <strong>🌅 Atmospheric Scattering:</strong> ${atmosphericScattering ? 'Yes ✅' : 'No ❌'}
+                    </div>
+                    <div class="info-item">
+                        <strong>🌊 Tidal Forces:</strong> ${tidalForces ? 'Yes ✅' : 'No ❌'}
+                    </div>
+                </div>
+            `;
+            
+            planetList.innerHTML = planets.map(planet => {
+                const habSymbol = planet.habitability?.isHabitable ? '🌍' : 
+                                 (planet.habitability?.habitabilityStatus === 'TOO_HOT' ? '🔥' : '🧊');
+                const tempDisplay = planet.habitability ? `${planet.habitability.estimatedTempC}°C` : 'Unknown';
+                const procSymbol = planet.proceduralGeneration ? '✨' : '🔄';
+                
+                return `
+                    <div class="planet-item">
+                        <strong>${procSymbol}${habSymbol} ${planet.name}</strong><br>
+                        Type: ${planet.classification || planet.type} | Diameter: ${planet.diameter.toFixed(2)}⊕ | Distance: ${planet.distanceAU.toFixed(2)} AU<br>
+                        Orbital Period: ${planet.orbitalPeriod.toFixed(1)} Earth years | Rotation: ${Math.abs(planet.rotationHours).toFixed(1)}h<br>
+                        <span style="color: ${planet.habitability?.isHabitable ? '#00ff00' : (planet.habitability?.habitabilityStatus === 'TOO_HOT' ? '#ff4444' : '#4fb3ff')}">
+                            Temperature: ${tempDisplay} | Habitability: ${planet.habitability?.habitabilityStatus || 'Unknown'}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+            
+            systemInfo.style.display = 'block';
+        }
+        
+        // Randomize system parameters
+        function randomizeSystem() {
+            // Random orbit duration (10-300 seconds)
+            const orbitDuration = Math.floor(Math.random() * 290) + 10;
+            document.getElementById('orbitDuration').value = orbitDuration;
+            document.getElementById('orbitDurationValue').textContent = orbitDuration;
+            
+            // Random rotation duration (1-30 seconds)
+            const rotationDuration = Math.floor(Math.random() * 29) + 1;
+            document.getElementById('rotationDuration').value = rotationDuration;
+            document.getElementById('rotationDurationValue').textContent = rotationDuration;
+            
+            // Random distance scale (2-15)
+            const distanceScale = Math.random() * 13 + 2;
+            document.getElementById('distanceScale').value = distanceScale.toFixed(1);
+            document.getElementById('distanceScaleValue').textContent = distanceScale.toFixed(1);
+            
+            // Random size scale (0.2-3.0)
+            const sizeScale = Math.random() * 2.8 + 0.2;
+            document.getElementById('sizeScale').value = sizeScale.toFixed(1);
+            document.getElementById('sizeScaleValue').textContent = sizeScale.toFixed(1);
+            
+            // Random subdivisions (0-3)
+            const subdivisions = Math.floor(Math.random() * 4);
+            document.getElementById('subdivisions').value = subdivisions;
+            document.getElementById('subdivisionsValue').textContent = subdivisions;
+            
+            // Random features
+            document.getElementById('includePluto').checked = Math.random() > 0.3;
+            document.getElementById('showOrbits').checked = Math.random() > 0.3;
+            document.getElementById('showStars').checked = Math.random() > 0.2;
+            
+            // Random physics settings
+            document.getElementById('realisticPhysics').checked = Math.random() > 0.2;
+            document.getElementById('gravitationalEffects').checked = Math.random() > 0.2;
+            document.getElementById('atmosphericScattering').checked = Math.random() > 0.2;
+            document.getElementById('tidalForces').checked = Math.random() > 0.3;
+            
+            // Generate the system
+            generateSolarSystem();
+        };
+        
+        // Clear system
+        function clearSystem() {
+            if (!scene) return;
+            
+            // Clear planet groups
+            planetGroups.forEach(pg => {
+                scene.remove(pg.group);
+            });
+            planetGroups = [];
+            
+            // Clear system group
+            if (currentSystem) {
+                scene.remove(currentSystem);
+                currentSystem = null;
+            }
+            
+            // Clear star field
+            if (starField) {
+                scene.remove(starField);
+                starField = null;
+            }
+            
+            // Hide system info
+            document.getElementById('systemInfo').style.display = 'none';
+            showStatus('Solar system cleared', 'warning');
+        };
+        
+        // Show/hide loading
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        // Show status message
+        function showStatus(message, type = 'warning') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            if (!camera || !renderer) return;
+            
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Handle keyboard shortcuts
+        function onKeyDown(event) {
+            if (!camera || !controls) return;
+            
+            switch(event.key.toLowerCase()) {
+                case 'r':
+                    // Reset camera
+                    camera.position.set(0, 50, 100);
+                    controls.target.set(0, 0, 0);
+                    controls.update();
+                    break;
+                case 'f':
+                    // Focus on star
+                    camera.position.set(0, 0, 20);
+                    controls.target.set(0, 0, 0);
+                    controls.update();
+                    break;
+                case 'g':
+                    // Generate system
+                    generateSolarSystem();
+                    break;
+                case 'c':
+                    // Clear system
+                    clearSystem();
+                    break;
+            }
+        }
+        
+        // Animation loop with realistic orbital mechanics and physics
+        function animate() {
+            if (!scene || !camera || !renderer || !controls) return;
+            
+            const elapsed = clock ? clock.getElapsedTime() : Date.now() * 0.001;
+            
+            // Get physics settings
+            const realisticPhysics = document.getElementById('realisticPhysics')?.checked || false;
+            const gravitationalEffects = document.getElementById('gravitationalEffects')?.checked || false;
+            const atmosphericScattering = document.getElementById('atmosphericScattering')?.checked || false;
+            const tidalForces = document.getElementById('tidalForces')?.checked || false;
+            
+            // Animate planets with enhanced motion and realistic physics
+            for (let i = 0; i < planetGroups.length; i++) {
+                const planetGroup = planetGroups[i];
+                if (!planetGroup || !planetGroup.group || !planetGroup.mesh) continue;
+                
+                try {
+                    // Realistic orbital motion with eccentricity
+                    if (planetGroup.angularSpeed && typeof planetGroup.angularSpeed === 'number') {
+                        let orbitalAngle = elapsed * planetGroup.angularSpeed;
+                        
+                        // Apply eccentricity for more realistic orbits
+                        if (realisticPhysics && planetGroup.planet && planetGroup.planet.eccentricity) {
+                            const eccentricity = planetGroup.planet.eccentricity;
+                            const radius = planetGroup.radius;
+                            
+                            // Calculate true anomaly and radius vector
+                            const trueAnomaly = orbitalAngle;
+                            const radiusVector = radius * (1 - eccentricity * eccentricity) / (1 + eccentricity * Math.cos(trueAnomaly));
+                            
+                            // Update planet position based on orbital mechanics
+                            planetGroup.group.position.x = radiusVector * Math.cos(trueAnomaly);
+                            planetGroup.group.position.z = radiusVector * Math.sin(trueAnomaly);
+                        } else {
+                            // Simple circular orbit
+                            planetGroup.group.rotation.y = orbitalAngle;
+                        }
+                    }
+                    
+                    // Realistic axial rotation with tilt
+                    if (planetGroup.mesh.userData && planetGroup.mesh.userData.rotationSpeed) {
+                        const rotationSpeed = planetGroup.mesh.userData.rotationSpeed;
+                        if (typeof rotationSpeed === 'number') {
+                            planetGroup.mesh.rotation.y = elapsed * rotationSpeed;
+                            
+                            // Apply axial tilt for realistic rotation
+                            if (realisticPhysics && planetGroup.planet && planetGroup.planet.axialTilt) {
+                                const tiltRadians = (planetGroup.planet.axialTilt * Math.PI) / 180;
+                                planetGroup.mesh.rotation.x = tiltRadians;
+                            }
+                        }
+                    }
+                    
+                    // Enhanced animation for procedural planets with realistic physics
+                    if (planetGroup.isEnhanced && planetGroup.planetResult) {
+                        // Realistic floating animation based on mass and gravity
+                        const mass = planetGroup.planet?.massEarth || 1;
+                        const gravity = planetGroup.planet?.gravity || 1;
+                        const floatFrequency = 0.3 / Math.sqrt(mass); // Heavier planets float slower
+                        const floatAmplitude = 0.005 / gravity; // Lower gravity = more floating
+                        const floatAmount = Math.sin(elapsed * floatFrequency + i) * floatAmplitude;
+                        planetGroup.mesh.position.y = floatAmount;
+                        
+                        // Enhanced gravitational effects with realistic physics
+                        if (gravitationalEffects && planetGroup.planet && planetGroup.planet.massEarth > 0.1) {
+                            // Realistic gravitational lensing effect
+                            const gravitationalStrength = Math.min(planetGroup.planet.massEarth * 0.08, 0.3);
+                            const lensingEffect = Math.sin(elapsed * 1.2) * gravitationalStrength;
+                            planetGroup.mesh.material.opacity = 0.95 - lensingEffect * 0.1;
+                            
+                            // Subtle gravitational field visualization
+                            const fieldStrength = planetGroup.planet.massEarth * 0.015;
+                            if (planetGroup.mesh.material.emissive) {
+                                planetGroup.mesh.material.emissiveIntensity = fieldStrength * Math.sin(elapsed * 0.4);
+                            }
+                        }
+                        
+                        // Enhanced atmospheric scattering with realistic physics
+                        if (atmosphericScattering && planetGroup.planetResult.atmosphere) {
+                            const atmosphere = planetGroup.planetResult.atmosphere;
+                            if (atmosphere && atmosphere.rotation) {
+                                // Realistic atmosphere rotation based on planet size
+                                const atmosphereSpeed = 0.15 / Math.sqrt(planetGroup.planet?.massEarth || 1);
+                                atmosphere.rotation.y = elapsed * atmosphereSpeed;
+                                
+                                // Dynamic atmospheric opacity based on viewing angle
+                                if (camera && atmosphere.material) {
+                                    const cameraDistance = camera.position.distanceTo(planetGroup.mesh.position);
+                                    const atmosphericOpacity = Math.max(0.15, Math.min(0.35, 1.0 - cameraDistance / 40));
+                                    atmosphere.material.opacity = atmosphericOpacity;
+                                }
+                            }
+                        }
+                        
+                        // Enhanced tidal force effects with realistic physics
+                        if (tidalForces && planetGroup.planetResult.moons && planetGroup.planetResult.moons.length > 0) {
+                            planetGroup.planetResult.moons.forEach((moon, moonIndex) => {
+                                if (moon && moon.rotation) {
+                                    // Realistic tidal locking based on mass ratio
+                                    const tidalLockFactor = 0.8 / (1 + moonIndex * 0.4);
+                                    moon.rotation.y = elapsed * tidalLockFactor;
+                                    
+                                    // Realistic tidal distortion based on gravitational forces
+                                    const tidalDistortion = Math.sin(elapsed * 1.8 + moonIndex) * 0.015;
+                                    const massRatio = planetGroup.planet?.massEarth || 1;
+                                    const distortionFactor = Math.min(0.08, massRatio * 0.015);
+                                    moon.scale.x = 1 + tidalDistortion * distortionFactor;
+                                    moon.scale.z = 1 - tidalDistortion * distortionFactor;
+                                    
+                                    // Subtle orbital perturbation
+                                    const perturbation = Math.sin(elapsed * 0.6 + moonIndex) * 0.01;
+                                    moon.position.x += perturbation;
+                                }
+                            });
+                        }
+                        
+                        // Enhanced ring system animation with realistic physics
+                        if (planetGroup.planetResult.rings && planetGroup.planetResult.rings.length > 0) {
+                            planetGroup.planetResult.rings.forEach((ring, ringIndex) => {
+                                if (ring && ring.rotation) {
+                                    // Realistic ring rotation with differential rotation
+                                    const ringSpeed = 0.2 / Math.sqrt(ringIndex + 1);
+                                    ring.rotation.y = elapsed * ringSpeed;
+                                    
+                                    // Ring particle density variation
+                                    if (ring.material) {
+                                        const densityVariation = Math.sin(elapsed * 0.8 + ringIndex) * 0.08;
+                                        ring.material.opacity = 0.75 + densityVariation;
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Enhanced planet surface effects
+                        if (planetGroup.mesh && planetGroup.mesh.material) {
+                            // Subtle surface shimmer based on atmospheric conditions
+                            const shimmerEffect = Math.sin(elapsed * 0.5 + i) * 0.02;
+                            planetGroup.mesh.material.shininess = 30 + shimmerEffect * 10;
+                            
+                            // Dynamic specular highlights
+                            if (planetGroup.mesh.material.specular) {
+                                const specularIntensity = Math.sin(elapsed * 0.3) * 0.1;
+                                planetGroup.mesh.material.specular.setRGB(
+                                    0.2 + specularIntensity,
+                                    0.2 + specularIntensity,
+                                    0.2 + specularIntensity
+                                );
+                            }
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.warn(`⚠️ [ANIMATION] Error animating planet ${i}:`, error);
+                }
+            }
+            
+            // Animate star field rotation
+            if (starField && starField.rotation) {
+                starField.rotation.y = elapsed * 0.01;
+                starField.rotation.x = elapsed * 0.005;
+            }
+            
+            // Update camera controls
+            if (controls) {
+                controls.update();
+            }
+            
+            // Render the scene
+            try {
+                renderer.render(scene, camera);
+            } catch (renderError) {
+                console.error('🎨 [RENDER] Render error:', renderError);
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Update range input displays
+        document.getElementById('orbitDuration').addEventListener('input', function() {
+            document.getElementById('orbitDurationValue').textContent = this.value;
+        });
+        
+        document.getElementById('rotationDuration').addEventListener('input', function() {
+            document.getElementById('rotationDurationValue').textContent = this.value;
+        });
+        
+        document.getElementById('distanceScale').addEventListener('input', function() {
+            document.getElementById('distanceScaleValue').textContent = this.value;
+        });
+        
+        document.getElementById('sizeScale').addEventListener('input', function() {
+            document.getElementById('sizeScaleValue').textContent = this.value;
+        });
+        
+        document.getElementById('subdivisions').addEventListener('input', function() {
+            document.getElementById('subdivisionsValue').textContent = this.value;
+        });
+        
+        // Add event listeners for physics controls
+        document.getElementById('realisticPhysics').addEventListener('change', function() {
+            console.log('⚛️ Realistic Physics:', this.checked ? 'Enabled' : 'Disabled');
+        });
+        
+        document.getElementById('gravitationalEffects').addEventListener('change', function() {
+            console.log('🌌 Gravitational Effects:', this.checked ? 'Enabled' : 'Disabled');
+        });
+        
+        document.getElementById('atmosphericScattering').addEventListener('change', function() {
+            console.log('🌅 Atmospheric Scattering:', this.checked ? 'Enabled' : 'Disabled');
+        });
+        
+        document.getElementById('tidalForces').addEventListener('change', function() {
+            console.log('🌊 Tidal Forces:', this.checked ? 'Enabled' : 'Disabled');
+        });
+        
+        // Initialize everything
+        initThreeJS();
+        
+        // Auto-generate a default system
+        setTimeout(() => {
+            generateSolarSystem();
+        }, 1000);
+        
+        // Expose functions to global scope for onclick handlers
+        window.generateSolarSystem = generateSolarSystem;
+        window.randomizeSystem = randomizeSystem;
+        window.clearSystem = clearSystem;
+        
+        console.log('🔗 [GLOBAL] Functions exposed to window:');
+        console.log('  - generateSolarSystem:', typeof window.generateSolarSystem);
+        console.log('  - randomizeSystem:', typeof window.randomizeSystem);
+        console.log('  - clearSystem:', typeof window.clearSystem);
+        
+        console.log('☀️ Solar System Generator Test initialized');
+        console.log('🎮 Controls: Mouse to rotate, Scroll to zoom, R to reset camera');
+        console.log('⌨️ Shortcuts: G=Generate, C=Clear, R=Reset camera, F=Focus on star');
+    </script>
+</body>
+</html> 

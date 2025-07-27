@@ -1,0 +1,54 @@
+---
+alwaysApply: true
+---
+
+# JavaScript Coding & Commenting Standards
+
+This document outlines the coding standards for all JavaScript files in the project. Adherence to these standards is mandatory for maintaining code quality and readability.
+
+## File Size and Complexity
+
+-   **Maximum 500 lines per file**: Including comments and whitespace. Files exceeding this limit must be refactored.
+-   **Target 300-400 lines**: Strive for smaller, more manageable files.
+-   **Split large files**: Use logical sub-modules to break down complex files.
+
+## Documentation & Commenting
+
+### Principles of Good Comments
+
+-   **Explain "Why," Not "What"**: Your code should be self-documenting in *what* it is doing. Comments should explain *why* a particular implementation was chosen.
+-   **Keep Comments Up to Date**: An incorrect comment is worse than no comment at all.
+-   **Avoid Obvious Comments**: Do not write comments that state the obvious (e.g., `// This is a loop`).
+
+### Comment Style
+
+-   **JSDoc**: All public methods, classes, and functions must have JSDoc comments.
+-   **Inline Comments**: Use `//` for single-line comments for complex or non-obvious logic.
+-   **Multi-line Comments**: Use `/* ... */` for multi-line comments.
+-   **Complete Sentences**: Write in complete sentences with proper grammar and punctuation.
+
+### File Header
+
+Every `.js` file must start with a file header block explaining its purpose.
+
+```javascript
+/**
+ * @file FileName.js
+ * @description A brief description of the file's purpose.
+ * @version 1.0.0
+ * @author AstroGarden Development Team
+ * @created YYYY-MM-DD
+ * 
+ * @purpose A more detailed explanation of what this file is for.
+ * @dependencies List of other modules or libraries this file depends on.
+ * @exports What the module exports (e.g., ClassName class).
+ */
+```
+
+
+This rule is based on the [ARCHITECTURE.md](mdc:ARCHITECTURE.md) and [dev-workflow.js](mdc:dev-workflow.js) files.
+
+```
+
+
+This rule is based on the [ARCHITECTURE.md](mdc:ARCHITECTURE.md) and [dev-workflow.js](mdc:dev-workflow.js) files.

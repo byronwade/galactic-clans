@@ -1,0 +1,248 @@
+# Graphics & Rendering Error Handling
+
+This rule provides specialized error handling patterns for graphics, Three.js, WebGL, and rendering systems in the game.
+
+## Graphics Error Categories
+
+```typescript
+enum GraphicsErrorType {
+    WEBGL_CONTEXT_LOST = "WEBGL_CONTEXT_LOST",
+    RENDERER_FAILURE = "RENDERER_FAILURE", 
+    SHADER_COMPILATION = "SHADER_COMPILATION",
+    TEXTURE_LOADING = "TEXTURE_LOADING",
+    GEOMETRY_CREATION = "GEOMETRY_CREATION",
+    SCENE_RENDERING = "SCENE_RENDERING",
+    CANVAS_CREATION = "CANVAS_CREATION",
+    MEMORY_OVERFLOW = "MEMORY_OVERFLOW",
+    PERFORMANCE_DEGRADATION = "PERFORMANCE_DEGRADATION"
+}
+```
+
+## WebGL Context Recovery
+
+All graphics components MUST implement WebGL context loss recovery:
+
+```typescript
+class GraphicsManager {
+    private setupWebGLRecovery(): void {
+        this.canvas.addEventListener('webglcontextlost', (event) => {
+            event.preventDefault();
+            console.error(`🎨 [GRAPHICS:CRITICAL] WebGL context lost:
+                Cause: ${event.statusMessage || 'Unknown'}
+                Canvas: ${this.canvas.width}x${this.canvas.height}
+                Active Objects: ${this.scene?.children.length || 0}
+                Memory Usage: ${this.getGPUMemoryUsage()}
+                Recovery: Attempting context restoration...`);
+            
+            this.handleContextLoss();
+        });
+
+        this.canvas.addEventListener('webglcontextrestored', () => {
+            console.warn(`🎨 [GRAPHICS:HIGH] WebGL context restored - reinitializing graphics...`);
+            this.reinitializeGraphics();
+        });
+    }
+
+    private handleContextLoss(): void {
+        // Save current state before cleanup
+        const sceneState = this.saveSceneState();
+        
+        // Clear all WebGL resources
+        this.disposeResources();
+        
+        // Store recovery data
+        this.contextLossRecoveryData = {
+            timestamp: Date.now(),
+            sceneState,
+            lastRenderCall: this.lastRenderCall,
+            activeShaders: this.getActiveShaders()
+        };
+    }
+}
+```
+
+## Renderer Error Monitoring
+
+Monitor and handle rendering failures with detailed diagnostics:
+
+```typescript
+public render(scene: THREE.Scene, camera: THREE.Camera): void {
+    const startTime = performance.now();
+    
+    try {
+        // Pre-render validation
+        this.validateRenderState(scene, camera);
+        
+        // Attempt rendering
+        this.renderer.render(scene, camera);
+        
+        // Post-render monitoring
+        this.monitorRenderPerformance(startTime);
+        
+    } catch (error) {
+        this.handleRenderError(error, scene, camera, startTime);
+    }
+}
+
+private handleRenderError(error: Error, scene: THREE.Scene, camera: THREE.Camera, startTime: number): void {
+    const renderDuration = performance.now() - startTime;
+    
+    console.error(`🎨 [GRAPHICS:CRITICAL] Render failure:
+        ❌ Error: ${error.message}
+        📊 Scene Stats: ${this.getSceneStats(scene)}
+        📷 Camera: position=${camera.position.toArray()}, fov=${camera.fov}
+        🖥️ Canvas: ${this.canvas.width}x${this.canvas.height}
+        ⏱️ Render Duration: ${renderDuration.toFixed(2)}ms
+        🧠 Memory: GPU=${this.getGPUMemoryUsage()}, JS=${this.getJSMemoryUsage()}
+        🔧 WebGL State: ${this.getWebGLDiagnostics()}
+        🎯 Recovery: ${this.determineRecoveryStrategy(error)}`);
+    
+    this.executeRenderRecovery(error, scene, camera);
+}
+
+private getSceneStats(scene: THREE.Scene): string {
+    return `objects=${scene.children.length}, lights=${this.countLights(scene)}, materials=${this.countMaterials(scene)}`;
+}
+
+private getWebGLDiagnostics(): string {
+    const gl = this.renderer.getContext();
+    return `context=${gl ? 'valid' : 'lost'}, extensions=${this.getActiveExtensions()}, max_textures=${gl?.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)}`;
+}
+```
+
+## Shader Error Handling
+
+Handle shader compilation and linking failures:
+
+```typescript
+private compileShader(source: string, type: number): WebGLShader {
+    const gl = this.renderer.getContext();
+    const shader = gl.createShader(type);
+    
+    try {
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            const info = gl.getShaderInfoLog(shader);
+            throw new Error(`Shader compilation failed: ${info}`);
+        }
+        
+        return shader;
+    } catch (error) {
+        console.error(`🎨 [GRAPHICS:HIGH] Shader compilation error:
+            Type: ${type === gl.VERTEX_SHADER ? 'vertex' : 'fragment'}
+            Source Length: ${source.length}
+            Error: ${error.message}
+            Line Numbers: ${this.addLineNumbers(source)}
+            Fallback: Using basic shader...`);
+        
+        return this.getFallbackShader(type);
+    }
+}
+```
+
+## Texture Loading Error Recovery
+
+Handle texture loading failures with fallbacks:
+
+```typescript
+private loadTexture(url: string): Promise<THREE.Texture> {
+    return new Promise((resolve, reject) => {
+        const loader = new THREE.TextureLoader();
+        const startTime = Date.now();
+        
+        loader.load(
+            url,
+            (texture) => {
+                const loadTime = Date.now() - startTime;
+                console.log(`🖼️ [GRAPHICS:DEBUG] Texture loaded: ${url} (${loadTime}ms)`);
+                resolve(texture);
+            },
+            (progress) => {
+                console.log(`🖼️ [GRAPHICS:DEBUG] Texture loading: ${url} (${Math.round(progress.loaded / progress.total * 100)}%)`);
+            },
+            (error) => {
+                console.error(`🖼️ [GRAPHICS:MEDIUM] Texture load failed:
+                    URL: ${url}
+                    Error: ${error}
+                    Time: ${Date.now() - startTime}ms
+                    Fallback: Using default texture...`);
+                
+                resolve(this.getDefaultTexture());
+            }
+        );
+    });
+}
+```
+
+## Performance Monitoring
+
+Monitor graphics performance with automatic quality adjustment:
+
+```typescript
+private monitorGraphicsPerformance(): void {
+    setInterval(() => {
+        const metrics = this.getPerformanceMetrics();
+        
+        if (metrics.fps < this.targetFPS * 0.7) {
+            console.warn(`🎮 [GRAPHICS:MEDIUM] Performance degradation detected:
+                FPS: ${metrics.fps}/${this.targetFPS}
+                Frame Time: ${metrics.frameTime}ms
+                Draw Calls: ${metrics.drawCalls}
+                Triangles: ${metrics.triangles}
+                GPU Memory: ${metrics.gpuMemory}MB
+                Auto-adjustment: Reducing quality...`);
+            
+            this.adjustQualityDown();
+        }
+        
+        if (metrics.memoryUsage > this.memoryThreshold) {
+            console.warn(`🧠 [GRAPHICS:HIGH] Memory threshold exceeded:
+                Used: ${metrics.memoryUsage}MB
+                Threshold: ${this.memoryThreshold}MB
+                Action: Forcing garbage collection...`);
+            
+            this.forceResourceCleanup();
+        }
+    }, 5000); // Check every 5 seconds
+}
+```
+
+## Graphics Recovery Strategies
+
+Implement multiple fallback levels for graphics failures:
+
+```typescript
+private executeGraphicsRecovery(error: Error, severity: string): void {
+    switch (severity) {
+        case 'CRITICAL':
+            // Complete graphics system restart
+            this.reinitializeRenderer();
+            this.reloadAllAssets();
+            break;
+            
+        case 'HIGH':
+            // Reset render state and clear caches
+            this.resetRenderState();
+            this.clearTextureCache();
+            break;
+            
+        case 'MEDIUM':
+            // Reduce quality and continue
+            this.reduceQuality();
+            this.disableNonEssentialFeatures();
+            break;
+            
+        default:
+            // Log and continue
+            console.log(`🎨 [GRAPHICS:LOW] Minor graphics issue - continuing normally`);
+    }
+}
+```
+
+This comprehensive graphics error handling ensures the rendering system remains stable and provides detailed diagnostics for quick issue resolution.
+description:
+globs:
+alwaysApply: true
+---

@@ -1,0 +1,44 @@
+---
+alwaysApply: true
+---
+
+# Freeroam Navigation, UI & UX
+
+The freeroam navigation system is a core feature of **Galactic Clans**, allowing players to seamlessly explore the universe. This system must be intuitive, performant, and work across all supported platforms, with a user-friendly and consistent UI.
+
+## UX Flow & Camera Modes
+
+The navigation system will feature three distinct camera modes with smooth, cinematic transitions between them:
+
+1.  **Galaxy View**: A top-down, strategic, node-based view of the player's solar systems and their neighbors. This is the primary view for galaxy-level management and navigation.
+2.  **Solar System View**: An orbital view of a single solar system, allowing players to see the planets, moons, and other celestial bodies.
+3.  **Planet View (Third-Person)**: A 3D, third-person perspective that allows players to walk around on the surface of a planet and observe the civilization. This is the primary view for planetary management and raids.
+
+## Controls
+
+-   **Seamless Zoom**: Players should be able to smoothly zoom in and out, transitioning between the different camera modes.
+-   **Intuitive Pan and Orbit**: The controls for panning and orbiting the camera should be consistent and easy to use across all camera modes.
+-   **Collision Detection**: The camera should not be able to clip through planets or other celestial bodies. In the third-person Planet View, the camera should not be able to go through walls or other solid objects.
+-   **Camera Limits**: To manage performance, the camera's movement may be limited to a certain distance from the player's home solar system or a selected "point of interest."
+
+## UI Principles & Components
+
+-   **Consistency**: Use a component-based approach to ensure a consistent look and feel across the entire game.
+-   **Performance**: The UI must not impact the game's performance. It should be lightweight and optimized.
+-   **Responsiveness**: The UI must be responsive and adapt to different screen sizes and aspect ratios.
+-   **User-Friendliness**: The UI should be intuitive, easy to navigate, and provide clear feedback to the player.
+-   **View Switching**: The UI must provide a clear and easy-to-use method for switching between the Galaxy, Solar System, and Planet views.
+-   **Heads-Up Display (HUD)**: The HUD should adapt to the current camera view.
+    -   *Galaxy View HUD*: Shows high-level information about the player's empire, clan activity, and incoming raids.
+    -   *Planet View HUD*: Shows information about the current planet, its resources, and civilization.
+-   **Targeting and Selection**: The UI must provide a way for players to select and interact with objects in the universe (solar systems, planets, units).
+-   **Search and Bookmarks**: For a large universe, a search function and the ability to bookmark locations are essential.
+
+## Platform-Specific Considerations
+
+-   **Input Methods**: The UI must support a variety of input methods, including mouse and keyboard, touch, and gamepad.
+-   **Native UI Elements**: Where appropriate, use native UI elements to provide a more familiar experience for the user on different platforms (e.g., date pickers, file dialogs).
+
+-   **Streaming**: The game must stream in assets and data as the player moves through the universe. This is essential for managing memory and maintaining a smooth frame rate.
+-   **Level of Detail (LOD)**: A robust LOD system is required to reduce the complexity of distant objects. In the Galaxy View, entire solar systems may be represented by a single icon or a simplified model.
+-   **Occlusion Culling**: The rendering engine should use occlusion culling to avoid rendering objects that are hidden behind other objects.

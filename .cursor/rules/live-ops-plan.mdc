@@ -1,0 +1,39 @@
+---
+# Live Operations (Live Ops) Plan
+
+A successful game launch is just the beginning. This document outlines our strategy for managing **Galactic Clans** post-launch to ensure long-term player engagement and retention.
+
+## Guiding Principles
+
+-   **Consistent Cadence**: Deliver new content and events on a regular, predictable schedule.
+-   **Community-Focused**: Actively listen to and engage with our player community.
+-   **Data-Informed**: Use analytics to understand player behavior and make informed decisions.
+
+## Content & Event Cadence
+
+Our goal is to provide a steady stream of new experiences for our players.
+
+-   **Weekly**:
+    -   **Mini-Events**: Small-scale events with simple objectives and rewards (e.g., "Train 50 Tank units for a resource bonus").
+    -   **Leaderboard Resets**: Weekly resets for individual and clan leaderboards with small rewards for top performers.
+-   **Monthly**:
+    -   **Major Events**: Themed, multi-day events with unique mechanics and exclusive cosmetic rewards (e.g., "The Pirate Invasion").
+    -   **New Battle Pass Season**: A new Battle Pass will launch on the first of every month.
+-   **Quarterly**:
+    -   **Major Content Updates**: Significant updates that introduce new units, buildings, game modes, or expand the game world.
+
+## Community Management
+
+-   **Communication Channels**: We will actively engage with players on Discord, Reddit, and our official forums.
+-   **Developer Updates**: A monthly blog post or video will share insights into upcoming features and the state of the game.
+-   **Player Feedback**: We will use surveys and community polls to gather feedback and involve players in the decision-making process.
+
+## Monetization & Economy Tuning
+
+-   **Special Offers**: Time-limited bundles and offers will be introduced around major events and holidays.
+-   **Economy Monitoring**: We will continuously monitor the game's economy to identify and address any imbalances.
+-   **A/B Testing**: New features and offers may be A/B tested with a small segment of the player base before a full rollout.
+description:
+globs:
+alwaysApply: true
+---

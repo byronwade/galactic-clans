@@ -1,0 +1,575 @@
+/* Icon Fallback System for Galactic Clans */
+/* Provides essential icons when Font Awesome CDN is unavailable */
+
+/* Base icon styles */
+.fas,
+.fa,
+.gi {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    text-align: center;
+    font-weight: normal;
+    font-style: normal;
+    text-decoration: inherit;
+    font-family: 'Arial Unicode MS', 'Lucida Grande', sans-serif;
+}
+
+/* Essential game icons using Unicode characters */
+.fa-galaxy::before {
+    content: "🌌";
+}
+
+.fa-sun::before {
+    content: "☀️";
+}
+
+.fa-globe::before {
+    content: "🌍";
+}
+
+.fa-chart-bar::before {
+    content: "📊";
+}
+
+.fa-cog::before {
+    content: "⚙️";
+}
+
+.fa-gamepad::before {
+    content: "🎮";
+}
+
+.fa-check::before {
+    content: "✅";
+}
+
+.fa-times::before {
+    content: "❌";
+}
+
+.fa-play::before {
+    content: "▶️";
+}
+
+.fa-pause::before {
+    content: "⏸️";
+}
+
+.fa-stop::before {
+    content: "⏹️";
+}
+
+.fa-fast-forward::before {
+    content: "⏩";
+}
+
+.fa-rewind::before {
+    content: "⏪";
+}
+
+.fa-home::before {
+    content: "🏠";
+}
+
+.fa-user::before {
+    content: "👤";
+}
+
+.fa-users::before {
+    content: "👥";
+}
+
+.fa-star::before {
+    content: "⭐";
+}
+
+.fa-heart::before {
+    content: "❤️";
+}
+
+.fa-fire::before {
+    content: "🔥";
+}
+
+.fa-water::before {
+    content: "💧";
+}
+
+.fa-leaf::before {
+    content: "🍃";
+}
+
+.fa-gem::before {
+    content: "💎";
+}
+
+.fa-coins::before {
+    content: "🪙";
+}
+
+.fa-trophy::before {
+    content: "🏆";
+}
+
+.fa-medal::before {
+    content: "🏅";
+}
+
+.fa-crown::before {
+    content: "👑";
+}
+
+.fa-shield::before {
+    content: "🛡️";
+}
+
+.fa-sword::before {
+    content: "⚔️";
+}
+
+.fa-bow::before {
+    content: "🏹";
+}
+
+.fa-magic::before {
+    content: "✨";
+}
+
+.fa-lightning::before {
+    content: "⚡";
+}
+
+.fa-ice::before {
+    content: "❄️";
+}
+
+.fa-earth::before {
+    content: "🌍";
+}
+
+.fa-wind::before {
+    content: "💨";
+}
+
+.fa-mountain::before {
+    content: "⛰️";
+}
+
+.fa-tree::before {
+    content: "🌳";
+}
+
+.fa-flower::before {
+    content: "🌸";
+}
+
+.fa-fish::before {
+    content: "🐟";
+}
+
+.fa-bird::before {
+    content: "🐦";
+}
+
+.fa-dragon::before {
+    content: "🐉";
+}
+
+.fa-unicorn::before {
+    content: "🦄";
+}
+
+.fa-phoenix::before {
+    content: "🦅";
+}
+
+.fa-ship::before {
+    content: "🚢";
+}
+
+.fa-rocket::before {
+    content: "🚀";
+}
+
+.fa-satellite::before {
+    content: "🛰️";
+}
+
+.fa-planet::before {
+    content: "🪐";
+}
+
+.fa-moon::before {
+    content: "🌙";
+}
+
+.fa-comet::before {
+    content: "☄️";
+}
+
+.fa-meteor::before {
+    content: "💫";
+}
+
+.fa-asteroid::before {
+    content: "☄️";
+}
+
+.fa-black-hole::before {
+    content: "⚫";
+}
+
+.fa-nebula::before {
+    content: "🌫️";
+}
+
+.fa-galaxy-cluster::before {
+    content: "🌌";
+}
+
+/* Navigation icons */
+.fa-arrow-left::before {
+    content: "←";
+}
+
+.fa-arrow-right::before {
+    content: "→";
+}
+
+.fa-arrow-up::before {
+    content: "↑";
+}
+
+.fa-arrow-down::before {
+    content: "↓";
+}
+
+.fa-chevron-left::before {
+    content: "‹";
+}
+
+.fa-chevron-right::before {
+    content: "›";
+}
+
+.fa-chevron-up::before {
+    content: "⌃";
+}
+
+.fa-chevron-down::before {
+    content: "⌄";
+}
+
+/* UI icons */
+.fa-search::before {
+    content: "🔍";
+}
+
+.fa-filter::before {
+    content: "🔧";
+}
+
+.fa-sort::before {
+    content: "↕️";
+}
+
+.fa-edit::before {
+    content: "✏️";
+}
+
+.fa-delete::before {
+    content: "🗑️";
+}
+
+.fa-add::before {
+    content: "➕";
+}
+
+.fa-remove::before {
+    content: "➖";
+}
+
+.fa-settings::before {
+    content: "⚙️";
+}
+
+.fa-info::before {
+    content: "ℹ️";
+}
+
+.fa-warning::before {
+    content: "⚠️";
+}
+
+.fa-error::before {
+    content: "❌";
+}
+
+.fa-success::before {
+    content: "✅";
+}
+
+.fa-question::before {
+    content: "❓";
+}
+
+.fa-help::before {
+    content: "💡";
+}
+
+/* Communication icons */
+.fa-chat::before {
+    content: "💬";
+}
+
+.fa-message::before {
+    content: "📨";
+}
+
+.fa-mail::before {
+    content: "📧";
+}
+
+.fa-phone::before {
+    content: "📞";
+}
+
+.fa-video::before {
+    content: "📹";
+}
+
+.fa-camera::before {
+    content: "📷";
+}
+
+.fa-microphone::before {
+    content: "🎤";
+}
+
+.fa-speaker::before {
+    content: "🔊";
+}
+
+/* Time and status icons */
+.fa-clock::before {
+    content: "🕐";
+}
+
+.fa-calendar::before {
+    content: "📅";
+}
+
+.fa-timer::before {
+    content: "⏱️";
+}
+
+.fa-stopwatch::before {
+    content: "⏲️";
+}
+
+.fa-hourglass::before {
+    content: "⏳";
+}
+
+.fa-sync::before {
+    content: "🔄";
+}
+
+.fa-refresh::before {
+    content: "🔄";
+}
+
+.fa-download::before {
+    content: "⬇️";
+}
+
+.fa-upload::before {
+    content: "⬆️";
+}
+
+.fa-save::before {
+    content: "💾";
+}
+
+.fa-load::before {
+    content: "📂";
+}
+
+/* Game-specific icons */
+.fa-clan::before {
+    content: "🏰";
+}
+
+.fa-alliance::before {
+    content: "🤝";
+}
+
+.fa-war::before {
+    content: "⚔️";
+}
+
+.fa-peace::before {
+    content: "🕊️";
+}
+
+.fa-trade::before {
+    content: "🤝";
+}
+
+.fa-diplomacy::before {
+    content: "📜";
+}
+
+.fa-research::before {
+    content: "🔬";
+}
+
+.fa-technology::before {
+    content: "⚡";
+}
+
+.fa-culture::before {
+    content: "🎭";
+}
+
+.fa-religion::before {
+    content: "⛪";
+}
+
+.fa-military::before {
+    content: "🎖️";
+}
+
+.fa-economy::before {
+    content: "💰";
+}
+
+.fa-production::before {
+    content: "🏭";
+}
+
+.fa-farming::before {
+    content: "🌾";
+}
+
+.fa-mining::before {
+    content: "⛏️";
+}
+
+.fa-construction::before {
+    content: "🏗️";
+}
+
+.fa-transport::before {
+    content: "🚚";
+}
+
+.fa-energy::before {
+    content: "⚡";
+}
+
+.fa-food::before {
+    content: "🍎";
+}
+
+.fa-housing::before {
+    content: "🏠";
+}
+
+.fa-entertainment::before {
+    content: "🎮";
+}
+
+.fa-health::before {
+    content: "🏥";
+}
+
+.fa-education::before {
+    content: "📚";
+}
+
+.fa-security::before {
+    content: "👮";
+}
+
+/* Fallback for any missing icons */
+.fas::before,
+.fa::before,
+.gi::before {
+    content: "●";
+    color: #666;
+}
+
+/* Icon sizing utilities */
+.fa-xs {
+    font-size: 0.75em;
+}
+
+.fa-sm {
+    font-size: 0.875em;
+}
+
+.fa-lg {
+    font-size: 1.33em;
+}
+
+.fa-2x {
+    font-size: 2em;
+}
+
+.fa-3x {
+    font-size: 3em;
+}
+
+.fa-4x {
+    font-size: 4em;
+}
+
+.fa-5x {
+    font-size: 5em;
+}
+
+/* Icon animation fallbacks */
+@keyframes fa-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spin {
+    animation: fa-spin 2s linear infinite;
+}
+
+@keyframes fa-pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.fa-pulse {
+    animation: fa-pulse 1s ease-in-out infinite;
+}
+
+/* Ensure icons are visible even without Font Awesome */
+.fas,
+.fa,
+.gi {
+    line-height: 1;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

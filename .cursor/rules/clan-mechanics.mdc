@@ -1,0 +1,47 @@
+---
+alwaysApply: true
+---
+
+# Clan Mechanics Design
+
+This document outlines the design for the clan system in **Galactic Clans**. Clans are a core social feature, designed to foster collaboration, competition, and long-term engagement.
+
+## Guiding Principles
+
+-   **Collaboration**: Encourage players to work together for mutual benefit.
+-   **Meaningful Progression**: Clans should have their own progression path and long-term goals.
+-   **Inclusive**: The system should be valuable for both casual and hardcore players.
+
+## Clan Structure & Roles
+
+A clan can have up to 50 members. Roles define permissions within the clan.
+
+-   **Leader**: Full control. Can edit clan settings, kick/promote members, and initiate clan wars.
+-   **Co-Leader**: Can invite new members, kick Elders and below, and help manage the clan.
+-   **Elder**: Can invite new members. A role of trust and seniority.
+-   **Member**: A regular member of the clan.
+
+## Core Clan Features
+
+-   **Clan Chat**: A dedicated channel for clan members to communicate.
+-   **Resource Sharing**: Members can request and donate resources and army units to each other. There will be a cooldown and a daily limit to prevent abuse.
+-   **Clan Accomplishments**: Shared goals that the entire clan works towards to unlock perks, such as resource production boosts or faster unit training.
+
+## Clan Progression & Events
+
+```mermaid
+graph TD
+    A[New Clan Created] --> B{Recruit Members};
+    B --> C[Work on Clan Accomplishments];
+    C --> D{Unlock Clan Perks};
+    D --> E[Participate in Clan Raids];
+    E --> F{Compete in Clan Wars};
+    F --> G[Climb Clan Leaderboards];
+    G --> C;
+```
+
+-   **Clan Raids**: Coordinated mass attacks where multiple clan members can raid a single high-value target (e.g., a "Rogue Planet" AI base). Rewards are shared among participants.
+-   **Clan Wars**: A week-long event where two clans are matched against each other.
+    1.  **Preparation Day**: Players can scout enemy bases and donate troops to a shared "War Treasury."
+    2.  **Battle Day**: Each player gets two attacks to score points by destroying enemy bases.
+    3.  **Outcome**: The clan with the most points at the end of the week wins significant resource and Dark Matter rewards.

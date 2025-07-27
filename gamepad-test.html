@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Galactic Clans - Gamepad Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #107C10, #00D4FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .gamepad-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gamepad-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .gamepad-icon {
+            font-size: 2rem;
+        }
+
+        .gamepad-info h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .gamepad-info p {
+            margin: 5px 0 0 0;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status.connected {
+            background: #107C10;
+            color: white;
+        }
+
+        .status.disconnected {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .button.pressed {
+            background: #107C10;
+            border-color: #107C10;
+            transform: scale(0.95);
+        }
+
+        .button-name {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .axes-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .axis {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .axis-name {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .axis-bar {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .axis-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #107C10, #00D4FF);
+            border-radius: 10px;
+            transition: width 0.1s ease;
+        }
+
+        .axis-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .actions-section {
+            margin-top: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #107C10, #0d5f0d);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 124, 16, 0.3);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .instructions {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #00D4FF;
+        }
+
+        .instructions ul {
+            margin: 10px 0;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .waiting {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🎮 Galactic Clans</h1>
+            <p class="subtitle">Xbox & PlayStation Controller Test</p>
+        </div>
+
+        <div class="instructions">
+            <h3>🎯 How to Test Your Controller</h3>
+            <ul>
+                <li><strong>Connect your controller:</strong> Xbox Series X/S, Xbox One, PS5 DualSense, or PS4 DualShock</li>
+                <li><strong>Test all buttons:</strong> Press each button to see it highlight in green</li>
+                <li><strong>Test analog sticks:</strong> Move sticks to see the axis values change</li>
+                <li><strong>Test triggers:</strong> Pull triggers to see analog pressure values</li>
+                <li><strong>Test vibration:</strong> Click the "Test Vibration" button to feel haptic feedback</li>
+                <li><strong>Quick Actions:</strong> Use D-Pad for quick navigation actions</li>
+            </ul>
+        </div>
+
+        <div id="gamepad-list">
+            <div class="gamepad-section waiting">
+                <div class="gamepad-header">
+                    <div class="gamepad-icon">🎮</div>
+                    <div class="gamepad-info">
+                        <h3>No Controller Connected</h3>
+                        <p>Connect an Xbox or PlayStation controller to begin testing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <h3>🎮 Test Actions</h3>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="testVibration()">Test Vibration</button>
+                <button class="action-btn" onclick="resetCounters()">Reset Counters</button>
+                <button class="action-btn" onclick="toggleLog()">Toggle Debug Log</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gamepads = {};
+        let buttonPressCount = {};
+        let logEnabled = false;
+
+        function getControllerType(id) {
+            const idLower = id.toLowerCase();
+            
+            if (idLower.includes('xbox') || idLower.includes('microsoft') || idLower.includes('045e')) {
+                return { type: 'Xbox', icon: '🎮', color: '#107C10' };
+            } else if (idLower.includes('playstation') || idLower.includes('dualshock') || 
+                       idLower.includes('dualsense') || idLower.includes('054c') || idLower.includes('sony')) {
+                return { type: 'PlayStation', icon: '🕹️', color: '#0070F3' };
+            } else if (idLower.includes('switch') || idLower.includes('joy-con') || idLower.includes('057e')) {
+                return { type: 'Nintendo Switch', icon: '🎮', color: '#E60012' };
+            } else {
+                return { type: 'Generic', icon: '🎮', color: '#666666' };
+            }
+        }
+
+        function getButtonName(index, controllerType) {
+            const buttonMaps = {
+                'Xbox': [
+                    'A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 
+                    'View', 'Menu', 'LS', 'RS', 'D-Up', 'D-Down', 'D-Left', 'D-Right', 'Xbox'
+                ],
+                'PlayStation': [
+                    '✕ Cross', '○ Circle', '□ Square', '△ Triangle', 'L1', 'R1', 'L2', 'R2',
+                    'Share', 'Options', 'L3', 'R3', 'D-Up', 'D-Down', 'D-Left', 'D-Right', 'PS', 'TouchPad'
+                ],
+                'Generic': [
+                    'Button 0', 'Button 1', 'Button 2', 'Button 3', 'Button 4', 'Button 5', 
+                    'Button 6', 'Button 7', 'Button 8', 'Button 9', 'Button 10', 'Button 11',
+                    'Button 12', 'Button 13', 'Button 14', 'Button 15', 'Button 16', 'Button 17'
+                ]
+            };
+
+            const map = buttonMaps[controllerType] || buttonMaps['Generic'];
+            return map[index] || `Button ${index}`;
+        }
+
+        function getAxisName(index) {
+            const axisNames = [
+                'Left Stick X', 'Left Stick Y', 'Right Stick X', 'Right Stick Y'
+            ];
+            return axisNames[index] || `Axis ${index}`;
+        }
+
+        function createGamepadElement(gamepad) {
+            const controllerInfo = getControllerType(gamepad.id);
+            
+            const element = document.createElement('div');
+            element.className = 'gamepad-section';
+            element.id = `gamepad-${gamepad.index}`;
+            
+            element.innerHTML = `
+                <div class="gamepad-header">
+                    <div class="gamepad-icon">${controllerInfo.icon}</div>
+                    <div class="gamepad-info">
+                        <h3>${controllerInfo.type} Controller</h3>
+                        <p>${gamepad.id}</p>
+                        <span class="status connected">Connected - Player ${gamepad.index + 1}</span>
+                    </div>
+                </div>
+                
+                <div class="buttons-section">
+                    <h4>Buttons</h4>
+                    <div class="buttons-grid" id="buttons-${gamepad.index}">
+                        ${Array.from({ length: gamepad.buttons.length }, (_, i) => `
+                            <div class="button" id="button-${gamepad.index}-${i}">
+                                <div class="button-name">${getButtonName(i, controllerInfo.type)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="axes-section" id="axes-${gamepad.index}">
+                    ${Array.from({ length: gamepad.axes.length }, (_, i) => `
+                        <div class="axis">
+                            <div class="axis-name">${getAxisName(i)}</div>
+                            <div class="axis-bar">
+                                <div class="axis-fill" id="axis-fill-${gamepad.index}-${i}" style="width: 50%"></div>
+                                <div class="axis-value" id="axis-value-${gamepad.index}-${i}">0.00</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            return element;
+        }
+
+        function updateGamepadDisplay() {
+            const gamepadList = document.getElementById('gamepad-list');
+            const connectedGamepads = navigator.getGamepads();
+            
+            // Clear existing display
+            gamepadList.innerHTML = '';
+            
+            let hasGamepads = false;
+            
+            for (let i = 0; i < connectedGamepads.length; i++) {
+                const gamepad = connectedGamepads[i];
+                if (!gamepad) continue;
+                
+                hasGamepads = true;
+                
+                if (!gamepads[gamepad.index]) {
+                    gamepads[gamepad.index] = {
+                        previousButtons: new Array(gamepad.buttons.length).fill(false)
+                    };
+                }
+                
+                const gamepadElement = createGamepadElement(gamepad);
+                gamepadList.appendChild(gamepadElement);
+                
+                // Update button states
+                for (let j = 0; j < gamepad.buttons.length; j++) {
+                    const button = gamepad.buttons[j];
+                    const buttonElement = document.getElementById(`button-${gamepad.index}-${j}`);
+                    const wasPressed = gamepads[gamepad.index].previousButtons[j];
+                    const isPressed = button.pressed;
+                    
+                    if (buttonElement) {
+                        if (isPressed) {
+                            buttonElement.classList.add('pressed');
+                            
+                            // Count button presses
+                            if (!wasPressed && isPressed) {
+                                const key = `${gamepad.index}-${j}`;
+                                buttonPressCount[key] = (buttonPressCount[key] || 0) + 1;
+                                
+                                if (logEnabled) {
+                                    console.log(`🎮 Button ${getButtonName(j, getControllerType(gamepad.id).type)} pressed (${buttonPressCount[key]} times)`);
+                                }
+                                
+                                // Trigger haptic feedback for special buttons
+                                if (j === 0 || j === 1) { // A/Cross or B/Circle
+                                    vibrateGamepad(gamepad.index, 0.2, 50);
+                                }
+                            }
+                        } else {
+                            buttonElement.classList.remove('pressed');
+                        }
+                    }
+                    
+                    gamepads[gamepad.index].previousButtons[j] = isPressed;
+                }
+                
+                // Update axis states
+                for (let j = 0; j < gamepad.axes.length; j++) {
+                    const axisValue = gamepad.axes[j];
+                    const axisBar = document.getElementById(`axis-fill-${gamepad.index}-${j}`);
+                    const axisValueElement = document.getElementById(`axis-value-${gamepad.index}-${j}`);
+                    
+                    if (axisBar && axisValueElement) {
+                        // Convert axis value (-1 to 1) to percentage (0 to 100)
+                        const percentage = ((axisValue + 1) / 2) * 100;
+                        axisBar.style.width = `${percentage}%`;
+                        axisValueElement.textContent = axisValue.toFixed(2);
+                        
+                        // Color coding for axis values
+                        if (Math.abs(axisValue) > 0.8) {
+                            axisBar.style.background = 'linear-gradient(90deg, #d32f2f, #f44336)';
+                        } else if (Math.abs(axisValue) > 0.5) {
+                            axisBar.style.background = 'linear-gradient(90deg, #ff9800, #ffc107)';
+                        } else {
+                            axisBar.style.background = 'linear-gradient(90deg, #107C10, #00D4FF)';
+                        }
+                    }
+                }
+            }
+            
+            if (!hasGamepads) {
+                gamepadList.innerHTML = `
+                    <div class="gamepad-section waiting">
+                        <div class="gamepad-header">
+                            <div class="gamepad-icon">🎮</div>
+                            <div class="gamepad-info">
+                                <h3>No Controller Connected</h3>
+                                <p>Connect an Xbox or PlayStation controller and press any button</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function vibrateGamepad(index, intensity = 1.0, duration = 100) {
+            const gamepad = navigator.getGamepads()[index];
+            if (!gamepad || !gamepad.vibrationActuator) return;
+
+            try {
+                gamepad.vibrationActuator.playEffect("dual-rumble", {
+                    startDelay: 0,
+                    duration: duration,
+                    weakMagnitude: intensity * 0.5,
+                    strongMagnitude: intensity,
+                });
+                
+                if (logEnabled) {
+                    console.log(`🎮 Vibration triggered: ${intensity} intensity for ${duration}ms`);
+                }
+            } catch (error) {
+                console.warn("🎮 Vibration not supported:", error);
+            }
+        }
+
+        function testVibration() {
+            const connectedGamepads = navigator.getGamepads();
+            let vibrationTriggered = false;
+            
+            for (let i = 0; i < connectedGamepads.length; i++) {
+                const gamepad = connectedGamepads[i];
+                if (gamepad && gamepad.connected) {
+                    vibrateGamepad(i, 0.8, 300);
+                    vibrationTriggered = true;
+                }
+            }
+            
+            if (!vibrationTriggered) {
+                alert('No controllers connected to test vibration!');
+            }
+        }
+
+        function resetCounters() {
+            buttonPressCount = {};
+            console.log('🎮 Button press counters reset');
+        }
+
+        function toggleLog() {
+            logEnabled = !logEnabled;
+            console.log(`🎮 Debug logging ${logEnabled ? 'enabled' : 'disabled'}`);
+        }
+
+        // Event listeners
+        window.addEventListener('gamepadconnected', (event) => {
+            console.log(`🎮 Controller connected: ${event.gamepad.id}`);
+            vibrateGamepad(event.gamepad.index, 0.5, 200);
+        });
+
+        window.addEventListener('gamepaddisconnected', (event) => {
+            console.log(`🎮 Controller disconnected: ${event.gamepad.id}`);
+            delete gamepads[event.gamepad.index];
+        });
+
+        // Start the update loop
+        function gameLoop() {
+            updateGamepadDisplay();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+
+        // Initial message
+        console.log('🎮 Galactic Clans Gamepad Test Ready!');
+        console.log('Connect your Xbox or PlayStation controller and start testing!');
+    </script>
+</body>
+</html> 

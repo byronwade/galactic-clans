@@ -1,0 +1,43 @@
+---
+# Art Style Guide
+
+This document is the visual companion to the `performance-and-visuals.mdc` rule. It provides specific examples and guidelines to ensure a consistent low-poly art style for **Galactic Clans**.
+
+## Core Principles
+
+-   **Simplicity**: Focus on strong, readable silhouettes.
+-   **Flat Shading**: No smooth shading. Emphasize the geometric facets of the models.
+-   **Vibrant, Limited Colors**: Use a consistent color palette to define biomes and factions.
+
+## Color Palette
+
+-   **Primary Colors**: Used for large surfaces like terrain and buildings.
+    -   Faction A (Player): `[#4A90E2]` (Blue), `[#F5A623]` (Gold)
+    -   Faction B (Rival): `[#E03C31]` (Red), `[#4A4A4A]` (Dark Grey)
+    -   AI / Rogue: `[#7ED321]` (Green)
+-   **Accent Colors**: Used for details, lights, and effects.
+
+## Modeling Guidelines
+
+-   **Polygon Budget**:
+    -   Small props & units: < 200 triangles
+    -   Medium buildings: < 500 triangles
+    -   Large centerpiece buildings (Town Hall): < 1000 triangles
+-   **No Detailed Textures**: Rely on vertex colors and small, reusable color palettes/atlases for all model coloration.
+-   **Example - Grunt Unit**:
+    -   *A simple, blocky humanoid figure. The weapon is part of the main mesh to save polygons. Color is applied via vertex painting to denote faction.*
+
+## UI & Iconography
+
+-   **Style**: Flat, minimalist, and vector-based.
+-   **Icons**: Icons should be simple and immediately recognizable. Use a consistent stroke width and style.
+-   **Example - Mineral Icon**:
+    -   *A simple, faceted crystal shape using the primary blue and a lighter accent.*
+
+## Reference Moodboard
+
+*(This section would contain a collage of images that capture the desired feel of the game, including examples of other low-poly games, concept art, and color studies.)*
+description:
+globs:
+alwaysApply: true
+---

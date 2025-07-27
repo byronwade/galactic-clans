@@ -1,0 +1,43 @@
+---
+# Testing Strategy
+
+A robust testing strategy is essential for delivering a high-quality, bug-free game. This document outlines our approach to quality assurance for **Galactic Clans**.
+
+## Levels of Testing
+
+We will employ a multi-layered testing approach:
+
+1.  **Unit Tests**:
+    -   **What**: Automated tests that verify the functionality of individual components or functions in isolation (e.g., a damage calculation formula).
+    -   **Who**: Written by the developer who implements the feature.
+    -   **When**: Run automatically on every code commit.
+
+2.  **Integration Tests**:
+    -   **What**: Automated tests that verify that multiple components work together correctly (e.g., testing the full raid flow from unit deployment to resource collection).
+    -   **Who**: Written by developers, with support from QA.
+    -   **When**: Run nightly on the main development branch.
+
+3.  **Manual QA Testing**:
+    -   **What**: A dedicated QA team will manually test new features, bug fixes, and the overall game experience using a structured test plan.
+    -   **Who**: QA Testers.
+    -   **When**: Performed on a regular schedule (e.g., at the end of each sprint).
+
+4.  **Community Playtesting**:
+    -   **What**: We will periodically invite a small group of community members to playtest upcoming features on a separate test server.
+    -   **Who**: External players.
+    -   **When**: Before major updates. This is crucial for gathering feedback on game balance, fun factor, and usability.
+
+## Bug Reporting & Triage
+
+-   **Bug Database**: All bugs will be tracked in a central database (e.g., Jira, Trello).
+-   **Triage Process**: A weekly meeting will be held with leads from engineering, design, and QA to prioritize bugs based on severity and impact.
+-   **Severity Levels**:
+    -   **Blocker**: Prevents the game from being played (e.g., a crash on startup).
+    -   **Critical**: A major feature is non-functional or causes significant issues.
+    -   **Major**: A feature is not working as intended.
+    -   **Minor**: A cosmetic or low-impact issue.
+    -   **Trivial**: A small typo or visual glitch.
+description:
+globs:
+alwaysApply: true
+---

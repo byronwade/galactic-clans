@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Galactic Clans</title>
+        
+        <!-- Icon Libraries with Robust Fallbacks -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onerror="this.onerror=null; this.href=''">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/game-icons@0.5.0/icons.css" onerror="this.onerror=null; this.href=''">
+        <link rel="stylesheet" href="/src/styles/icon-fallback.css">
+        
+        <link rel="stylesheet" href="/src/styles/output.css" />
+    </head>
+    <body>
+        <div id="game-ui" class="fixed inset-0 pointer-events-none z-[100] flex flex-col">
+            <!-- Universim-style navigation breadcrumb -->
+            <div id="navigation-breadcrumb" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-3 bg-black/60 backdrop-blur-game border border-game-border rounded-full animate-slide-in-top shadow-game">
+                <div class="breadcrumb-item active flex items-center gap-2 px-2 py-1 text-game-primary bg-game-primary/10 rounded-xl cursor-pointer transition-all" data-level="galaxy">
+                    <i class="fas fa-galaxy text-sm text-game-primary"></i> 
+                    <span class="text-sm font-medium">Galaxy</span>
+                </div>
+                <div class="text-game-text-muted text-sm">›</div>
+                <div class="breadcrumb-item flex items-center gap-2 px-2 py-1 text-game-text-muted hover:text-white hover:bg-white/10 rounded-xl cursor-pointer transition-all" data-level="system">
+                    <i class="fas fa-sun text-sm text-game-primary"></i> 
+                    <span class="text-sm font-medium">System</span>
+                </div>
+                <div class="text-game-text-muted text-sm">›</div>
+                <div class="breadcrumb-item flex items-center gap-2 px-2 py-1 text-game-text-muted hover:text-white hover:bg-white/10 rounded-xl cursor-pointer transition-all" data-level="planet">
+                    <i class="fas fa-globe text-sm text-game-primary"></i> 
+                    <span class="text-sm font-medium">Planet</span>
+                </div>
+            </div>
+
+            <!-- Universim-style left detail panel -->
+            <div id="detail-panel" class="detail-panel fixed top-4 left-[-350px] w-80 h-[calc(100vh-2rem)] bg-black/85 border border-game-border-bright rounded-xl backdrop-blur-[20px] z-[120] hidden flex-col shadow-game-strong transition-all duration-400 opacity-0 invisible">
+                <div class="flex items-center justify-between p-4 border-b border-game-border">
+                    <h2 id="detail-title" class="text-lg font-semibold text-game-primary flex items-center gap-2">
+                        <i class="fas fa-chart-bar"></i>
+                        Galaxy Overview
+                    </h2>
+                    <button id="panel-close" class="w-6 h-6 flex items-center justify-center text-game-text-muted hover:text-white transition-colors">×</button>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-4 space-y-6">
+                    <div id="detail-info" class="space-y-6">
+                        <div class="space-y-4">
+                            <h3 class="text-sm font-semibold text-game-text flex items-center gap-2">
+                                <i class="fas fa-chart-line text-game-primary"></i>
+                                Statistics
+                            </h3>
+                            <div id="stats-content" class="grid grid-cols-2 gap-3">
+                                <div class="bg-white/5 rounded-lg p-3 border border-game-border">
+                                    <div class="text-xs text-game-text-muted uppercase tracking-wide">Systems</div>
+                                    <div class="text-xl font-bold text-game-primary" id="stat-systems">100</div>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-3 border border-game-border">
+                                    <div class="text-xs text-game-text-muted uppercase tracking-wide">Planets</div>
+                                    <div class="text-xl font-bold text-game-text" id="stat-planets">--</div>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-3 border border-game-border">
+                                    <div class="text-xs text-game-text-muted uppercase tracking-wide">Population</div>
+                                    <div class="text-xl font-bold text-game-text" id="stat-population">--</div>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-3 border border-game-border">
+                                    <div class="text-xs text-game-text-muted uppercase tracking-wide">Resources</div>
+                                    <div class="text-xl font-bold text-game-text" id="stat-resources">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <h3 class="text-sm font-semibold text-game-text flex items-center gap-2">
+                                <i class="fas fa-rocket text-game-primary"></i>
+                                Actions
+                            </h3>
+                            <div class="space-y-2">
+                                <button id="action-explore" class="action-btn primary w-full bg-game-primary hover:bg-game-primary/80 text-black font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-search"></i>
+                                    Explore
+                                </button>
+                                <button id="action-claim" class="action-btn secondary w-full bg-game-secondary/20 hover:bg-game-secondary/30 text-game-secondary border border-game-secondary/30 font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-flag"></i>
+                                    Claim
+                                </button>
+                                <button id="action-manage" class="action-btn secondary w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-cogs"></i>
+                                    Manage
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="info-section" id="planet-details" style="display: none;">
+                            <h3>🌍 Planet Details</h3>
+                            <div id="planet-info" class="planet-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Type:</span>
+                                    <span class="detail-value" id="planet-type">--</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Radius:</span>
+                                    <span class="detail-value" id="planet-radius">--</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Temperature:</span>
+                                    <span class="detail-value" id="planet-temperature">--</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Atmosphere:</span>
+                                    <span class="detail-value" id="planet-atmosphere">--</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Resources:</span>
+                                    <span class="detail-value" id="planet-resources">--</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Habitability:</span>
+                                    <span class="detail-value" id="planet-habitability">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <h3>📋 Description</h3>
+                            <div id="detail-description" class="description-text">
+                                Select a cosmic object to view detailed information about its properties, resources, and strategic value.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top resource panel -->
+            <div id="resource-panel" class="fixed top-[70px] left-1/2 transform -translate-x-1/2 z-[190] flex gap-4 px-5 py-3 bg-black/80 backdrop-blur-game border border-white/15 rounded-2xl text-white font-game animate-slide-in-top shadow-game"></div>
+            
+            <!-- Old info panel (keep for compatibility) -->
+            <div id="info-panel" class="hidden">
+                <button id="return-button" class="hidden">Return to Galaxy</button>
+                <button id="claim-button" class="hidden">Claim System</button>
+                <div id="info-content">
+                    <div id="info-name"></div>
+                    <div id="info-type"></div>
+                    <div id="info-stats"></div>
+                </div>
+            </div>
+            
+            <!-- Galaxy Overview Panel Toggle -->
+            <button id="panel-toggle" class="panel-toggle fixed top-1/2 left-4 transform -translate-y-1/2 w-10 h-20 bg-black/80 border border-game-border-bright border-l-0 rounded-r-xl backdrop-blur-game z-[125] cursor-pointer flex items-center justify-center transition-all text-game-text-muted hover:bg-game-primary/80 hover:text-black hover:border-game-primary text-lg" title="Toggle Galaxy Overview">
+                <i class="fas fa-chart-bar"></i>
+            </button>
+
+            <!-- Top Controls - Repositioned with better spacing -->
+            <div class="top-controls fixed top-4 right-4 z-[200] flex flex-col items-end gap-3">
+                <!-- Top Row: User Profile and Settings -->
+                <div class="flex items-center gap-2">
+                    <!-- User Profile -->
+                    <div class="user-profile flex items-center gap-2 px-3 py-1.5 bg-black/70 backdrop-blur-game border border-game-border rounded-lg">
+                        <div class="user-avatar w-6 h-6 bg-game-primary text-black font-bold rounded-full flex items-center justify-center text-xs">P1</div>
+                        <span class="user-name text-xs font-medium text-white">Player</span>
+                    </div>
+                    
+                    <!-- Settings Button -->
+                    <button id="settings-btn" class="control-btn settings w-8 h-8 rounded-lg bg-black/80 border border-white/30 text-white font-bold cursor-pointer backdrop-blur-game transition-all flex items-center justify-center hover:bg-game-secondary/80 hover:border-game-secondary hover:text-black transform hover:scale-105" title="Settings">
+                        <i class="fas fa-cog text-xs"></i>
+                    </button>
+                    
+                    <!-- Help Button -->
+                    <button id="help-btn" class="control-btn help w-8 h-8 rounded-lg bg-black/80 border border-white/30 text-white font-bold cursor-pointer backdrop-blur-game transition-all flex items-center justify-center hover:bg-game-accent/80 hover:border-game-accent hover:text-black transform hover:scale-105" title="Controller Help">
+                        <i class="fas fa-gamepad text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Game Speed Controls - Moved to avoid overlap -->
+            <div class="game-speed-controls fixed top-20 right-4 z-[180] flex gap-1 bg-black/60 backdrop-blur-game border border-white/20 rounded-lg p-1">
+                <button class="speed-button px-2 py-1 border border-white/30 rounded bg-white/10 text-white text-xs font-semibold cursor-pointer transition-all hover:bg-white/20 hover:border-white/50" data-speed="0.5">0.5x</button>
+                <button class="speed-button active px-2 py-1 border border-game-primary rounded bg-game-primary/80 text-black text-xs font-semibold cursor-pointer transition-all" data-speed="1">1x</button>
+                <button class="speed-button px-2 py-1 border border-white/30 rounded bg-white/10 text-white text-xs font-semibold cursor-pointer transition-all hover:bg-white/20 hover:border-white/50" data-speed="2">2x</button>
+                <button class="speed-button px-2 py-1 border border-white/30 rounded bg-white/10 text-white text-xs font-semibold cursor-pointer transition-all hover:bg-white/20 hover:border-white/50" data-speed="4">4x</button>
+                <button class="pause-button px-2 py-1 border border-white/30 rounded bg-white/10 text-white text-xs font-semibold cursor-pointer transition-all hover:bg-white/20 hover:border-white/50 flex items-center justify-center">
+                    <i class="fas fa-pause text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Enhanced Help Overlay -->
+            <div id="help-overlay" class="help-overlay fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1000] hidden">
+                <div class="help-content">
+                    <h3>🎮 Controller & Keyboard Guide</h3>
+                    
+                    <div class="help-section">
+                        <h4>🎮 Xbox/PlayStation Controller:</h4>
+                        <p><strong>Left Stick:</strong> Camera movement (forward/back/left/right)</p>
+                        <p><strong>Right Stick:</strong> Camera look/rotation</p>
+                        <p><strong>L2/R2 (LT/RT):</strong> Zoom in/out</p>
+                        <p><strong>D-Pad:</strong> Quick navigation (Galaxy/System/Planet/Research)</p>
+                        <p><strong>Start/Options:</strong> Settings menu</p>
+                        <p><strong>A/X (✕):</strong> Confirm selection</p>
+                        <p><strong>B/○:</strong> Cancel/back</p>
+                        <p><strong>TouchPad (PS5):</strong> Special action</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h4>📷 Camera Controls:</h4>
+                        <p><strong>Mouse Drag:</strong> Orbit around target</p>
+                        <p><strong>Scroll Wheel:</strong> Zoom in/out</p>
+                        <p><strong>Single Click Planet:</strong> Close-up view</p>
+                        <p><strong>Double Click Planet:</strong> Ultra-close inspection</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h4>⌨️ Keyboard Shortcuts:</h4>
+                        <p><strong>0:</strong> Galaxy View</p>
+                        <p><strong>1:</strong> System Overview</p>
+                        <p><strong>2:</strong> Planet Close-up</p>
+                        <p><strong>3:</strong> Surface Inspection</p>
+                        <p><strong>4:</strong> Ultra-Close Detail</p>
+                        <p><strong>F10:</strong> Settings</p>
+                        <p><strong>Escape:</strong> Navigate Back</p>
+                        <p><strong>H:</strong> Toggle Help</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h4>🚀 Game Features:</h4>
+                        <p><strong>Galaxy Overview:</strong> Click 📊 button to open/close</p>
+                        <p><strong>Speed Controls:</strong> 0.5x, 1x, 2x, 4x game speed + pause</p>
+                        <p><strong>Minimap:</strong> Shows galaxy overview (bottom-right)</p>
+                        <p><strong>Resources:</strong> Real-time updates with smooth animations</p>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button id="help-close" class="action-btn primary"><i class="fas fa-check"></i> Got it!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="module" src="/src/main.ts"></script>
+    </body>
+</html> 
