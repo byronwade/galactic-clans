@@ -1,5 +1,5 @@
 {
-  "/test/planet/page": "app/test/planet/page.js",
   "/page": "app/page.js",
-  "/test/page": "app/test/page.js"
+  "/test/page": "app/test/page.js",
+  "/test/planet/page": "app/test/planet/page.js"
 }

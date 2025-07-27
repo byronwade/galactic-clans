@@ -217,8 +217,8 @@ function TerrainSystem({ config }: { config: FPSConfig }) {
 			const vertices = positionAttribute.array as Float32Array;
 
 			for (let i = 0; i < vertices.length; i += 3) {
-				const x = vertices[i] + chunkX * chunkSize;
-				const z = vertices[i + 2] + chunkZ * chunkSize;
+				const x = (vertices[i] ?? 0) + chunkX * chunkSize;
+				const z = (vertices[i + 2] ?? 0) + chunkZ * chunkSize;
 
 				// Multi-octave noise for terrain
 				let height = 0;
@@ -257,8 +257,10 @@ function TerrainSystem({ config }: { config: FPSConfig }) {
 				const chunkKey = `${x},${z}`;
 				if (!terrainChunks.has(chunkKey)) {
 					const chunk = generateTerrainChunk(x, z);
-					terrainRef.current?.add(chunk);
-					setTerrainChunks((prev) => new Map(prev).set(chunkKey, chunk));
+					if (chunk && terrainRef.current) {
+						terrainRef.current.add(chunk);
+						setTerrainChunks((prev) => new Map(prev).set(chunkKey, chunk));
+					}
 				}
 			}
 		}
@@ -299,11 +301,11 @@ function Environment({ config }: { config: FPSConfig }) {
 // Helper function for terrain height calculation
 function getTerrainHeightAt(x: number, z: number): number {
 	// Simplified terrain height calculation
-	const noise = new SimplexNoise();
+	const noise = createNoise2D();
 	let height = 0;
-	height += noise.noise2D(x * 0.01, z * 0.01) * 5;
-	height += noise.noise2D(x * 0.05, z * 0.05) * 2.5;
-	height += noise.noise2D(x * 0.1, z * 0.1) * 1.25;
+	height += noise(x * 0.01, z * 0.01) * 5;
+	height += noise(x * 0.05, z * 0.05) * 2.5;
+	height += noise(x * 0.1, z * 0.1) * 1.25;
 	return height;
 }
 
@@ -408,8 +410,11 @@ export const FPSRenderer3D = forwardRef<FPSRenderer3DRef, FPSRenderer3DProps>(({
 				camera={{ position: [0, 2, 0], fov: config.player.fov }}
 				gl={{
 					antialias: true,
-					shadowMap: { enabled: true, type: THREE.PCFSoftShadowMap },
 					outputColorSpace: THREE.SRGBColorSpace,
+				}}
+				onCreated={({ gl }) => {
+					gl.shadowMap.enabled = true;
+					gl.shadowMap.type = THREE.PCFSoftShadowMap;
 				}}
 			>
 				<FPSScene config={config} inputManager={inputManager} onPerformanceUpdate={onPerformanceUpdate} />

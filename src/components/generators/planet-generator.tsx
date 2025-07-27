@@ -18,6 +18,7 @@ import { PlanetControls } from "./planet-controls";
 import { PlanetSettings } from "./planet-settings";
 import { PlanetInfo } from "./planet-info";
 import { PlanetStats } from "./planet-stats";
+import { ComponentErrorBoundary } from "@/components/ErrorBoundary";
 
 // Simple planet configuration
 interface SimplePlanetConfig {
@@ -99,7 +100,9 @@ export default function PlanetGenerator() {
 			)}
 
 			{/* 3D Canvas - Full Screen */}
-			<PlanetRenderer3D config={config} isLoading={isLoading} onLoadingChange={setIsLoading} />
+			<ComponentErrorBoundary name="Planet Renderer">
+				<PlanetRenderer3D config={config} isLoading={isLoading} onLoadingChange={setIsLoading} />
+			</ComponentErrorBoundary>
 
 			{/* Settings Panel */}
 			{showSettings && <PlanetSettings config={config} onConfigChange={setConfig} onClose={() => setShowSettings(false)} />}
