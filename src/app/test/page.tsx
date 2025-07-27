@@ -84,6 +84,17 @@ const testPages: TestCard[] = [
 		lastUpdated: "2025-01-09",
 	},
 	{
+		title: "Settings System Test",
+		description: "Comprehensive game settings management with AAA-grade configuration system and real-time preview.",
+		features: ["7 Settings Categories", "Real-time Preview", "Export/Import", "Performance Tuning", "Accessibility Options"],
+		status: "Ready",
+		href: "/test/settings",
+		icon: <Settings className="w-6 h-6" />,
+		category: "UI Systems",
+		techStack: ["React", "Local Storage", "Performance API"],
+		lastUpdated: "2025-01-27",
+	},
+	{
 		title: "Star Generator",
 		description: "Advanced stellar object generation with realistic physics, stellar evolution, and visual effects.",
 		features: ["Stellar Physics", "Realistic Effects", "Multiple Types", "Advanced Shaders"],
@@ -104,6 +115,17 @@ const testPages: TestCard[] = [
 		category: "Procedural Generation",
 		techStack: ["Three.js", "Physics", "Relativity"],
 		lastUpdated: "2025-01-10",
+	},
+	{
+		title: "FPS Explorer",
+		description: "AAA-quality first-person planetary exploration with physics-based movement and immersive controls.",
+		features: ["FPS Controls", "Physics Movement", "Procedural Terrain", "3D Audio", "Call of Duty Style"],
+		status: "Ready",
+		href: "/test/fps-explorer",
+		icon: <Target className="w-6 h-6" />,
+		category: "Game Systems",
+		techStack: ["Three.js", "Physics", "FPS Controls", "Spatial Audio"],
+		lastUpdated: "2025-01-27",
 	},
 
 	{
