@@ -13,21 +13,56 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { BlackHoleConfig } from "./blackhole-generator";
 
-// Dynamic import to prevent SSR issues
-const BlackHoleRenderer = dynamic(() => import("@/components/BlackHoleRenderer"), {
-	ssr: false,
-	loading: () => (
-		<div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-purple-950 to-black flex items-center justify-center z-50">
-			<div className="text-center space-y-4">
-				<div className="w-16 h-16 border-4 border-purple-400/30 border-t-purple-400 rounded-full animate-spin mx-auto" />
-				<div className="space-y-2">
-					<h2 className="text-xl font-semibold text-white">Initializing Black Hole Generator</h2>
-					<p className="text-sm text-slate-300">Loading spacetime curvature and relativistic physics...</p>
-				</div>
-			</div>
-		</div>
-	),
-});
+// Black Hole 3D Scene Component
+function BlackHoleScene({ config }: { config: BlackHoleConfig }) {
+	return (
+		<>
+			{/* Lighting */}
+			<ambientLight intensity={0.1} />
+			<pointLight position={[10, 10, 10]} intensity={0.5} />
+			
+			{/* Black Hole Sphere (Event Horizon) */}
+			<mesh position={[0, 0, 0]}>
+				<sphereGeometry args={[2, 32, 32]} />
+				<meshBasicMaterial color="#000000" />
+			</mesh>
+			
+			{/* Accretion Disk */}
+			<mesh rotation={[Math.PI / 2, 0, 0]}>
+				<ringGeometry args={[3, 8, 64]} />
+				<meshLambertMaterial 
+					color="#ff6600" 
+					transparent 
+					opacity={0.7}
+					emissive="#ff3300"
+					emissiveIntensity={0.3}
+				/>
+			</mesh>
+			
+			{/* Relativistic Jets */}
+			<mesh position={[0, 15, 0]}>
+				<cylinderGeometry args={[0.2, 0.5, 20, 16]} />
+				<meshLambertMaterial 
+					color="#00ffff" 
+					transparent 
+					opacity={0.8}
+					emissive="#0088ff"
+					emissiveIntensity={0.5}
+				/>
+			</mesh>
+			<mesh position={[0, -15, 0]}>
+				<cylinderGeometry args={[0.2, 0.5, 20, 16]} />
+				<meshLambertMaterial 
+					color="#00ffff" 
+					transparent 
+					opacity={0.8}
+					emissive="#0088ff"
+					emissiveIntensity={0.5}
+				/>
+			</mesh>
+		</>
+	);
+}
 
 interface BlackHoleRenderer3DProps {
 	config: BlackHoleConfig;
@@ -38,12 +73,15 @@ interface BlackHoleRenderer3DProps {
 
 export function BlackHoleRenderer3D({ config, onGenerate, onClear, isGenerating }: BlackHoleRenderer3DProps) {
 	return (
-		<div className="absolute inset-0">
-			<BlackHoleRenderer 
-				config={config} 
-				onGenerate={onGenerate} 
-				onClear={onClear}
-			/>
+		<div className="absolute inset-0 pt-16 w-full h-full">
+			<div className="w-full h-full relative">
+				<Canvas camera={{ position: [0, 0, 20], fov: 75 }} style={{ width: "100%", height: "100%" }}>
+					<Suspense fallback={null}>
+						<BlackHoleScene config={config} />
+						<OrbitControls enablePan={true} enableZoom={true} enableRotate={true} minDistance={5} maxDistance={50} />
+					</Suspense>
+				</Canvas>
+			</div>
 		</div>
 	);
 } 

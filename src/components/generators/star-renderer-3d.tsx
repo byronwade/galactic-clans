@@ -34,29 +34,65 @@ interface StarRenderer3DProps {
 	onGenerate: () => void;
 }
 
-// Dynamic import of the StarRenderer to prevent SSR issues
-const StarRendererComponent = dynamic(() => import("@/components/StarRenderer"), {
-	ssr: false,
-	loading: () => (
-		<div className="absolute inset-0 flex items-center justify-center">
-			<div className="text-center space-y-4">
-				<div className="w-16 h-16 border-4 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin mx-auto" />
-				<div className="space-y-2">
-					<h2 className="text-xl font-semibold text-white">Loading Star Renderer</h2>
-					<p className="text-sm text-slate-300">Initializing stellar visualization...</p>
-				</div>
-			</div>
-		</div>
-	),
-});
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Stars } from "@react-three/drei";
+import { Suspense } from "react";
+
+// Star Scene Component
+function StarScene({ config }: { config: StarConfig }) {
+	const getStarColor = () => {
+		if (config.temperature > 30000) return "#9bb0ff"; // O-type
+		if (config.temperature > 10000) return "#aabfff"; // B-type
+		if (config.temperature > 7500) return "#cad7ff"; // A-type
+		if (config.temperature > 6000) return "#f8f7ff"; // F-type
+		if (config.temperature > 5200) return "#fff4ea"; // G-type
+		if (config.temperature > 3700) return "#ffd2a1"; // K-type
+		return "#ffad51"; // M-type
+	};
+
+	return (
+		<>
+			{/* Lighting */}
+			<ambientLight intensity={0.3} />
+
+			{/* Main Star */}
+			<mesh position={[0, 0, 0]}>
+				<sphereGeometry args={[config.radius, 32, 32]} />
+				<meshLambertMaterial color={getStarColor()} emissive={getStarColor()} emissiveIntensity={0.6} />
+			</mesh>
+
+			{/* Companion Star (if binary) */}
+			{config.hasCompanion && (
+				<mesh position={[config.companionDistance, 0, 0]}>
+					<sphereGeometry args={[config.radius * 0.7, 32, 32]} />
+					<meshLambertMaterial color="#ff8c00" emissive="#ff6600" emissiveIntensity={0.5} />
+				</mesh>
+			)}
+
+			{/* Habitable Zone Ring */}
+			<mesh rotation={[Math.PI / 2, 0, 0]}>
+				<ringGeometry args={[config.radius * 3, config.radius * 5, 64]} />
+				<meshBasicMaterial color="#00ff88" transparent opacity={0.2} side={2} />
+			</mesh>
+
+			{/* Background stars */}
+			<Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade={true} />
+		</>
+	);
+}
 
 export function StarRenderer3D({ config, isGenerating, onLoadingChange, onGenerate }: StarRenderer3DProps) {
 	const mountRef = useRef<HTMLDivElement>(null);
 
 	return (
-		<div className="absolute inset-0 pt-16">
-			<div ref={mountRef} className="w-full h-full" style={{ position: "relative" }}>
-				<StarRendererComponent config={config} />
+		<div className="absolute inset-0 pt-16 w-full h-full">
+			<div ref={mountRef} className="w-full h-full relative">
+				<Canvas camera={{ position: [0, 0, 20], fov: 75 }} style={{ width: "100%", height: "100%" }}>
+					<Suspense fallback={null}>
+						<StarScene config={config} />
+						<OrbitControls enablePan={true} enableZoom={true} enableRotate={true} minDistance={5} maxDistance={50} />
+					</Suspense>
+				</Canvas>
 			</div>
 		</div>
 	);
