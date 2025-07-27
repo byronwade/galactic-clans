@@ -43,8 +43,7 @@ export function SolarSystemStats({ config, currentSystemType }: SolarSystemStats
 	};
 
 	return (
-		<div className="absolute bottom-4 right-4 w-72 bg-slate-900/95 backdrop-blur-xl border border-orange-400/30 
-						rounded-lg shadow-2xl z-20">
+		<div className="absolute bottom-4 right-4 w-72 bg-slate-900/95 backdrop-blur-xl border border-orange-400/30 rounded-lg shadow-2xl z-20">
 			<div className="p-4">
 				{/* Header */}
 				<div className="flex items-center space-x-2 mb-3">
@@ -128,31 +127,11 @@ export function SolarSystemStats({ config, currentSystemType }: SolarSystemStats
 					<div className="pt-2 border-t border-slate-700/50">
 						<div className="text-xs text-slate-400 mb-2">System Features</div>
 						<div className="flex flex-wrap gap-1">
-							{config.hasGasGiants && (
-								<div className="px-2 py-1 bg-blue-500/20 border border-blue-400/30 rounded text-xs text-blue-300">
-									Gas Giants
-								</div>
-							)}
-							{config.hasTerrestrialPlanets && (
-								<div className="px-2 py-1 bg-green-500/20 border border-green-400/30 rounded text-xs text-green-300">
-									Terrestrial
-								</div>
-							)}
-							{config.asteroidBelt && (
-								<div className="px-2 py-1 bg-gray-500/20 border border-gray-400/30 rounded text-xs text-gray-300">
-									Asteroids
-								</div>
-							)}
-							{config.hasRoguePlanets && (
-								<div className="px-2 py-1 bg-purple-500/20 border border-purple-400/30 rounded text-xs text-purple-300">
-									Rogues
-								</div>
-							)}
-							{config.cometCount > 50 && (
-								<div className="px-2 py-1 bg-cyan-500/20 border border-cyan-400/30 rounded text-xs text-cyan-300">
-									Rich Comets
-								</div>
-							)}
+							{config.hasGasGiants && <div className="px-2 py-1 bg-blue-500/20 border border-blue-400/30 rounded text-xs text-blue-300">Gas Giants</div>}
+							{config.hasTerrestrialPlanets && <div className="px-2 py-1 bg-green-500/20 border border-green-400/30 rounded text-xs text-green-300">Terrestrial</div>}
+							{config.asteroidBelt && <div className="px-2 py-1 bg-gray-500/20 border border-gray-400/30 rounded text-xs text-gray-300">Asteroids</div>}
+							{config.hasRoguePlanets && <div className="px-2 py-1 bg-purple-500/20 border border-purple-400/30 rounded text-xs text-purple-300">Rogues</div>}
+							{config.cometCount > 50 && <div className="px-2 py-1 bg-cyan-500/20 border border-cyan-400/30 rounded text-xs text-cyan-300">Rich Comets</div>}
 						</div>
 					</div>
 
@@ -162,28 +141,15 @@ export function SolarSystemStats({ config, currentSystemType }: SolarSystemStats
 						<div className="space-y-1">
 							<div className="flex justify-between text-xs">
 								<span className="text-slate-400">Zone Position</span>
-								<span className={`font-mono ${
-									config.habitableZone.inner < 1.5 && config.habitableZone.outer > 0.8 
-										? "text-green-400" : "text-yellow-400"
-								}`}>
-									{config.habitableZone.inner < 1.5 && config.habitableZone.outer > 0.8 ? "Optimal" : "Marginal"}
-								</span>
+								<span className={`font-mono ${config.habitableZone.inner < 1.5 && config.habitableZone.outer > 0.8 ? "text-green-400" : "text-yellow-400"}`}>{config.habitableZone.inner < 1.5 && config.habitableZone.outer > 0.8 ? "Optimal" : "Marginal"}</span>
 							</div>
 							<div className="flex justify-between text-xs">
 								<span className="text-slate-400">Star Stability</span>
-								<span className={`font-mono ${
-									config.starMass < 1.5 ? "text-green-400" : "text-red-400"
-								}`}>
-									{config.starMass < 1.5 ? "Stable" : "Variable"}
-								</span>
+								<span className={`font-mono ${config.starMass < 1.5 ? "text-green-400" : "text-red-400"}`}>{config.starMass < 1.5 ? "Stable" : "Variable"}</span>
 							</div>
 							<div className="flex justify-between text-xs">
 								<span className="text-slate-400">System Age</span>
-								<span className={`font-mono ${
-									config.systemAge > 1.0 && config.systemAge < 10.0 ? "text-green-400" : "text-yellow-400"
-								}`}>
-									{config.systemAge > 1.0 && config.systemAge < 10.0 ? "Mature" : config.systemAge <= 1.0 ? "Young" : "Ancient"}
-								</span>
+								<span className={`font-mono ${config.systemAge > 1.0 && config.systemAge < 10.0 ? "text-green-400" : "text-yellow-400"}`}>{config.systemAge > 1.0 && config.systemAge < 10.0 ? "Mature" : config.systemAge <= 1.0 ? "Young" : "Ancient"}</span>
 							</div>
 						</div>
 					</div>

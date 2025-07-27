@@ -64,8 +64,7 @@ export function SolarSystemInfo({ systemType, config, onClose }: SolarSystemInfo
 	const characteristics = getSystemCharacteristics(systemType);
 
 	return (
-		<div className="absolute top-32 right-4 w-96 bg-slate-900/95 backdrop-blur-xl border border-orange-400/30 
-						rounded-lg shadow-2xl z-30 max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
+		<div className="absolute top-32 right-4 w-96 bg-slate-900/95 backdrop-blur-xl border border-orange-400/30 rounded-lg shadow-2xl z-30 max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
 			<div className="p-4">
 				{/* Header */}
 				<div className="flex items-center justify-between mb-4">
@@ -73,10 +72,7 @@ export function SolarSystemInfo({ systemType, config, onClose }: SolarSystemInfo
 						<Info className="w-5 h-5 text-orange-400" />
 						<span>System Information</span>
 					</h3>
-					<button
-						onClick={onClose}
-						className="text-slate-400 hover:text-white transition-colors duration-200"
-					>
+					<button onClick={onClose} className="text-slate-400 hover:text-white transition-colors duration-200">
 						<X className="w-5 h-5" />
 					</button>
 				</div>
