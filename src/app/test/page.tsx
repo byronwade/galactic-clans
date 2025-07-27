@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Gamepad2, Globe, Telescope, Atom, Zap, Activity, Code2, Settings, ChevronRight, Sparkles, Sun, Moon, Star, Target, CheckCircle2, Clock, Wrench, Beaker, ExternalLink, Play, Pause, BarChart3, Cpu, Layers3, Palette, Share2, Download, Headphones } from "lucide-react";
+import { useGamepadController } from "@/hooks/useGamepadController";
 
 interface TestCard {
 	title: string;
@@ -178,14 +179,79 @@ const statusConfig = {
 export default function TestSuitePage() {
 	const [analytics, setAnalytics] = useState<Record<string, number>>({});
 	const [selectedCategory, setSelectedCategory] = useState<string>("All");
+	const [selectedTestIndex, setSelectedTestIndex] = useState<number>(0);
+	const [showControllerHelp, setShowControllerHelp] = useState<boolean>(false);
 
 	const categories = ["All", ...new Set(testPages.map((test) => test.category))];
 	const filteredTests = selectedCategory === "All" ? testPages : testPages.filter((test) => test.category === selectedCategory);
 
+	// Controller support
+	const { isConnected, controllerType, triggerHapticFeedback } = useGamepadController({
+		actions: {
+			onNavigateUp: () => {
+				setSelectedTestIndex((prev) => {
+					const newIndex = Math.max(0, prev - 1);
+					if (newIndex !== prev) triggerHapticFeedback(0.2, 50);
+					return newIndex;
+				});
+			},
+			onNavigateDown: () => {
+				setSelectedTestIndex((prev) => {
+					const newIndex = Math.min(filteredTests.length - 1, prev + 1);
+					if (newIndex !== prev) triggerHapticFeedback(0.2, 50);
+					return newIndex;
+				});
+			},
+			onNavigateLeft: () => {
+				const currentCategoryIndex = categories.indexOf(selectedCategory);
+				const newIndex = Math.max(0, currentCategoryIndex - 1);
+				const newCategory = categories[newIndex];
+				if (newCategory) {
+					setSelectedCategory(newCategory);
+					setSelectedTestIndex(0);
+					triggerHapticFeedback(0.3, 75);
+				}
+			},
+			onNavigateRight: () => {
+				const currentCategoryIndex = categories.indexOf(selectedCategory);
+				const newIndex = Math.min(categories.length - 1, currentCategoryIndex + 1);
+				const newCategory = categories[newIndex];
+				if (newCategory) {
+					setSelectedCategory(newCategory);
+					setSelectedTestIndex(0);
+					triggerHapticFeedback(0.3, 75);
+				}
+			},
+			onPrimaryAction: () => {
+				const selectedTest = filteredTests[selectedTestIndex];
+				if (selectedTest && selectedTest.href !== "#") {
+					triggerHapticFeedback(0.5, 100);
+					handleTestLaunch(selectedTest.title, selectedTest.href);
+					window.location.href = selectedTest.href;
+				}
+			},
+			onSecondaryAction: () => {
+				triggerHapticFeedback(0.3, 75);
+				window.history.back();
+			},
+			onMenuToggle: () => {
+				setShowControllerHelp((prev) => !prev);
+				triggerHapticFeedback(0.4, 100);
+			},
+		},
+	});
+
 	useEffect(() => {
 		console.log("🧪 [TEST SUITE] Galactic Clans Test Suite Initialized");
 		console.log("📊 [ANALYTICS] Tracking test page launches");
-	}, []);
+
+		// Show controller help for a few seconds when controller connects
+		if (isConnected) {
+			setShowControllerHelp(true);
+			const timer = setTimeout(() => setShowControllerHelp(false), 3000);
+			return () => clearTimeout(timer);
+		}
+	}, [isConnected]);
 
 	const handleTestLaunch = (testName: string, href: string) => {
 		if (href === "#") {
@@ -206,6 +272,35 @@ export default function TestSuitePage() {
 
 	return (
 		<div className="min-h-screen bg-black text-white">
+			{/* Controller Help Overlay */}
+			{showControllerHelp && isConnected && (
+				<div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+					<div className="bg-slate-900/95 border border-blue-500/30 rounded-xl p-8 max-w-md text-center space-y-4">
+						<div className="flex items-center justify-center space-x-2 text-blue-400">
+							<Gamepad2 className="w-8 h-8" />
+							<h2 className="text-xl font-bold">{controllerType} Controller</h2>
+						</div>
+						<div className="space-y-2 text-sm text-slate-300">
+							<p>
+								<strong>D-Pad/Left Stick:</strong> Navigate tests and categories
+							</p>
+							<p>
+								<strong>A/X Button:</strong> Launch selected test
+							</p>
+							<p>
+								<strong>B/Circle:</strong> Go back
+							</p>
+							<p>
+								<strong>Start/Options:</strong> Toggle this help
+							</p>
+						</div>
+						<button onClick={() => setShowControllerHelp(false)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+							Got it!
+						</button>
+					</div>
+				</div>
+			)}
+
 			{/* Modern Header */}
 			<header className="absolute top-0 left-0 right-0 z-20 bg-slate-900/10 backdrop-blur-sm border-b border-slate-700/20">
 				<div className="container mx-auto px-4 py-2">
@@ -225,7 +320,13 @@ export default function TestSuitePage() {
 								</div>
 							</div>
 						</div>
-						<div className="flex items-center space-x-1">
+						<div className="flex items-center space-x-2">
+							{isConnected && (
+								<div className="flex items-center space-x-2 px-2 py-1 bg-green-500/20 border border-green-400/30 rounded-md">
+									<Gamepad2 className="w-3 h-3 text-green-400" />
+									<span className="text-xs text-green-300">{controllerType}</span>
+								</div>
+							)}
 							<button className="p-1.5 rounded-md bg-slate-800/30 hover:bg-slate-800/50 text-slate-300 hover:text-white transition-colors">
 								<Share2 className="w-3 h-3" />
 							</button>
@@ -258,8 +359,15 @@ export default function TestSuitePage() {
 				{/* Category Filter */}
 				<div className="flex items-center space-x-2 mb-8 overflow-x-auto pb-2">
 					<p className="text-sm font-medium text-gray-400 whitespace-nowrap">Filter by category:</p>
-					{categories.map((category) => (
-						<button key={category} onClick={() => setSelectedCategory(category)} className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === category ? "bg-blue-600 text-white shadow-sm" : "bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white"}`}>
+					{categories.map((category, index) => (
+						<button
+							key={category}
+							onClick={() => {
+								setSelectedCategory(category);
+								setSelectedTestIndex(0);
+							}}
+							className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === category ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-400/50" : "bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white"}`}
+						>
 							{category}
 						</button>
 					))}
@@ -267,8 +375,8 @@ export default function TestSuitePage() {
 
 				{/* Test Cards Grid */}
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{filteredTests.map((test) => (
-						<TestCard key={test.title} test={test} onLaunch={handleTestLaunch} />
+					{filteredTests.map((test, index) => (
+						<TestCard key={test.title} test={test} onLaunch={handleTestLaunch} isSelected={isConnected && index === selectedTestIndex} />
 					))}
 				</div>
 
@@ -296,7 +404,7 @@ export default function TestSuitePage() {
 	);
 }
 
-function TestCard({ test, onLaunch }: { test: TestCard; onLaunch: (name: string, href: string) => void }) {
+function TestCard({ test, onLaunch, isSelected = false }: { test: TestCard; onLaunch: (name: string, href: string) => void; isSelected?: boolean }) {
 	const isAvailable = test.status === "Ready";
 	const statusConfig = {
 		Ready: {
@@ -322,7 +430,7 @@ function TestCard({ test, onLaunch }: { test: TestCard; onLaunch: (name: string,
 	};
 
 	return (
-		<div className="group relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/5 hover:border-blue-500/20">
+		<div className={`group relative overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/5 ${isSelected ? "border-blue-500/50 bg-blue-500/10 ring-2 ring-blue-400/30 shadow-lg shadow-blue-500/20" : "border-gray-800 bg-gray-900/50 hover:border-blue-500/20"} backdrop-blur-sm`}>
 			{/* Card Header */}
 			<div className="p-6 space-y-4">
 				<div className="flex items-start justify-between">
