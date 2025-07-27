@@ -1,7 +1,7 @@
 /**
  * @file fps-renderer-3d.tsx
  * @description AAA-Quality First-Person Planetary Exploration Renderer
- * @version 2.0.0
+ * @version 2.1.0
  * @author Galactic Clans Development Team
  *
  * Features:
@@ -11,6 +11,7 @@
  * - Physics-based player controller
  * - Procedural vegetation and detail objects
  * - Performance optimization with LOD and culling
+ * - Professional HUD system with real-time data
  */
 
 "use client";
@@ -21,19 +22,33 @@ import { Sky, PointerLockControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
 import type { FPSConfig, FPSPerformanceMetrics } from "./fps-explorer-generator";
+import { FPSHUDSystem } from "./fps-hud-system";
 
 // Terrain height function for collision detection
 const noise2D = createNoise2D();
 function getTerrainHeightAt(x: number, z: number): number {
 	let height = 0;
 	height += noise2D(x * 0.005, z * 0.005) * 20; // Large hills
-	height += noise2D(x * 0.02, z * 0.02) * 8;    // Medium features
-	height += noise2D(x * 0.1, z * 0.1) * 2;      // Small details
+	height += noise2D(x * 0.02, z * 0.02) * 8; // Medium features
+	height += noise2D(x * 0.1, z * 0.1) * 2; // Small details
 	return Math.max(0, height);
 }
 
-// Professional FPS Player Controller
-function FPSPlayer({ config, inputManager, onCameraUpdate }: { config: FPSConfig; inputManager: any; onCameraUpdate: (position: THREE.Vector3, rotation: THREE.Euler) => void }) {
+// Get biome based on position and height
+function getBiomeAt(x: number, z: number, height: number): string {
+	const moisture = (noise2D(x * 0.001, z * 0.001) + 1) * 0.5;
+	const temperature = Math.max(0, 1 - height / 30); // Colder at higher altitudes
+
+	if (height < 2) return "Beach";
+	if (height > 25) return "Mountain";
+	if (moisture < 0.3) return "Desert";
+	if (moisture > 0.7 && temperature > 0.6) return "Rainforest";
+	if (temperature < 0.3) return "Tundra";
+	return "Grassland";
+}
+
+// Enhanced Player Controller with environmental tracking
+function FPSPlayer({ config, inputManager, onCameraUpdate, onPlayerDataUpdate }: { config: FPSConfig; inputManager: any; onCameraUpdate: (position: THREE.Vector3, rotation: THREE.Euler) => void; onPlayerDataUpdate: (data: any) => void }) {
 	const { camera, gl } = useThree();
 	const playerRef = useRef<THREE.Group>(null);
 	const velocityRef = useRef(new THREE.Vector3());
@@ -43,13 +58,24 @@ function FPSPlayer({ config, inputManager, onCameraUpdate }: { config: FPSConfig
 	// Head bobbing
 	const bobRef = useRef({ time: 0, intensity: 0 });
 
-	// Player state
+	// Enhanced player state with survival mechanics
 	const [playerState, setPlayerState] = useState({
 		position: new THREE.Vector3(0, 50, 0),
 		health: 100,
+		maxHealth: 100,
 		stamina: 100,
+		maxStamina: 100,
+		oxygen: 100,
+		maxOxygen: 100,
+		temperature: 20,
 		isRunning: false,
 		isCrouching: false,
+		isAiming: false,
+		currentBiome: "Grassland",
+		elevation: 0,
+		windSpeed: 0,
+		humidity: 50,
+		visibility: 1.0,
 	});
 
 	// Initialize camera position
@@ -60,8 +86,9 @@ function FPSPlayer({ config, inputManager, onCameraUpdate }: { config: FPSConfig
 
 			// Find safe spawn position
 			const spawnHeight = getTerrainHeightAt(0, 0) + 2;
-			playerState.position.y = spawnHeight;
-			camera.position.copy(playerState.position);
+			const newPos = new THREE.Vector3(0, spawnHeight, 0);
+			setPlayerState((prev) => ({ ...prev, position: newPos, elevation: spawnHeight }));
+			camera.position.copy(newPos);
 		}
 	}, [camera, config.player.fov]);
 
@@ -93,6 +120,53 @@ function FPSPlayer({ config, inputManager, onCameraUpdate }: { config: FPSConfig
 			document.removeEventListener("mousemove", handleMouseMove);
 		};
 	}, [gl.domElement, config.player.mouseSensitivity, inputManager]);
+
+	// Environmental effects update
+	const updateEnvironmentalEffects = useCallback((position: THREE.Vector3, delta: number) => {
+		const height = getTerrainHeightAt(position.x, position.z);
+		const biome = getBiomeAt(position.x, position.z, height);
+
+		// Temperature calculation based on biome and elevation
+		let baseTemp = 20;
+		switch (biome) {
+			case "Desert":
+				baseTemp = 45;
+				break;
+			case "Tundra":
+				baseTemp = -15;
+				break;
+			case "Mountain":
+				baseTemp = 5;
+				break;
+			case "Rainforest":
+				baseTemp = 28;
+				break;
+			case "Beach":
+				baseTemp = 25;
+				break;
+			default:
+				baseTemp = 20;
+		}
+
+		// Altitude effect on temperature (roughly -6.5°C per 1000m)
+		const altitudeEffect = -6.5 * (height / 1000);
+		const temperature = baseTemp + altitudeEffect;
+
+		// Environmental data
+		const windSpeed = Math.abs(noise2D(position.x * 0.001, position.z * 0.001)) * 10;
+		const humidity = biome === "Desert" ? 20 : biome === "Rainforest" ? 85 : 50;
+		const visibility = 1.0; // Could be affected by weather
+
+		setPlayerState((prev) => ({
+			...prev,
+			currentBiome: biome,
+			elevation: height,
+			temperature,
+			windSpeed,
+			humidity,
+			visibility,
+		}));
+	}, []);
 
 	// Main game loop
 	useFrame((state, delta) => {
@@ -127,14 +201,14 @@ function FPSPlayer({ config, inputManager, onCameraUpdate }: { config: FPSConfig
 		if (inputState.left) moveDirection.sub(right);
 		if (inputState.right) moveDirection.add(right);
 
-		// Speed calculation
+		// Speed calculation with stamina system
 		let speed = config.player.walkSpeed || 5;
 		let isMoving = moveDirection.length() > 0;
 
 		if (isMoving) {
 			moveDirection.normalize();
 
-			// Running
+			// Running (consumes stamina)
 			if (inputState.run && playerState.stamina > 0 && !inputState.crouch) {
 				speed = config.player.runSpeed || 10;
 				setPlayerState((prev) => ({
@@ -143,9 +217,10 @@ function FPSPlayer({ config, inputManager, onCameraUpdate }: { config: FPSConfig
 					isRunning: true,
 				}));
 			} else {
+				// Stamina regeneration
 				setPlayerState((prev) => ({
 					...prev,
-					stamina: Math.min(100, prev.stamina + delta * 15),
+					stamina: Math.min(prev.maxStamina, prev.stamina + delta * 15),
 					isRunning: false,
 				}));
 			}
@@ -166,6 +241,9 @@ function FPSPlayer({ config, inputManager, onCameraUpdate }: { config: FPSConfig
 			velocity.x *= 0.8;
 			velocity.z *= 0.8;
 		}
+
+		// Aiming state
+		setPlayerState((prev) => ({ ...prev, isAiming: inputState.aim }));
 
 		// Jumping
 		if (inputState.jump && isGroundedRef.current) {
@@ -212,9 +290,15 @@ function FPSPlayer({ config, inputManager, onCameraUpdate }: { config: FPSConfig
 		camera.position.y += eyeHeight + bobY;
 		camera.position.x += bobX;
 
-		// Update state
+		// Update environmental effects
+		updateEnvironmentalEffects(newPosition, delta);
+
+		// Update player state position
 		setPlayerState((prev) => ({ ...prev, position: newPosition.clone() }));
+
+		// Notify parent components
 		onCameraUpdate(camera.position, camera.rotation);
+		onPlayerDataUpdate(playerState);
 	});
 
 	return (
@@ -254,24 +338,47 @@ function TerrainSystem({ config }: { config: FPSConfig }) {
 			const height = getTerrainHeightAt(x, z);
 			positions[i + 1] = height;
 
-			// Generate colors based on height and slope
-			const normalizedHeight = height / 30;
-			if (normalizedHeight < 0.2) {
-				// Sand/beach
-				colors[i] = 0.9; // R
-				colors[i + 1] = 0.8; // G
-				colors[i + 2] = 0.6; // B
-			} else if (normalizedHeight < 0.7) {
-				// Grass
-				colors[i] = 0.2 + normalizedHeight * 0.3;
-				colors[i + 1] = 0.6 + normalizedHeight * 0.2;
-				colors[i + 2] = 0.1;
-			} else {
-				// Rock/mountain
-				colors[i] = 0.4;
-				colors[i + 1] = 0.4;
-				colors[i + 2] = 0.4;
+			// Generate colors based on height and biome
+			const biome = getBiomeAt(x, z, height);
+			let r = 0.2,
+				g = 0.6,
+				b = 0.1; // Default grass
+
+			switch (biome) {
+				case "Beach":
+					r = 0.9;
+					g = 0.8;
+					b = 0.6; // Sand
+					break;
+				case "Desert":
+					r = 0.8;
+					g = 0.7;
+					b = 0.4; // Desert sand
+					break;
+				case "Mountain":
+					r = 0.4;
+					g = 0.4;
+					b = 0.4; // Rock
+					break;
+				case "Rainforest":
+					r = 0.1;
+					g = 0.5;
+					b = 0.1; // Dark green
+					break;
+				case "Tundra":
+					r = 0.8;
+					g = 0.8;
+					b = 0.9; // Snow/ice
+					break;
+				default: // Grassland
+					r = 0.2 + height / 100;
+					g = 0.6 + height / 150;
+					b = 0.1;
 			}
+
+			colors[i] = r;
+			colors[i + 1] = g;
+			colors[i + 2] = b;
 		}
 
 		geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
@@ -412,15 +519,36 @@ function VegetationSystem() {
 				const treeKey = `${x},${z}`;
 
 				if (!trees.has(treeKey)) {
-					// Random chance for tree placement
-					if (Math.random() < 0.3) {
-						const height = getTerrainHeightAt(x, z);
-						// Only place trees on suitable terrain
-						if (height > 2 && height < 15) {
-							const tree = createTree(x + (Math.random() - 0.5) * 4, z + (Math.random() - 0.5) * 4);
-							trees.set(treeKey, tree);
-							vegetationRef.current.add(tree);
-						}
+					// Random chance for tree placement based on biome
+					const height = getTerrainHeightAt(x, z);
+					const biome = getBiomeAt(x, z, height);
+
+					let treeProbability = 0.1; // Default
+					switch (biome) {
+						case "Rainforest":
+							treeProbability = 0.7;
+							break;
+						case "Grassland":
+							treeProbability = 0.3;
+							break;
+						case "Tundra":
+							treeProbability = 0.05;
+							break;
+						case "Desert":
+							treeProbability = 0.01;
+							break;
+						case "Beach":
+							treeProbability = 0.02;
+							break;
+						case "Mountain":
+							treeProbability = 0.05;
+							break;
+					}
+
+					if (Math.random() < treeProbability && height > 2 && height < 25) {
+						const tree = createTree(x + (Math.random() - 0.5) * 4, z + (Math.random() - 0.5) * 4);
+						trees.set(treeKey, tree);
+						vegetationRef.current.add(tree);
 					}
 				}
 			}
@@ -453,11 +581,7 @@ function VegetationSystem() {
 }
 
 // Main FPS Scene
-function FPSScene({ config, inputManager, onPerformanceUpdate }: {
-	config: FPSConfig;
-	inputManager: any;
-	onPerformanceUpdate: (metrics: FPSPerformanceMetrics) => void;
-}) {
+function FPSScene({ config, inputManager, onPerformanceUpdate, onPlayerDataUpdate }: { config: FPSConfig; inputManager: any; onPerformanceUpdate: (metrics: FPSPerformanceMetrics) => void; onPlayerDataUpdate: (data: any) => void }) {
 	const [cameraPosition, setCameraPosition] = useState(new THREE.Vector3());
 	const [cameraRotation, setCameraRotation] = useState(new THREE.Euler());
 
@@ -493,7 +617,7 @@ function FPSScene({ config, inputManager, onPerformanceUpdate }: {
 			<fog attach="fog" args={["#87CEEB", 50, 200]} />
 
 			{/* Player Controller */}
-			<FPSPlayer config={config} inputManager={inputManager} onCameraUpdate={handleCameraUpdate} />
+			<FPSPlayer config={config} inputManager={inputManager} onCameraUpdate={handleCameraUpdate} onPlayerDataUpdate={onPlayerDataUpdate} />
 
 			{/* Terrain System */}
 			<TerrainSystem config={config} />
@@ -523,6 +647,41 @@ interface FPSRenderer3DProps {
 export const FPSRenderer3D = forwardRef<FPSRenderer3DRef, FPSRenderer3DProps>(({ config, isExploring, isInitializing, inputManager, onPerformanceUpdate, onLoadingChange }, ref) => {
 	const playerPosRef = useRef(new THREE.Vector3(0, 50, 0));
 	const cameraRotRef = useRef(new THREE.Euler(0, 0, 0));
+	const [playerData, setPlayerData] = useState<any>({
+		position: new THREE.Vector3(0, 50, 0),
+		health: 100,
+		maxHealth: 100,
+		stamina: 100,
+		maxStamina: 100,
+		temperature: 20,
+		currentBiome: "Grassland",
+		elevation: 50,
+		windSpeed: 2,
+		humidity: 50,
+		visibility: 1.0,
+		isAiming: false,
+	});
+	const [performanceMetrics, setPerformanceMetrics] = useState({
+		frameRate: 60,
+		frameTime: 16,
+		memoryUsage: 0,
+		drawCalls: 0,
+		triangles: 0,
+		cpuUsage: 0,
+	});
+
+	const handlePlayerDataUpdate = useCallback((data: any) => {
+		setPlayerData(data);
+		playerPosRef.current.copy(data.position);
+	}, []);
+
+	const handlePerformanceUpdate = useCallback(
+		(metrics: FPSPerformanceMetrics) => {
+			setPerformanceMetrics(metrics);
+			onPerformanceUpdate(metrics);
+		},
+		[onPerformanceUpdate]
+	);
 
 	useImperativeHandle(ref, () => ({
 		getPlayerPosition: () => playerPosRef.current.clone(),
@@ -543,7 +702,8 @@ export const FPSRenderer3D = forwardRef<FPSRenderer3DRef, FPSRenderer3DProps>(({
 						<p>• Procedural terrain generation</p>
 						<p>• Dynamic day/night cycle</p>
 						<p>• Physics-based movement</p>
-						<p>• Controller support</p>
+						<p>• Survival mechanics</p>
+						<p>• Professional HUD system</p>
 					</div>
 				</div>
 			</div>
@@ -566,6 +726,7 @@ export const FPSRenderer3D = forwardRef<FPSRenderer3DRef, FPSRenderer3DProps>(({
 						<p>🌳 Placing procedural vegetation and landmarks</p>
 						<p>☀️ Initializing dynamic lighting systems</p>
 						<p>⚡ Optimizing physics and rendering pipeline</p>
+						<p>📊 Setting up HUD and survival systems</p>
 					</div>
 				</div>
 			</div>
@@ -590,23 +751,36 @@ export const FPSRenderer3D = forwardRef<FPSRenderer3DRef, FPSRenderer3DProps>(({
 					scene.fog = new THREE.Fog("#87CEEB", 50, 200);
 				}}
 			>
-				<FPSScene config={config} inputManager={inputManager} onPerformanceUpdate={onPerformanceUpdate} />
+				<FPSScene config={config} inputManager={inputManager} onPerformanceUpdate={handlePerformanceUpdate} onPlayerDataUpdate={handlePlayerDataUpdate} />
 			</Canvas>
 
-			{/* Professional Crosshair */}
-			{config.gameplay.showCrosshair && (
-				<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-					<div className="relative">
-						<div className="w-6 h-6 border border-white/60 rounded-full" />
-						<div className="absolute top-1/2 left-1/2 w-2 h-2 bg-white/80 rounded-full transform -translate-x-1/2 -translate-y-1/2" />
-					</div>
-				</div>
-			)}
+			{/* Professional HUD System */}
+			<FPSHUDSystem
+				playerPosition={playerData.position}
+				cameraRotation={cameraRotRef.current}
+				health={playerData.health}
+				maxHealth={playerData.maxHealth}
+				stamina={playerData.stamina}
+				maxStamina={playerData.maxStamina}
+				temperature={playerData.temperature}
+				weather="Clear"
+				timeOfDay={12}
+				isAiming={playerData.isAiming}
+				performanceMetrics={performanceMetrics}
+				environmentData={{
+					biome: playerData.currentBiome,
+					elevation: playerData.elevation,
+					windSpeed: playerData.windSpeed,
+					humidity: playerData.humidity,
+					visibility: playerData.visibility,
+				}}
+				showDebugInfo={false}
+			/>
 
 			{/* Click to start hint */}
 			<div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 pointer-events-none">
 				<div className="bg-black/60 backdrop-blur-sm px-6 py-3 rounded-lg border border-white/20">
-					<p className="text-white text-sm font-medium">Click to capture mouse • WASD to move • Mouse to look</p>
+					<p className="text-white text-sm font-medium">Click to capture mouse • WASD to move • Mouse to look • H to toggle HUD</p>
 				</div>
 			</div>
 		</div>

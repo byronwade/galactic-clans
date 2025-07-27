@@ -1,3 +1,5 @@
 {
-  "/test/fps-explorer/page": "app/test/fps-explorer/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/test/controller/page": "app/test/controller/page.js",
+  "/test/page": "app/test/page.js"
 }
