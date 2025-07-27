@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Settings2, Monitor, Volume2, Gamepad2, Eye, Palette, Accessibility, Save, RotateCcw, CheckCircle, XCircle, AlertTriangle, Info, ChevronDown, ChevronUp, Sun, Moon, Zap, Target, MousePointer, Keyboard, Headphones, Speaker, Mic, Wifi, WifiOff, Shield, BarChart3, Cpu, HardDrive, MemoryStick, Thermometer, RefreshCw, Download, Upload, Lock, Unlock, EyeOff, VolumeX, Volume1, Volume3, Settings, Sliders, Smartphone, Tablet, MonitorSmartphone, Laptop } from "lucide-react";
+import { ArrowLeft, Settings2, Monitor, Volume2, Gamepad2, Eye, Palette, Accessibility, Save, RotateCcw, CheckCircle, XCircle, AlertTriangle, Info, ChevronDown, ChevronUp, Sun, Moon, Zap, Target, MousePointer, Keyboard, Headphones, Speaker, Mic, Wifi, WifiOff, Shield, BarChart3, Cpu, HardDrive, MemoryStick, Thermometer, RefreshCw, Download, Upload, Lock, Unlock, EyeOff, VolumeX, Volume1, Settings, Sliders, Smartphone, Tablet, MonitorSmartphone, Laptop } from "lucide-react";
 
 // Import settings components
 import GraphicsSettings from "../../../components/settings/GraphicsSettings";
@@ -284,7 +284,7 @@ export default function SettingsTestPage() {
 				const gl2 = canvas.getContext("webgl2");
 				info.webgl2 = !!gl2;
 
-				if (gl) {
+				if (gl && gl instanceof WebGLRenderingContext) {
 					const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
 					if (debugInfo) {
 						info.gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
@@ -379,43 +379,43 @@ export default function SettingsTestPage() {
 	];
 
 	return (
-		<div className="fixed inset-0 bg-black overflow-hidden">
-			{/* Modern Header */}
-			<header className="absolute top-0 left-0 right-0 z-20 bg-slate-900/10 backdrop-blur-sm border-b border-slate-700/20">
-				<div className="container mx-auto px-4 py-2">
-					<div className="flex items-center justify-between">
+		<div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-violet-950 to-black text-white overflow-hidden">
+			{/* Header - Consistent 64px height */}
+			<header className="fixed top-0 left-0 right-0 z-50 h-16 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700/30">
+				<div className="h-full px-6 flex items-center justify-between">
+					<div className="flex items-center space-x-4">
+						<Link href="/test" className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/70 text-slate-200 hover:text-white transition-all duration-200">
+							<ArrowLeft className="w-4 h-4" />
+							<span className="text-sm font-medium">Back to Tests</span>
+						</Link>
+
 						<div className="flex items-center space-x-3">
-							<Link className="flex items-center space-x-2 px-2 py-1 rounded-md bg-slate-800/30 hover:bg-slate-800/50 text-slate-200 hover:text-white transition-all duration-200 text-sm" href="/test">
-								<ArrowLeft className="w-3 h-3" />
-								<span className="text-xs font-medium">Back</span>
-							</Link>
-							<div className="flex items-center space-x-2">
-								<div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-									<Settings2 className="w-3 h-3 text-white" />
-								</div>
-								<div>
-									<h1 className="text-sm font-semibold text-white">Game Settings</h1>
-									<p className="text-xs text-slate-300">AAA-grade configuration system</p>
-								</div>
+							<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+								<Settings2 className="w-5 h-5 text-white" />
+							</div>
+							<div>
+								<h1 className="text-xl font-bold text-white">Settings System Test</h1>
+								<p className="text-sm text-slate-400">Comprehensive game settings management</p>
 							</div>
 						</div>
-						<div className="flex items-center space-x-1">
-							<button onClick={runBenchmark} className="p-1.5 rounded-md bg-slate-800/30 hover:bg-slate-800/50 text-slate-300 hover:text-white transition-colors" title="Run Benchmark">
-								<BarChart3 className="w-3 h-3" />
-							</button>
-							<button onClick={() => setShowResetDialog(true)} className="p-1.5 rounded-md bg-slate-800/30 hover:bg-slate-800/50 text-slate-300 hover:text-white transition-colors" title="Reset Settings">
-								<RotateCcw className="w-3 h-3" />
-							</button>
-							<button onClick={saveSettings} disabled={!hasUnsavedChanges || isSaving} className={`p-1.5 rounded-md transition-colors ${hasUnsavedChanges && !isSaving ? "bg-green-600/30 hover:bg-green-600/50 text-green-400 hover:text-green-300" : "bg-slate-800/30 text-slate-500"}`} title="Save Settings">
-								{isSaving ? <RefreshCw className="w-3 h-3 animate-spin" /> : hasUnsavedChanges ? <Save className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
-							</button>
-						</div>
+					</div>
+
+					<div className="flex items-center space-x-3">
+						<button onClick={runBenchmark} className="p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/70 text-slate-300 hover:text-white transition-colors" title="Run Benchmark">
+							<BarChart3 className="w-4 h-4" />
+						</button>
+						<button onClick={() => setShowResetDialog(true)} className="p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/70 text-slate-300 hover:text-white transition-colors" title="Reset Settings">
+							<RotateCcw className="w-4 h-4" />
+						</button>
+						<button onClick={saveSettings} disabled={!hasUnsavedChanges || isSaving} className={`p-2 rounded-lg transition-colors ${hasUnsavedChanges && !isSaving ? "bg-green-600/50 hover:bg-green-600/70 text-green-300 hover:text-green-200" : "bg-slate-800/50 text-slate-500"}`} title="Save Settings">
+							{isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : hasUnsavedChanges ? <Save className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+						</button>
 					</div>
 				</div>
 			</header>
 
 			{/* Main Content */}
-			<div className="absolute inset-0 top-20 flex">
+			<div className="absolute inset-0 top-16 flex">
 				{/* Sidebar */}
 				<div className="w-64 bg-slate-900/40 backdrop-blur-xl border-r border-slate-700/30 overflow-y-auto">
 					<div className="p-4 space-y-2">

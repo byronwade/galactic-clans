@@ -52,38 +52,38 @@ export default function AAAMenuDemoPage() {
 	};
 
 	return (
-		<div className="fixed inset-0 bg-black overflow-hidden">
-			{/* Header */}
-			<header className="absolute top-0 left-0 right-0 z-20 bg-slate-900/10 backdrop-blur-sm border-b border-slate-700/20">
-				<div className="container mx-auto px-4 py-2">
-					<div className="flex items-center justify-between">
+		<div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-black text-white overflow-hidden">
+			{/* Header - Consistent 64px height */}
+			<header className="fixed top-0 left-0 right-0 z-50 h-16 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700/30">
+				<div className="h-full px-6 flex items-center justify-between">
+					<div className="flex items-center space-x-4">
+						<Link href="/test" className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/70 text-slate-200 hover:text-white transition-all duration-200">
+							<ArrowLeft className="w-4 h-4" />
+							<span className="text-sm font-medium">Back to Tests</span>
+						</Link>
+
 						<div className="flex items-center space-x-3">
-							<Link className="flex items-center space-x-2 px-2 py-1 rounded-md bg-slate-800/30 hover:bg-slate-800/50 text-slate-200 hover:text-white transition-all duration-200 text-sm" href="/">
-								<ArrowLeft className="w-3 h-3" />
-								<span className="text-xs font-medium">Back</span>
-							</Link>
-							<div className="flex items-center space-x-2">
-								<div className="w-6 h-6 rounded-md bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-									<Gamepad2 className="w-3 h-3 text-white" />
-								</div>
-								<div>
-									<h1 className="text-sm font-semibold text-white">AAA Menu Demo</h1>
-									<p className="text-xs text-slate-300">Professional game menu</p>
-								</div>
+							<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+								<Gamepad2 className="w-5 h-5 text-white" />
+							</div>
+							<div>
+								<h1 className="text-xl font-bold text-white">Main Menu Test</h1>
+								<p className="text-sm text-slate-400">AAA-quality game menu demonstration</p>
 							</div>
 						</div>
-						<div className="flex items-center space-x-1">
-							<button title="Toggle Demo Info" className="p-1.5 rounded-md bg-slate-800/30 hover:bg-slate-800/50 text-slate-300 hover:text-white transition-colors" onClick={() => setShowDemoInfo(!showDemoInfo)}>
-								{showDemoInfo ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-							</button>
-						</div>
+					</div>
+
+					<div className="flex items-center space-x-3">
+						<button onClick={() => setShowDemoInfo(!showDemoInfo)} className="p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/70 text-slate-300 hover:text-white transition-colors" title="Toggle Demo Info">
+							{showDemoInfo ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+						</button>
 					</div>
 				</div>
 			</header>
 
 			{/* Demo Information Panel */}
 			{showDemoInfo && (
-				<div className="absolute top-20 left-4 z-10 bg-black/90 text-white p-4 rounded-xl font-mono text-sm max-w-md border border-cyan-500/30 backdrop-blur-xl">
+				<div className="absolute top-20 left-6 z-10 bg-black/90 text-white p-4 rounded-xl font-mono text-sm max-w-md border border-cyan-500/30 backdrop-blur-xl">
 					<h3 className="text-cyan-400 text-lg font-bold mb-3">🎮 AAA Game Menu Demo</h3>
 					<p className="mb-2">
 						<strong>Professional Features:</strong>

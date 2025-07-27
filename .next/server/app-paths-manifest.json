@@ -1,8 +1,3 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/page": "app/page.js",
-  "/test/planet/page": "app/test/planet/page.js",
-  "/test/galaxy/page": "app/test/galaxy/page.js",
-  "/test/page": "app/test/page.js",
-  "/test/star/page": "app/test/star/page.js"
+  "/test/page": "app/test/page.js"
 }
