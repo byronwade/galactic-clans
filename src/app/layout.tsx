@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CriticalErrorBoundary } from "@/components/ErrorBoundary";
@@ -30,9 +30,15 @@ export const metadata: Metadata = {
 		description: "Explore procedurally generated galaxies, planets, and cosmic phenomena in this immersive 3D universe.",
 		images: ["/favicon.png"],
 	},
-	viewport: "width=device-width, initial-scale=1",
 	robots: "index, follow",
 	manifest: "/manifest.json",
+	metadataBase: new URL("http://localhost:5173"),
+};
+
+export const viewport: Viewport = {
+	width: "device-width",
+	initialScale: 1,
+	themeColor: "#000000",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
