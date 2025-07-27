@@ -7,7 +7,7 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import * as THREE from "three";
 import { PlanetClass, getPlanetTypeByClass, PLANET_TYPES } from "@/shared/procgen/planet/planet-types";
 import { Globe, Settings, Shuffle, RotateCcw, Info, Palette } from "lucide-react";
@@ -51,7 +51,7 @@ export default function PlanetGenerator() {
 	const [isLoading, setIsLoading] = useState(false);
 
 	// Handle planet type change
-	const handlePlanetTypeChange = (planetClass: PlanetClass) => {
+	const handlePlanetTypeChange = useCallback((planetClass: PlanetClass) => {
 		const planetType = getPlanetTypeByClass(planetClass);
 		if (planetType && planetType.primaryColors && planetType.primaryColors.length > 0) {
 			setConfig((prev) => ({
@@ -63,11 +63,11 @@ export default function PlanetGenerator() {
 				hasAtmosphere: planetType.features.clouds,
 			}));
 		}
-	};
+	}, []);
 
 	// Get current planet type info
 	const currentPlanetType = getPlanetTypeByClass(config.planetClass);
-	const availablePlanetTypes = Array.from(PLANET_TYPES.keys());
+	const availablePlanetTypes = useCallback(() => Array.from(PLANET_TYPES.keys()), []);
 
 	return (
 		<div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-black overflow-hidden">
@@ -84,7 +84,7 @@ export default function PlanetGenerator() {
 						</div>
 					</div>
 
-					<PlanetControls config={config} availablePlanetTypes={availablePlanetTypes} onPlanetTypeChange={handlePlanetTypeChange} showSettings={showSettings} showInfo={showInfo} onToggleSettings={() => setShowSettings(!showSettings)} onToggleInfo={() => setShowInfo(!showInfo)} onRegenerate={() => setIsLoading(true)} />
+					<PlanetControls config={config} availablePlanetTypes={availablePlanetTypes()} onPlanetTypeChange={handlePlanetTypeChange} showSettings={showSettings} showInfo={showInfo} onToggleSettings={() => setShowSettings(!showSettings)} onToggleInfo={() => setShowInfo(!showInfo)} onRegenerate={() => setIsLoading(true)} />
 				</div>
 			</div>
 

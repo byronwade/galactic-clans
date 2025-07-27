@@ -1,0 +1,247 @@
+---
+alwaysApply: true
+---
+
+# Core Technology Stack & Architecture
+
+## 🛠️ **Technology Stack**
+
+### **Current Stack (In Use)**
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript (strict mode)
+- **Runtime**: Bun (preferred) / Node.js 18+
+- **3D Rendering**: Three.js + React Three Fiber (@react-three/fiber)
+- **Physics**: Cannon-ES
+- **Styling**: Tailwind CSS 4.x
+- **State Management**: Zustand
+- **Desktop**: Tauri (Rust + Web)
+- **ECS**: BitECS for game architecture
+
+### **Development Tools**
+- **Version Control**: Git with Git-LFS for large assets
+- **Code Editor**: VS Code with ESLint and Prettier
+- **Linter**: ESLint with TypeScript rules
+- **Formatter**: Prettier
+- **Package Manager**: Bun (preferred), npm fallback
+
+## 📁 **Project Structure**
+
+```
+cosmic/
+├── docs/                      # Organized documentation
+│   ├── architecture/          # System design docs
+│   ├── features/             # Feature specifications
+│   ├── implementation/       # Technical guides
+│   └── setup/               # Configuration docs
+├── src/
+│   ├── app/                 # Next.js App Router
+│   │   ├── test/           # Generator test pages
+│   │   └── page.tsx        # Main entry point
+│   ├── components/
+│   │   ├── generators/     # Modular generator system
+│   │   ├── settings/       # Settings components
+│   │   └── ui/            # Reusable UI components
+│   ├── shared/
+│   │   ├── audio/         # Audio system
+│   │   ├── core/          # Core utilities
+│   │   ├── procgen/       # Procedural generation
+│   │   └── rendering/     # Rendering utilities
+│   ├── hooks/             # React hooks
+│   ├── types/             # TypeScript definitions
+│   └── utils/             # Utility functions
+└── public/                # Static assets
+    └── audio/             # Audio files
+```
+
+## 📝 **Coding Standards**
+
+### **File Organization**
+- **Maximum 500 lines per file** (target 300-400)
+- **Modular components** with single responsibility
+- **Consistent naming**: PascalCase for components, camelCase for functions
+- **File headers** with JSDoc describing purpose and version
+
+### **TypeScript Standards**
+- **Strict mode enabled** - No implicit any, strict null checks
+- **Explicit types** for all public APIs
+- **Interface over type** for object shapes
+- **Proper error handling** with typed exceptions
+
+### **React Standards**
+- **Functional components** with hooks
+- **useCallback/useMemo** for performance optimization
+- **Dynamic imports** for SSR prevention (`next/dynamic`)
+- **Error boundaries** for component isolation
+
+### **Performance Requirements**
+- **Target**: 60 FPS minimum, 120 FPS ideal
+- **Memory**: < 4GB RAM, < 512MB JS heap
+- **Network**: < 100ms latency, < 50KB/s bandwidth
+- **Bundle size**: Code splitting and lazy loading
+
+### **3D Rendering Standards**
+- **LOD system** for distant objects
+- **Object pooling** for frequently created objects
+- **Efficient geometry** reuse and instancing
+- **Texture atlasing** and compression
+
+## 🎯 **Architecture Principles**
+
+### **Modular Design**
+- **Component-based** architecture
+- **Separation of concerns** (UI, logic, data)
+- **Reusable systems** across generators
+- **Plugin-style** extensions
+
+### **Performance First**
+- **Lazy loading** of heavy components
+- **Progressive enhancement** for features
+- **Graceful degradation** for low-end devices
+- **Memory management** with cleanup
+
+### **Cross-Platform**
+- **Responsive design** for all screen sizes
+- **Input abstraction** (mouse, touch, gamepad)
+- **Platform-specific optimizations**
+- **Progressive Web App** capabilities
+
+## 🔧 **Build Configuration**
+
+### **Bun Scripts**
+```bash
+bun dev          # Development server (port 5173)
+bun build        # Production build
+bun lint         # ESLint check
+bun tauri        # Desktop app development
+```
+
+### **Required Dependencies**
+- **Core**: react, next, typescript, three
+- **3D**: @react-three/fiber, @react-three/drei
+- **Styling**: tailwindcss, clsx, class-variance-authority
+- **State**: zustand
+- **Physics**: cannon-es (future integration)
+- **ECS**: bitecs (game architecture)
+
+This consolidated approach ensures consistency, performance, and maintainability across the entire codebase.# Core Technology Stack & Architecture
+
+## 🛠️ **Technology Stack**
+
+### **Current Stack (In Use)**
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript (strict mode)
+- **Runtime**: Bun (preferred) / Node.js 18+
+- **3D Rendering**: Three.js + React Three Fiber (@react-three/fiber)
+- **Physics**: Cannon-ES
+- **Styling**: Tailwind CSS 4.x
+- **State Management**: Zustand
+- **Desktop**: Tauri (Rust + Web)
+- **ECS**: BitECS for game architecture
+
+### **Development Tools**
+- **Version Control**: Git with Git-LFS for large assets
+- **Code Editor**: VS Code with ESLint and Prettier
+- **Linter**: ESLint with TypeScript rules
+- **Formatter**: Prettier
+- **Package Manager**: Bun (preferred), npm fallback
+
+## 📁 **Project Structure**
+
+```
+cosmic/
+├── docs/                      # Organized documentation
+│   ├── architecture/          # System design docs
+│   ├── features/             # Feature specifications
+│   ├── implementation/       # Technical guides
+│   └── setup/               # Configuration docs
+├── src/
+│   ├── app/                 # Next.js App Router
+│   │   ├── test/           # Generator test pages
+│   │   └── page.tsx        # Main entry point
+│   ├── components/
+│   │   ├── generators/     # Modular generator system
+│   │   ├── settings/       # Settings components
+│   │   └── ui/            # Reusable UI components
+│   ├── shared/
+│   │   ├── audio/         # Audio system
+│   │   ├── core/          # Core utilities
+│   │   ├── procgen/       # Procedural generation
+│   │   └── rendering/     # Rendering utilities
+│   ├── hooks/             # React hooks
+│   ├── types/             # TypeScript definitions
+│   └── utils/             # Utility functions
+└── public/                # Static assets
+    └── audio/             # Audio files
+```
+
+## 📝 **Coding Standards**
+
+### **File Organization**
+- **Maximum 500 lines per file** (target 300-400)
+- **Modular components** with single responsibility
+- **Consistent naming**: PascalCase for components, camelCase for functions
+- **File headers** with JSDoc describing purpose and version
+
+### **TypeScript Standards**
+- **Strict mode enabled** - No implicit any, strict null checks
+- **Explicit types** for all public APIs
+- **Interface over type** for object shapes
+- **Proper error handling** with typed exceptions
+
+### **React Standards**
+- **Functional components** with hooks
+- **useCallback/useMemo** for performance optimization
+- **Dynamic imports** for SSR prevention (`next/dynamic`)
+- **Error boundaries** for component isolation
+
+### **Performance Requirements**
+- **Target**: 60 FPS minimum, 120 FPS ideal
+- **Memory**: < 4GB RAM, < 512MB JS heap
+- **Network**: < 100ms latency, < 50KB/s bandwidth
+- **Bundle size**: Code splitting and lazy loading
+
+### **3D Rendering Standards**
+- **LOD system** for distant objects
+- **Object pooling** for frequently created objects
+- **Efficient geometry** reuse and instancing
+- **Texture atlasing** and compression
+
+## 🎯 **Architecture Principles**
+
+### **Modular Design**
+- **Component-based** architecture
+- **Separation of concerns** (UI, logic, data)
+- **Reusable systems** across generators
+- **Plugin-style** extensions
+
+### **Performance First**
+- **Lazy loading** of heavy components
+- **Progressive enhancement** for features
+- **Graceful degradation** for low-end devices
+- **Memory management** with cleanup
+
+### **Cross-Platform**
+- **Responsive design** for all screen sizes
+- **Input abstraction** (mouse, touch, gamepad)
+- **Platform-specific optimizations**
+- **Progressive Web App** capabilities
+
+## 🔧 **Build Configuration**
+
+### **Bun Scripts**
+```bash
+bun dev          # Development server (port 5173)
+bun build        # Production build
+bun lint         # ESLint check
+bun tauri        # Desktop app development
+```
+
+### **Required Dependencies**
+- **Core**: react, next, typescript, three
+- **3D**: @react-three/fiber, @react-three/drei
+- **Styling**: tailwindcss, clsx, class-variance-authority
+- **State**: zustand
+- **Physics**: cannon-es (future integration)
+- **ECS**: bitecs (game architecture)
+
+This consolidated approach ensures consistency, performance, and maintainability across the entire codebase.

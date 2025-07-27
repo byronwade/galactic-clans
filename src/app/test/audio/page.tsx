@@ -71,10 +71,10 @@ export default function AudioTestPage() {
 									Background Music
 								</h3>
 								<ul className="space-y-1 text-slate-400">
-									<li>• Epic march theme music</li>
-									<li>• Ambient space atmospheres</li>
-									<li>• Mystic plains soundscapes</li>
-									<li>• Victory fanfare celebrations</li>
+									<li>• Epic march & victory fanfare</li>
+									<li>• Electronic tracks (Club Diver, Steel Rods)</li>
+									<li>• Ambient space atmospheres (5 variants)</li>
+									<li>• Sci-fi gaming soundtrack</li>
 								</ul>
 							</div>
 							<div>
@@ -103,19 +103,31 @@ export default function AudioTestPage() {
 					<div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 rounded-xl p-6 border border-purple-500/30">
 						<h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
 							<Music className="w-5 h-5 text-purple-400" />
-							Background Music Library
+							Complete Music Library
 						</h3>
-						<div className="grid md:grid-cols-2 gap-6 text-sm">
+						<div className="grid md:grid-cols-3 gap-6 text-sm">
 							<div>
-								<h4 className="font-medium text-purple-400 mb-2">Music Tracks</h4>
+								<h4 className="font-medium text-purple-400 mb-2">Theme Music</h4>
 								<div className="space-y-2 text-slate-300">
 									<div className="flex justify-between">
 										<span>Epic March</span>
-										<span className="text-purple-400">Theme Music</span>
+										<span className="text-purple-400">Classic</span>
 									</div>
 									<div className="flex justify-between">
 										<span>Victory Fanfare</span>
 										<span className="text-purple-400">Cinematic</span>
+									</div>
+									<div className="flex justify-between">
+										<span>Club Diver</span>
+										<span className="text-purple-400">Electronic</span>
+									</div>
+									<div className="flex justify-between">
+										<span>Steel Rods</span>
+										<span className="text-purple-400">Industrial</span>
+									</div>
+									<div className="flex justify-between">
+										<span>Space Game</span>
+										<span className="text-purple-400">Sci-fi</span>
 									</div>
 								</div>
 							</div>
@@ -130,11 +142,40 @@ export default function AudioTestPage() {
 										<span>Space Ambient (3 variants)</span>
 										<span className="text-blue-400">Environmental</span>
 									</div>
+									<div className="flex justify-between">
+										<span>Ice Flow</span>
+										<span className="text-blue-400">Chill</span>
+									</div>
+									<div className="flex justify-between">
+										<span>Space Goddess</span>
+										<span className="text-blue-400">Ethereal</span>
+									</div>
+								</div>
+							</div>
+							<div>
+								<h4 className="font-medium text-green-400 mb-2">Features</h4>
+								<div className="space-y-2 text-slate-300">
+									<div className="flex justify-between">
+										<span>Total Tracks</span>
+										<span className="text-green-400">11</span>
+									</div>
+									<div className="flex justify-between">
+										<span>Auto-Loop</span>
+										<span className="text-green-400">Enabled</span>
+									</div>
+									<div className="flex justify-between">
+										<span>Volume Control</span>
+										<span className="text-green-400">Per Track</span>
+									</div>
+									<div className="flex justify-between">
+										<span>Crossfade</span>
+										<span className="text-green-400">Smooth</span>
+									</div>
 								</div>
 							</div>
 						</div>
 						<div className="mt-4 p-3 bg-purple-900/20 rounded-lg border border-purple-500/20">
-							<p className="text-xs text-purple-200">🎵 Background music tracks feature automatic looping, volume balancing, and seamless integration with the game's audio system.</p>
+							<p className="text-xs text-purple-200">🎵 Complete music library with 11 tracks featuring automatic looping, volume balancing, and seamless integration. Use the music player to explore all available tracks!</p>
 						</div>
 					</div>
 
@@ -157,7 +198,8 @@ export default function AudioTestPage() {
 								<h4 className="font-medium text-green-400">Sound Sources</h4>
 								<p className="text-slate-300">Kenney Interface Sounds (CC0 License)</p>
 								<p className="text-slate-300">Custom Programmatic UI Sounds</p>
-								<p className="text-slate-300">Original Background Music Tracks</p>
+								<p className="text-slate-300">11 Background Music Tracks</p>
+								<p className="text-slate-300">Electronic & Ambient Music Library</p>
 								<p className="text-slate-500">100+ high-quality audio files</p>
 							</div>
 							<div className="space-y-2">

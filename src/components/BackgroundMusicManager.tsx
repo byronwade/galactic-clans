@@ -19,10 +19,12 @@ const BACKGROUND_TRACKS = [
 	"space_ambient_3",
 	"space_ambient_improved",
 	"victory_fanfare",
-	// Additional Music Tracks (uncomment when you add the files)
-	// "battle_theme",
-	// "exploration_theme",
-	// "menu_theme"
+	// New Music Tracks from /audio/music/
+	"club_diver",
+	"steel_rods",
+	"ice_flow",
+	"space_goddess",
+	"space_game",
 ];
 
 const BackgroundMusicManager: React.FC<BackgroundMusicManagerProps> = ({ autoStart = false, initialTrack = "space_ambient_improved", className = "", compact = false }) => {

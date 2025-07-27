@@ -1,0 +1,382 @@
+---
+alwaysApply: false
+---
+
+# Game Design & Mechanics
+
+## 🎮 **Core Game Concept**
+
+**Galactic Clans** is a space-based strategy game combining:
+- **Procedural Generation**: Infinite galaxies, solar systems, and planets
+- **Base Building**: Construct and upgrade planetary civilizations
+- **PvP Combat**: Strategic raids and clan warfare
+- **Social Systems**: Clans, alliances, and community features
+- **Idle Mechanics**: Offline progression and resource generation
+
+## 🚀 **Player Journey**
+
+### **Phase 1: The First Star** (Levels 1-10)
+- **Starting Point**: Single resource-rich solar system
+- **Core Learning**: Basic building, resource management
+- **Key Features**: Tutorial, infrastructure development
+- **Goal**: Master core mechanics and basic expansion
+
+### **Phase 2: Expansion & Exploration** (Levels 11-25)
+- **New Systems**: Unlock exploration and colonization
+- **Core Features**: Territory expansion, technology research
+- **Key Activities**: Discover new systems, interact with players
+- **Goal**: Build a multi-system empire
+
+### **Phase 3: The Rise of Clans** (Levels 26-50)
+- **Social Integration**: Join or create clans
+- **Clan Features**: Resource sharing, coordinated attacks
+- **Group Content**: Clan raids, shared accomplishments
+- **Goal**: Establish clan dominance and cooperation
+
+### **Phase 4: Galactic Domination** (Levels 51+)
+- **End Game**: Large-scale clan warfare
+- **Epic Content**: Control entire galaxy regions
+- **Advanced Features**: Clan wars, leaderboards, prestige
+- **Goal**: Achieve galactic supremacy
+
+## 💰 **Game Economy**
+
+### **Core Resources**
+- **Minerals**: Primary building material from planetary mines
+- **Energy**: Secondary resource from solar collectors
+- **Dark Matter**: Premium resource from events and high-level content
+
+### **Economic Loop**
+```
+Resource Generation → Building & Training → Raiding → Resource Acquisition
+        ↑                                                          ↓
+   Upgrade Production ← Research Technology ← Spend Resources ←────┘
+```
+
+### **Balancing Principles**
+- **Player-Driven**: Economy driven by player actions
+- **Balanced Progression**: Smooth difficulty curve
+- **Sink & Faucet Management**: Careful inflation control
+
+## ⚔️ **Combat System**
+
+### **Raid Flow**
+1. **Target Selection**: Choose enemy planet to attack
+2. **Army Deployment**: Drag units to attack positions
+3. **Combat Simulation**: Server-calculated with client prediction
+4. **Results**: Loot distribution and damage assessment
+
+### **Unit Types**
+- **Infantry**: High numbers, effective vs. resource buildings
+- **Tanks**: Low numbers, high damage, effective vs. defenses
+- **Support**: Healing and battlefield buffs
+
+### **Targeting Priority**
+1. Defensive Structures (Turrets, Shields)
+2. Resource Buildings (Mines, Collectors)
+3. Other Buildings (Command Centers, Barracks)
+
+### **Victory Conditions**
+- **Full Victory**: Destroy Town Hall OR 50% total destruction
+- **Partial Victory**: Significant damage for reduced rewards
+- **Shield System**: Attacked players get temporary protection
+
+## 🏛️ **Clan Mechanics**
+
+### **Clan Structure** (Max 50 members)
+- **Leader**: Full control, can manage all aspects
+- **Co-Leader**: Invite members, kick lower ranks, manage clan
+- **Elder**: Can invite new members, trusted veteran role
+- **Member**: Regular clan participant
+
+### **Core Clan Features**
+- **Clan Chat**: Dedicated communication channel
+- **Resource Sharing**: Request/donate resources with daily limits
+- **Clan Accomplishments**: Shared goals for group rewards
+- **Clan Raids**: Coordinated attacks on high-value targets
+- **Clan Wars**: Week-long competitive events between clans
+
+### **Clan Progression**
+```mermaid
+graph TD
+    A[New Clan] --> B[Recruit Members]
+    B --> C[Clan Accomplishments]
+    C --> D[Unlock Perks]
+    D --> E[Clan Raids]
+    E --> F[Clan Wars]
+    F --> G[Leaderboards]
+    G --> C
+```
+
+## 🏆 **Accomplishment System**
+
+### **Design Principles**
+- **Clear Goals**: Explicit requirements and progress tracking
+- **Meaningful Rewards**: Valuable cosmetic and functional benefits
+- **Variety**: Short-term, long-term, and hidden accomplishments
+- **Non-Intrusive**: Natural integration into gameplay loop
+
+### **Accomplishment Categories**
+- **Builder**: Construction and upgrade achievements
+- **Warrior**: Combat and raiding accomplishments
+- **Explorer**: Discovery and expansion goals
+- **Social**: Clan and community achievements
+- **Collector**: Resource gathering milestones
+- **Special**: Seasonal and event-based rewards
+
+### **Progress Tracking**
+- **Dedicated UI**: Clear progress visualization
+- **Real-time Updates**: Immediate feedback on advancement
+- **Notification System**: Celebrate milestone completion
+- **Reward Delivery**: Automatic or manual claim options
+
+## 🤝 **Social Features**
+
+### **Core Social Systems**
+- **Friends List**: Up to 200 friends with online status
+- **Private Messaging**: Direct player communication
+- **Global Chat**: Server-wide public channels
+- **Regional Chat**: Language and location-based channels
+- **Mail System**: Asynchronous messaging for invites and notifications
+
+### **Player Profiles**
+- **Basic Info**: Name, level, clan affiliation
+- **Statistics**: Accomplishment points, army composition
+- **Customization**: Bio section and badge display
+- **Interaction**: Add friend, message, clan invite options
+
+### **Social Interaction Flow**
+```
+Profile View → Add Friend/Message/Invite → Notification → Response → Relationship
+```
+
+## 🎯 **Core Gameplay Loop**
+
+### **Immediate Loop** (5-15 minutes)
+1. **Resource Collection**: Gather generated resources
+2. **Building Management**: Queue upgrades and construction
+3. **Army Training**: Prepare units for raids
+4. **Quick Raids**: Attack targets for additional resources
+
+### **Session Loop** (30-60 minutes)
+1. **Strategic Planning**: Review empire status and goals
+2. **Major Construction**: Start significant upgrades
+3. **Coordinated Raids**: Execute planned attacks
+4. **Clan Activities**: Participate in group events
+
+### **Daily Loop** (1-2 hours total)
+1. **Daily Quests**: Complete daily accomplishments
+2. **Clan Wars**: Participate in ongoing conflicts
+3. **Research**: Advance technology trees
+4. **Social Interaction**: Chat, coordinate, recruit
+
+### **Long-term Loop** (weeks/months)
+1. **Empire Expansion**: Colonize new systems
+2. **Clan Progression**: Advance clan standing
+3. **Seasonal Events**: Participate in special content
+4. **Prestige Systems**: End-game progression mechanics
+
+## 🔧 **Idle Mechanics**
+
+### **Offline Progression**
+- **Resource Generation**: Continue while offline (capped)
+- **Production Decay**: Efficiency drops without management
+- **Shield Protection**: Automatic defense for inactive players
+- **Return Bonuses**: Incentives for coming back
+
+### **Active vs. Idle Balance**
+- **Active Advantage**: 2-3x efficiency when playing
+- **Idle Sustainability**: Meaningful but limited progress
+- **Engagement Rewards**: Bonus for consistent play
+- **Catch-up Mechanics**: Help returning players
+
+This comprehensive design ensures engaging progression from tutorial to endgame while maintaining long-term player retention through social systems and competitive gameplay.
+# Game Design & Mechanics
+
+## 🎮 **Core Game Concept**
+
+**Galactic Clans** is a space-based strategy game combining:
+- **Procedural Generation**: Infinite galaxies, solar systems, and planets
+- **Base Building**: Construct and upgrade planetary civilizations
+- **PvP Combat**: Strategic raids and clan warfare
+- **Social Systems**: Clans, alliances, and community features
+- **Idle Mechanics**: Offline progression and resource generation
+
+## 🚀 **Player Journey**
+
+### **Phase 1: The First Star** (Levels 1-10)
+- **Starting Point**: Single resource-rich solar system
+- **Core Learning**: Basic building, resource management
+- **Key Features**: Tutorial, infrastructure development
+- **Goal**: Master core mechanics and basic expansion
+
+### **Phase 2: Expansion & Exploration** (Levels 11-25)
+- **New Systems**: Unlock exploration and colonization
+- **Core Features**: Territory expansion, technology research
+- **Key Activities**: Discover new systems, interact with players
+- **Goal**: Build a multi-system empire
+
+### **Phase 3: The Rise of Clans** (Levels 26-50)
+- **Social Integration**: Join or create clans
+- **Clan Features**: Resource sharing, coordinated attacks
+- **Group Content**: Clan raids, shared accomplishments
+- **Goal**: Establish clan dominance and cooperation
+
+### **Phase 4: Galactic Domination** (Levels 51+)
+- **End Game**: Large-scale clan warfare
+- **Epic Content**: Control entire galaxy regions
+- **Advanced Features**: Clan wars, leaderboards, prestige
+- **Goal**: Achieve galactic supremacy
+
+## 💰 **Game Economy**
+
+### **Core Resources**
+- **Minerals**: Primary building material from planetary mines
+- **Energy**: Secondary resource from solar collectors
+- **Dark Matter**: Premium resource from events and high-level content
+
+### **Economic Loop**
+```
+Resource Generation → Building & Training → Raiding → Resource Acquisition
+        ↑                                                          ↓
+   Upgrade Production ← Research Technology ← Spend Resources ←────┘
+```
+
+### **Balancing Principles**
+- **Player-Driven**: Economy driven by player actions
+- **Balanced Progression**: Smooth difficulty curve
+- **Sink & Faucet Management**: Careful inflation control
+
+## ⚔️ **Combat System**
+
+### **Raid Flow**
+1. **Target Selection**: Choose enemy planet to attack
+2. **Army Deployment**: Drag units to attack positions
+3. **Combat Simulation**: Server-calculated with client prediction
+4. **Results**: Loot distribution and damage assessment
+
+### **Unit Types**
+- **Infantry**: High numbers, effective vs. resource buildings
+- **Tanks**: Low numbers, high damage, effective vs. defenses
+- **Support**: Healing and battlefield buffs
+
+### **Targeting Priority**
+1. Defensive Structures (Turrets, Shields)
+2. Resource Buildings (Mines, Collectors)
+3. Other Buildings (Command Centers, Barracks)
+
+### **Victory Conditions**
+- **Full Victory**: Destroy Town Hall OR 50% total destruction
+- **Partial Victory**: Significant damage for reduced rewards
+- **Shield System**: Attacked players get temporary protection
+
+## 🏛️ **Clan Mechanics**
+
+### **Clan Structure** (Max 50 members)
+- **Leader**: Full control, can manage all aspects
+- **Co-Leader**: Invite members, kick lower ranks, manage clan
+- **Elder**: Can invite new members, trusted veteran role
+- **Member**: Regular clan participant
+
+### **Core Clan Features**
+- **Clan Chat**: Dedicated communication channel
+- **Resource Sharing**: Request/donate resources with daily limits
+- **Clan Accomplishments**: Shared goals for group rewards
+- **Clan Raids**: Coordinated attacks on high-value targets
+- **Clan Wars**: Week-long competitive events between clans
+
+### **Clan Progression**
+```mermaid
+graph TD
+    A[New Clan] --> B[Recruit Members]
+    B --> C[Clan Accomplishments]
+    C --> D[Unlock Perks]
+    D --> E[Clan Raids]
+    E --> F[Clan Wars]
+    F --> G[Leaderboards]
+    G --> C
+```
+
+## 🏆 **Accomplishment System**
+
+### **Design Principles**
+- **Clear Goals**: Explicit requirements and progress tracking
+- **Meaningful Rewards**: Valuable cosmetic and functional benefits
+- **Variety**: Short-term, long-term, and hidden accomplishments
+- **Non-Intrusive**: Natural integration into gameplay loop
+
+### **Accomplishment Categories**
+- **Builder**: Construction and upgrade achievements
+- **Warrior**: Combat and raiding accomplishments
+- **Explorer**: Discovery and expansion goals
+- **Social**: Clan and community achievements
+- **Collector**: Resource gathering milestones
+- **Special**: Seasonal and event-based rewards
+
+### **Progress Tracking**
+- **Dedicated UI**: Clear progress visualization
+- **Real-time Updates**: Immediate feedback on advancement
+- **Notification System**: Celebrate milestone completion
+- **Reward Delivery**: Automatic or manual claim options
+
+## 🤝 **Social Features**
+
+### **Core Social Systems**
+- **Friends List**: Up to 200 friends with online status
+- **Private Messaging**: Direct player communication
+- **Global Chat**: Server-wide public channels
+- **Regional Chat**: Language and location-based channels
+- **Mail System**: Asynchronous messaging for invites and notifications
+
+### **Player Profiles**
+- **Basic Info**: Name, level, clan affiliation
+- **Statistics**: Accomplishment points, army composition
+- **Customization**: Bio section and badge display
+- **Interaction**: Add friend, message, clan invite options
+
+### **Social Interaction Flow**
+```
+Profile View → Add Friend/Message/Invite → Notification → Response → Relationship
+```
+
+## 🎯 **Core Gameplay Loop**
+
+### **Immediate Loop** (5-15 minutes)
+1. **Resource Collection**: Gather generated resources
+2. **Building Management**: Queue upgrades and construction
+3. **Army Training**: Prepare units for raids
+4. **Quick Raids**: Attack targets for additional resources
+
+### **Session Loop** (30-60 minutes)
+1. **Strategic Planning**: Review empire status and goals
+2. **Major Construction**: Start significant upgrades
+3. **Coordinated Raids**: Execute planned attacks
+4. **Clan Activities**: Participate in group events
+
+### **Daily Loop** (1-2 hours total)
+1. **Daily Quests**: Complete daily accomplishments
+2. **Clan Wars**: Participate in ongoing conflicts
+3. **Research**: Advance technology trees
+4. **Social Interaction**: Chat, coordinate, recruit
+
+### **Long-term Loop** (weeks/months)
+1. **Empire Expansion**: Colonize new systems
+2. **Clan Progression**: Advance clan standing
+3. **Seasonal Events**: Participate in special content
+4. **Prestige Systems**: End-game progression mechanics
+
+## 🔧 **Idle Mechanics**
+
+### **Offline Progression**
+- **Resource Generation**: Continue while offline (capped)
+- **Production Decay**: Efficiency drops without management
+- **Shield Protection**: Automatic defense for inactive players
+- **Return Bonuses**: Incentives for coming back
+
+### **Active vs. Idle Balance**
+- **Active Advantage**: 2-3x efficiency when playing
+- **Idle Sustainability**: Meaningful but limited progress
+- **Engagement Rewards**: Bonus for consistent play
+- **Catch-up Mechanics**: Help returning players
+
+This comprehensive design ensures engaging progression from tutorial to endgame while maintaining long-term player retention through social systems and competitive gameplay.

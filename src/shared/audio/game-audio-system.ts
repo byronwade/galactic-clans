@@ -794,6 +794,48 @@ export const SOUND_EFFECTS: Record<string, SoundEffect> = {
 		volume: 0.8,
 	},
 
+	// New Music Tracks from /audio/music/
+	club_diver: {
+		id: "club_diver",
+		category: AudioCategory.MUSIC,
+		path: "/audio/music/Club Diver.mp3",
+		description: "Club Diver - Electronic dance track",
+		loop: true,
+		volume: 0.6,
+	},
+	steel_rods: {
+		id: "steel_rods",
+		category: AudioCategory.MUSIC,
+		path: "/audio/music/Steel Rods.mp3",
+		description: "Steel Rods - Industrial electronic music",
+		loop: true,
+		volume: 0.6,
+	},
+	ice_flow: {
+		id: "ice_flow",
+		category: AudioCategory.AMBIENT,
+		path: "/audio/music/Ice Flow.mp3",
+		description: "Ice Flow - Chill ambient electronic",
+		loop: true,
+		volume: 0.5,
+	},
+	space_goddess: {
+		id: "space_goddess",
+		category: AudioCategory.AMBIENT,
+		path: "/audio/music/mixkit-space-goddess-428.mp3",
+		description: "Space Goddess - Ethereal space ambient",
+		loop: true,
+		volume: 0.4,
+	},
+	space_game: {
+		id: "space_game",
+		category: AudioCategory.MUSIC,
+		path: "/audio/music/mixkit-space-game-668.mp3",
+		description: "Space Game - Sci-fi gaming soundtrack",
+		loop: true,
+		volume: 0.6,
+	},
+
 	// Game-Specific Sounds (Placeholders - Replace with your downloaded audio)
 	// Combat Sounds
 	sword_clash: {

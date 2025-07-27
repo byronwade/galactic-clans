@@ -1,0 +1,561 @@
+---
+alwaysApply: true
+---
+
+# Development Workflow & Standards
+
+## 📝 **Documentation Standards**
+
+### **File-Level Documentation**
+Every file must include a comprehensive header:
+
+```typescript
+/**
+ * @file ComponentName.tsx
+ * @description Brief description of the file's purpose and functionality
+ * @version 1.0.0
+ * @author Galactic Clans Development Team
+ * @created 2024-01-XX
+ * 
+ * @purpose Detailed explanation of what this file accomplishes
+ * @dependencies List of major dependencies (Three.js, React, etc.)
+ * @exports Main exports (ComponentName, types, utilities)
+ */
+```
+
+### **Function & Class Documentation**
+```typescript
+/**
+ * Generates a procedural planet with specified configuration
+ * @param config - Planet generation parameters
+ * @param seed - Random seed for consistent generation
+ * @returns Promise resolving to generated planet data
+ * @throws {ValidationError} When config parameters are invalid
+ * @example
+ * ```typescript
+ * const planet = await generatePlanet({
+ *   type: 'terrestrial',
+ *   size: 'medium'
+ * }, 12345);
+ * ```
+ */
+public async generatePlanet(config: PlanetConfig, seed: number): Promise<PlanetData> {
+    // Implementation
+}
+```
+
+### **Inline Comments**
+- **Explain "Why," Not "What"**: Focus on reasoning, not obvious code
+- **Complex Logic**: Document non-obvious algorithms
+- **Performance Notes**: Explain optimization decisions
+- **TODO/FIXME**: Track technical debt
+
+### **README Requirements**
+Every major directory must contain:
+
+```markdown
+# Directory Name
+
+## Purpose
+Brief description of the directory's role
+
+## Structure
+- `file1.ts` - Description
+- `file2.ts` - Description
+
+## Usage
+How to use components/utilities in this directory
+
+## Dependencies
+Key external dependencies
+```
+
+## 🔬 **Testing Strategy**
+
+### **Test Categories**
+1. **Unit Tests**: Individual component testing
+2. **Integration Tests**: Component interaction testing
+3. **Performance Tests**: FPS and memory validation
+4. **Visual Tests**: Rendering accuracy verification
+5. **Cross-Platform Tests**: Platform-specific behavior
+
+### **Test Structure**
+```typescript
+describe('PlanetGenerator', () => {
+    beforeEach(() => {
+        // Setup test environment
+        setupThreeJSMocks();
+        resetPerformanceCounters();
+    });
+
+    afterEach(() => {
+        // Cleanup
+        disposeThreeJSResources();
+        collectGarbage();
+    });
+
+    describe('Performance Tests', () => {
+        it('should maintain 60 FPS during generation', async () => {
+            const monitor = new PerformanceMonitor();
+            const startTime = performance.now();
+            
+            while (performance.now() - startTime < 5000) {
+                await generatePlanet(defaultConfig);
+                const fps = monitor.measureFPS();
+                expect(fps).toBeGreaterThan(45);
+            }
+        });
+
+        it('should not exceed memory limits', async () => {
+            const memoryMonitor = new MemoryMonitor();
+            const initialMemory = memoryMonitor.checkMemoryUsage();
+            
+            // Generate 100 planets
+            for (let i = 0; i < 100; i++) {
+                await generatePlanet(defaultConfig);
+            }
+            
+            const finalMemory = memoryMonitor.checkMemoryUsage();
+            expect(finalMemory.percentage).toBeLessThan(0.85);
+        });
+    });
+
+    describe('Functional Tests', () => {
+        it('should generate valid planet data', async () => {
+            const planet = await generatePlanet(defaultConfig);
+            
+            expect(planet).toBeDefined();
+            expect(planet.type).toBe(defaultConfig.type);
+            expect(planet.radius).toBeGreaterThan(0);
+            expect(planet.materials).toBeDefined();
+        });
+    });
+});
+```
+
+### **Performance Testing Requirements**
+- **FPS Monitoring**: All visual components must maintain 60 FPS
+- **Memory Testing**: No memory leaks over extended use
+- **Load Testing**: Handle multiple simultaneous operations
+- **Stress Testing**: Performance under extreme conditions
+
+## 🌐 **Cross-Platform Development**
+
+### **Platform Targets**
+- **Web**: Modern browsers with WebGL2 support
+- **Desktop**: Windows, macOS, Linux via Tauri
+- **Mobile**: Future React Native implementation
+- **PWA**: Progressive Web App capabilities
+
+### **Platform Abstraction**
+```typescript
+// Platform-specific implementations
+interface PlatformAPI {
+    filesystem: FileSystemAPI;
+    notifications: NotificationAPI;
+    input: InputAPI;
+    audio: AudioAPI;
+}
+
+// Factory pattern for platform selection
+class PlatformFactory {
+    static create(): PlatformAPI {
+        if (typeof window.__TAURI__ !== 'undefined') {
+            return new TauriPlatform();
+        } else if ('serviceWorker' in navigator) {
+            return new WebPlatform();
+        } else {
+            return new FallbackPlatform();
+        }
+    }
+}
+```
+
+### **Input Handling**
+```typescript
+class InputManager {
+    private handlers = new Map<InputType, InputHandler>();
+    
+    constructor() {
+        // Register platform-appropriate handlers
+        this.registerHandler('mouse', new MouseHandler());
+        this.registerHandler('touch', new TouchHandler());
+        this.registerHandler('gamepad', new GamepadHandler());
+        this.registerHandler('keyboard', new KeyboardHandler());
+    }
+    
+    public handleInput(event: InputEvent): void {
+        const handler = this.handlers.get(event.type);
+        handler?.process(event);
+    }
+}
+```
+
+### **Responsive Design**
+```typescript
+// Screen size breakpoints
+const breakpoints = {
+    mobile: '(max-width: 768px)',
+    tablet: '(min-width: 769px) and (max-width: 1024px)',
+    desktop: '(min-width: 1025px)',
+    ultrawide: '(min-width: 1920px)'
+};
+
+// Adaptive UI components
+function ResponsiveGenerator({ children }: Props) {
+    const [screenSize, setScreenSize] = useState(getScreenSize());
+    
+    useEffect(() => {
+        const handler = () => setScreenSize(getScreenSize());
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
+    
+    return (
+        <div className={`generator-${screenSize}`}>
+            {children}
+        </div>
+    );
+}
+```
+
+## 🔄 **Development Workflow**
+
+### **Feature Development Process**
+1. **Planning**: Create feature specification document
+2. **Architecture**: Design component structure
+3. **Implementation**: Code with performance in mind
+4. **Testing**: Unit, integration, and performance tests
+5. **Documentation**: Update all relevant docs
+6. **Review**: Code review and performance validation
+7. **Deployment**: Staged rollout with monitoring
+
+### **Code Review Checklist**
+- [ ] **Performance**: No FPS drops or memory leaks
+- [ ] **Error Handling**: Proper error boundaries and recovery
+- [ ] **Documentation**: Complete JSDoc and inline comments
+- [ ] **Testing**: Adequate test coverage
+- [ ] **Types**: Strong TypeScript typing
+- [ ] **Standards**: Follows coding conventions
+- [ ] **Cross-Platform**: Works on all target platforms
+
+### **Git Workflow**
+```bash
+# Feature branch naming
+feature/generator-black-hole
+bugfix/memory-leak-planet-renderer
+performance/optimize-galaxy-generation
+
+# Commit message format
+feat: add black hole generator with event horizon
+fix: resolve memory leak in planet disposal
+perf: optimize galaxy particle system (2x FPS improvement)
+docs: update API documentation for generators
+test: add performance tests for star renderer
+```
+
+### **Deployment Pipeline**
+1. **Development**: Local testing with hot reload
+2. **Staging**: Automated testing and performance validation
+3. **Production**: Gradual rollout with rollback capability
+4. **Monitoring**: Real-time performance and error tracking
+
+## 📊 **Quality Metrics**
+
+### **Code Quality**
+- **TypeScript Coverage**: 100% typed code
+- **ESLint Score**: Zero warnings or errors
+- **File Size**: Maximum 500 lines per file
+- **Complexity**: Low cyclomatic complexity
+
+### **Performance Metrics**
+- **FPS**: Minimum 60 FPS, target 120 FPS
+- **Memory**: < 512MB JavaScript heap
+- **Bundle Size**: < 2MB initial load
+- **Load Time**: < 3 seconds first paint
+
+### **Test Coverage**
+- **Unit Tests**: > 80% code coverage
+- **Integration Tests**: All major workflows
+- **Performance Tests**: All visual components
+- **Cross-Platform Tests**: All target platforms
+
+This comprehensive development workflow ensures high-quality, performant, and maintainable code across all platforms and features.# Development Workflow & Standards
+
+## 📝 **Documentation Standards**
+
+### **File-Level Documentation**
+Every file must include a comprehensive header:
+
+```typescript
+/**
+ * @file ComponentName.tsx
+ * @description Brief description of the file's purpose and functionality
+ * @version 1.0.0
+ * @author Galactic Clans Development Team
+ * @created 2024-01-XX
+ * 
+ * @purpose Detailed explanation of what this file accomplishes
+ * @dependencies List of major dependencies (Three.js, React, etc.)
+ * @exports Main exports (ComponentName, types, utilities)
+ */
+```
+
+### **Function & Class Documentation**
+```typescript
+/**
+ * Generates a procedural planet with specified configuration
+ * @param config - Planet generation parameters
+ * @param seed - Random seed for consistent generation
+ * @returns Promise resolving to generated planet data
+ * @throws {ValidationError} When config parameters are invalid
+ * @example
+ * ```typescript
+ * const planet = await generatePlanet({
+ *   type: 'terrestrial',
+ *   size: 'medium'
+ * }, 12345);
+ * ```
+ */
+public async generatePlanet(config: PlanetConfig, seed: number): Promise<PlanetData> {
+    // Implementation
+}
+```
+
+### **Inline Comments**
+- **Explain "Why," Not "What"**: Focus on reasoning, not obvious code
+- **Complex Logic**: Document non-obvious algorithms
+- **Performance Notes**: Explain optimization decisions
+- **TODO/FIXME**: Track technical debt
+
+### **README Requirements**
+Every major directory must contain:
+
+```markdown
+# Directory Name
+
+## Purpose
+Brief description of the directory's role
+
+## Structure
+- `file1.ts` - Description
+- `file2.ts` - Description
+
+## Usage
+How to use components/utilities in this directory
+
+## Dependencies
+Key external dependencies
+```
+
+## 🔬 **Testing Strategy**
+
+### **Test Categories**
+1. **Unit Tests**: Individual component testing
+2. **Integration Tests**: Component interaction testing
+3. **Performance Tests**: FPS and memory validation
+4. **Visual Tests**: Rendering accuracy verification
+5. **Cross-Platform Tests**: Platform-specific behavior
+
+### **Test Structure**
+```typescript
+describe('PlanetGenerator', () => {
+    beforeEach(() => {
+        // Setup test environment
+        setupThreeJSMocks();
+        resetPerformanceCounters();
+    });
+
+    afterEach(() => {
+        // Cleanup
+        disposeThreeJSResources();
+        collectGarbage();
+    });
+
+    describe('Performance Tests', () => {
+        it('should maintain 60 FPS during generation', async () => {
+            const monitor = new PerformanceMonitor();
+            const startTime = performance.now();
+            
+            while (performance.now() - startTime < 5000) {
+                await generatePlanet(defaultConfig);
+                const fps = monitor.measureFPS();
+                expect(fps).toBeGreaterThan(45);
+            }
+        });
+
+        it('should not exceed memory limits', async () => {
+            const memoryMonitor = new MemoryMonitor();
+            const initialMemory = memoryMonitor.checkMemoryUsage();
+            
+            // Generate 100 planets
+            for (let i = 0; i < 100; i++) {
+                await generatePlanet(defaultConfig);
+            }
+            
+            const finalMemory = memoryMonitor.checkMemoryUsage();
+            expect(finalMemory.percentage).toBeLessThan(0.85);
+        });
+    });
+
+    describe('Functional Tests', () => {
+        it('should generate valid planet data', async () => {
+            const planet = await generatePlanet(defaultConfig);
+            
+            expect(planet).toBeDefined();
+            expect(planet.type).toBe(defaultConfig.type);
+            expect(planet.radius).toBeGreaterThan(0);
+            expect(planet.materials).toBeDefined();
+        });
+    });
+});
+```
+
+### **Performance Testing Requirements**
+- **FPS Monitoring**: All visual components must maintain 60 FPS
+- **Memory Testing**: No memory leaks over extended use
+- **Load Testing**: Handle multiple simultaneous operations
+- **Stress Testing**: Performance under extreme conditions
+
+## 🌐 **Cross-Platform Development**
+
+### **Platform Targets**
+- **Web**: Modern browsers with WebGL2 support
+- **Desktop**: Windows, macOS, Linux via Tauri
+- **Mobile**: Future React Native implementation
+- **PWA**: Progressive Web App capabilities
+
+### **Platform Abstraction**
+```typescript
+// Platform-specific implementations
+interface PlatformAPI {
+    filesystem: FileSystemAPI;
+    notifications: NotificationAPI;
+    input: InputAPI;
+    audio: AudioAPI;
+}
+
+// Factory pattern for platform selection
+class PlatformFactory {
+    static create(): PlatformAPI {
+        if (typeof window.__TAURI__ !== 'undefined') {
+            return new TauriPlatform();
+        } else if ('serviceWorker' in navigator) {
+            return new WebPlatform();
+        } else {
+            return new FallbackPlatform();
+        }
+    }
+}
+```
+
+### **Input Handling**
+```typescript
+class InputManager {
+    private handlers = new Map<InputType, InputHandler>();
+    
+    constructor() {
+        // Register platform-appropriate handlers
+        this.registerHandler('mouse', new MouseHandler());
+        this.registerHandler('touch', new TouchHandler());
+        this.registerHandler('gamepad', new GamepadHandler());
+        this.registerHandler('keyboard', new KeyboardHandler());
+    }
+    
+    public handleInput(event: InputEvent): void {
+        const handler = this.handlers.get(event.type);
+        handler?.process(event);
+    }
+}
+```
+
+### **Responsive Design**
+```typescript
+// Screen size breakpoints
+const breakpoints = {
+    mobile: '(max-width: 768px)',
+    tablet: '(min-width: 769px) and (max-width: 1024px)',
+    desktop: '(min-width: 1025px)',
+    ultrawide: '(min-width: 1920px)'
+};
+
+// Adaptive UI components
+function ResponsiveGenerator({ children }: Props) {
+    const [screenSize, setScreenSize] = useState(getScreenSize());
+    
+    useEffect(() => {
+        const handler = () => setScreenSize(getScreenSize());
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
+    
+    return (
+        <div className={`generator-${screenSize}`}>
+            {children}
+        </div>
+    );
+}
+```
+
+## 🔄 **Development Workflow**
+
+### **Feature Development Process**
+1. **Planning**: Create feature specification document
+2. **Architecture**: Design component structure
+3. **Implementation**: Code with performance in mind
+4. **Testing**: Unit, integration, and performance tests
+5. **Documentation**: Update all relevant docs
+6. **Review**: Code review and performance validation
+7. **Deployment**: Staged rollout with monitoring
+
+### **Code Review Checklist**
+- [ ] **Performance**: No FPS drops or memory leaks
+- [ ] **Error Handling**: Proper error boundaries and recovery
+- [ ] **Documentation**: Complete JSDoc and inline comments
+- [ ] **Testing**: Adequate test coverage
+- [ ] **Types**: Strong TypeScript typing
+- [ ] **Standards**: Follows coding conventions
+- [ ] **Cross-Platform**: Works on all target platforms
+
+### **Git Workflow**
+```bash
+# Feature branch naming
+feature/generator-black-hole
+bugfix/memory-leak-planet-renderer
+performance/optimize-galaxy-generation
+
+# Commit message format
+feat: add black hole generator with event horizon
+fix: resolve memory leak in planet disposal
+perf: optimize galaxy particle system (2x FPS improvement)
+docs: update API documentation for generators
+test: add performance tests for star renderer
+```
+
+### **Deployment Pipeline**
+1. **Development**: Local testing with hot reload
+2. **Staging**: Automated testing and performance validation
+3. **Production**: Gradual rollout with rollback capability
+4. **Monitoring**: Real-time performance and error tracking
+
+## 📊 **Quality Metrics**
+
+### **Code Quality**
+- **TypeScript Coverage**: 100% typed code
+- **ESLint Score**: Zero warnings or errors
+- **File Size**: Maximum 500 lines per file
+- **Complexity**: Low cyclomatic complexity
+
+### **Performance Metrics**
+- **FPS**: Minimum 60 FPS, target 120 FPS
+- **Memory**: < 512MB JavaScript heap
+- **Bundle Size**: < 2MB initial load
+- **Load Time**: < 3 seconds first paint
+
+### **Test Coverage**
+- **Unit Tests**: > 80% code coverage
+- **Integration Tests**: All major workflows
+- **Performance Tests**: All visual components
+- **Cross-Platform Tests**: All target platforms
+
+This comprehensive development workflow ensures high-quality, performant, and maintainable code across all platforms and features.

@@ -1,0 +1,566 @@
+---
+alwaysApply: false
+---
+
+# Performance & Error Handling - Always Active
+
+## 🎯 **Performance Targets (Non-Negotiable)**
+
+### **Frame Rate Requirements**
+- **Target**: 60 FPS minimum at all times
+- **Critical Threshold**: Never drop below 45 FPS
+- **Ideal Target**: 120 FPS for high-refresh displays
+- **VR Ready**: 90 FPS minimum for future VR support
+
+### **Memory Limits**
+- **Total Memory Usage**: < 4GB RAM maximum
+- **JavaScript Heap**: < 512MB during gameplay
+- **GPU Memory**: < 2GB VRAM usage
+- **Asset Memory**: < 1GB for all loaded assets
+
+### **Network Performance**
+- **Latency**: < 100ms for multiplayer actions
+- **Bandwidth**: < 50KB/s during normal gameplay
+- **Connection Recovery**: < 2 seconds for reconnection
+
+## 🔍 **Performance Monitoring**
+
+### **Frame Rate Monitoring**
+```typescript
+class PerformanceMonitor {
+    private frameCount = 0;
+    private lastTime = performance.now();
+    private fps = 60;
+    
+    public measureFPS(): number {
+        const currentTime = performance.now();
+        this.frameCount++;
+        
+        if (currentTime - this.lastTime >= 1000) {
+            this.fps = this.frameCount;
+            
+            // Alert if FPS drops below threshold
+            if (this.fps < 45) {
+                console.warn(`🚨 [PERFORMANCE:CRITICAL] FPS dropped to ${this.fps}`);
+                this.triggerPerformanceRecovery();
+            }
+            
+            this.frameCount = 0;
+            this.lastTime = currentTime;
+        }
+        
+        return this.fps;
+    }
+}
+```
+
+### **Memory Usage Monitoring**
+```typescript
+class MemoryMonitor {
+    private memoryThresholds = {
+        warning: 0.7,    // 70% of limit
+        critical: 0.85,  // 85% of limit
+        emergency: 0.95  // 95% of limit
+    };
+    
+    public checkMemoryUsage(): MemoryInfo {
+        const memory = (performance as any).memory;
+        const usage = {
+            used: memory.usedJSHeapSize,
+            total: memory.totalJSHeapSize,
+            limit: memory.jsHeapSizeLimit,
+            percentage: memory.usedJSHeapSize / memory.jsHeapSizeLimit
+        };
+        
+        if (usage.percentage >= this.memoryThresholds.emergency) {
+            console.error(`🚨 [MEMORY:EMERGENCY] ${(usage.percentage * 100).toFixed(1)}% memory usage`);
+            this.emergencyCleanup();
+        }
+        
+        return usage;
+    }
+}
+```
+
+## 🛡️ **Error Handling Categories**
+
+### **System Error Types**
+```typescript
+enum SystemErrorType {
+    // Performance Errors
+    PERFORMANCE_DEGRADATION = "PERFORMANCE_DEGRADATION",
+    MEMORY_OVERFLOW = "MEMORY_OVERFLOW",
+    FPS_DROP = "FPS_DROP",
+    
+    // Rendering Errors
+    WEBGL_CONTEXT_LOST = "WEBGL_CONTEXT_LOST",
+    SHADER_COMPILATION_FAILED = "SHADER_COMPILATION_FAILED",
+    TEXTURE_LOAD_FAILED = "TEXTURE_LOAD_FAILED",
+    
+    // Game State Errors
+    SAVE_CORRUPTION = "SAVE_CORRUPTION",
+    LOAD_FAILURE = "LOAD_FAILURE",
+    STATE_DESYNC = "STATE_DESYNC",
+    
+    // Network Errors
+    CONNECTION_LOST = "CONNECTION_LOST",
+    TIMEOUT = "TIMEOUT",
+    SERVER_ERROR = "SERVER_ERROR",
+    
+    // Audio Errors
+    AUDIO_CONTEXT_FAILED = "AUDIO_CONTEXT_FAILED",
+    AUDIO_LOAD_FAILED = "AUDIO_LOAD_FAILED"
+}
+
+enum ErrorSeverity {
+    CRITICAL = "CRITICAL",        // Breaks core functionality
+    HIGH = "HIGH",               // Significant impact
+    MEDIUM = "MEDIUM",           // Moderate impact
+    LOW = "LOW"                  // Minor issues
+}
+```
+
+### **React Error Boundaries**
+```typescript
+class GeneratorErrorBoundary extends Component<Props, State> {
+    override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+        console.error(`🚨 [COMPONENT:CRITICAL] ${this.props.componentName} failed:
+            ❌ Error: ${error.message}
+            📍 Stack: ${error.stack}
+            ⚛️ Component Stack: ${errorInfo.componentStack}
+            🛡️ Fallback: Showing error UI...`);
+        
+        // Report to monitoring service
+        this.reportError(error, errorInfo);
+    }
+    
+    override render(): ReactNode {
+        if (this.state.hasError) {
+            return this.props.fallback || <DefaultErrorFallback />;
+        }
+        
+        return this.props.children;
+    }
+}
+```
+
+### **3D Rendering Error Recovery**
+```typescript
+class RenderingErrorHandler {
+    public handleWebGLContextLoss(canvas: HTMLCanvasElement): void {
+        console.error(`🎮 [WEBGL:CRITICAL] Context lost, attempting recovery...`);
+        
+        // Attempt context restoration
+        canvas.addEventListener('webglcontextrestored', () => {
+            console.log(`🎮 [WEBGL:RECOVERY] Context restored, reinitializing...`);
+            this.reinitializeRenderer();
+        });
+        
+        // Show user-friendly message
+        this.showContextLossMessage();
+    }
+    
+    public handleShaderError(error: Error, shaderType: string): void {
+        console.error(`🎨 [SHADER:HIGH] ${shaderType} shader compilation failed:
+            ❌ Error: ${error.message}
+            🛡️ Fallback: Using basic material...`);
+        
+        // Use fallback materials
+        this.useFallbackMaterial();
+    }
+}
+```
+
+### **Performance Recovery Strategies**
+```typescript
+class PerformanceRecovery {
+    public triggerPerformanceRecovery(): void {
+        console.warn(`⚡ [RECOVERY] Triggering performance recovery measures...`);
+        
+        // Progressive quality reduction
+        this.reduceParticleCount();
+        this.disableAdvancedShaders();
+        this.reduceRenderDistance();
+        this.enableAggressive LOD();
+        
+        // Memory cleanup
+        this.forceGarbageCollection();
+        this.unloadNonEssentialAssets();
+    }
+    
+    public emergencyCleanup(): void {
+        console.error(`🚨 [EMERGENCY] Executing emergency cleanup...`);
+        
+        // Force garbage collection if available
+        if ((window as any).gc) (window as any).gc();
+        
+        // Clear all caches
+        this.clearAllCaches();
+        
+        // Reduce quality to minimum
+        this.setMinimumQuality();
+        
+        // Restart critical systems
+        this.restartAudioSystem();
+        this.reinitializeRenderer();
+    }
+}
+```
+
+## 📊 **Monitoring Dashboard**
+
+### **System Health Metrics**
+```typescript
+interface SystemHealthMetrics {
+    // Performance
+    fps: number;
+    frameTime: number;
+    memoryUsage: number;
+    gpuMemory: number;
+    
+    // Errors
+    errorCount: number;
+    lastError: string;
+    recoveryAttempts: number;
+    
+    // Quality
+    currentQualityLevel: number;
+    autoAdjustments: number;
+}
+```
+
+### **Automatic Quality Adjustment**
+```typescript
+class QualityManager {
+    private qualityLevels = [
+        { name: 'Ultra',    particles: 1000, shadows: true,  antialiasing: 4 },
+        { name: 'High',     particles: 500,  shadows: true,  antialiasing: 2 },
+        { name: 'Medium',   particles: 250,  shadows: false, antialiasing: 1 },
+        { name: 'Low',      particles: 100,  shadows: false, antialiasing: 0 },
+        { name: 'Minimal', particles: 50,   shadows: false, antialiasing: 0 }
+    ];
+    
+    public adjustQualityBasedOnPerformance(fps: number, memoryUsage: number): void {
+        let targetQuality = this.currentQuality;
+        
+        // Reduce quality if performance is poor
+        if (fps < 45 || memoryUsage > 0.85) {
+            targetQuality = Math.max(0, targetQuality - 1);
+        }
+        // Increase quality if performance is good
+        else if (fps > 55 && memoryUsage < 0.6 && this.stableFor > 30) {
+            targetQuality = Math.min(this.qualityLevels.length - 1, targetQuality + 1);
+        }
+        
+        if (targetQuality !== this.currentQuality) {
+            this.setQualityLevel(targetQuality);
+        }
+    }
+}
+```
+
+## 🔧 **Implementation Requirements**
+
+### **Mandatory Patterns**
+1. **Every render loop must include FPS monitoring**
+2. **All asset loading must include memory checks**
+3. **Every component must have error boundaries**
+4. **All async operations must have timeout handling**
+5. **Every system must implement graceful degradation**
+
+### **Forbidden Anti-Patterns**
+❌ **NEVER** create objects in render loops
+❌ **NEVER** ignore memory cleanup
+❌ **NEVER** block the main thread for > 16ms
+❌ **NEVER** load assets synchronously
+❌ **NEVER** ignore error states
+
+### **Required Optimizations**
+✅ Use `requestAnimationFrame` for all animations
+✅ Implement object pooling for frequently created objects
+✅ Use Web Workers for heavy computations
+✅ Implement proper asset streaming and unloading
+✅ Use efficient data structures (TypedArrays when possible)
+
+This comprehensive system ensures stable performance and robust error recovery across all game systems.
+# Performance & Error Handling - Always Active
+
+## 🎯 **Performance Targets (Non-Negotiable)**
+
+### **Frame Rate Requirements**
+- **Target**: 60 FPS minimum at all times
+- **Critical Threshold**: Never drop below 45 FPS
+- **Ideal Target**: 120 FPS for high-refresh displays
+- **VR Ready**: 90 FPS minimum for future VR support
+
+### **Memory Limits**
+- **Total Memory Usage**: < 4GB RAM maximum
+- **JavaScript Heap**: < 512MB during gameplay
+- **GPU Memory**: < 2GB VRAM usage
+- **Asset Memory**: < 1GB for all loaded assets
+
+### **Network Performance**
+- **Latency**: < 100ms for multiplayer actions
+- **Bandwidth**: < 50KB/s during normal gameplay
+- **Connection Recovery**: < 2 seconds for reconnection
+
+## 🔍 **Performance Monitoring**
+
+### **Frame Rate Monitoring**
+```typescript
+class PerformanceMonitor {
+    private frameCount = 0;
+    private lastTime = performance.now();
+    private fps = 60;
+    
+    public measureFPS(): number {
+        const currentTime = performance.now();
+        this.frameCount++;
+        
+        if (currentTime - this.lastTime >= 1000) {
+            this.fps = this.frameCount;
+            
+            // Alert if FPS drops below threshold
+            if (this.fps < 45) {
+                console.warn(`🚨 [PERFORMANCE:CRITICAL] FPS dropped to ${this.fps}`);
+                this.triggerPerformanceRecovery();
+            }
+            
+            this.frameCount = 0;
+            this.lastTime = currentTime;
+        }
+        
+        return this.fps;
+    }
+}
+```
+
+### **Memory Usage Monitoring**
+```typescript
+class MemoryMonitor {
+    private memoryThresholds = {
+        warning: 0.7,    // 70% of limit
+        critical: 0.85,  // 85% of limit
+        emergency: 0.95  // 95% of limit
+    };
+    
+    public checkMemoryUsage(): MemoryInfo {
+        const memory = (performance as any).memory;
+        const usage = {
+            used: memory.usedJSHeapSize,
+            total: memory.totalJSHeapSize,
+            limit: memory.jsHeapSizeLimit,
+            percentage: memory.usedJSHeapSize / memory.jsHeapSizeLimit
+        };
+        
+        if (usage.percentage >= this.memoryThresholds.emergency) {
+            console.error(`🚨 [MEMORY:EMERGENCY] ${(usage.percentage * 100).toFixed(1)}% memory usage`);
+            this.emergencyCleanup();
+        }
+        
+        return usage;
+    }
+}
+```
+
+## 🛡️ **Error Handling Categories**
+
+### **System Error Types**
+```typescript
+enum SystemErrorType {
+    // Performance Errors
+    PERFORMANCE_DEGRADATION = "PERFORMANCE_DEGRADATION",
+    MEMORY_OVERFLOW = "MEMORY_OVERFLOW",
+    FPS_DROP = "FPS_DROP",
+    
+    // Rendering Errors
+    WEBGL_CONTEXT_LOST = "WEBGL_CONTEXT_LOST",
+    SHADER_COMPILATION_FAILED = "SHADER_COMPILATION_FAILED",
+    TEXTURE_LOAD_FAILED = "TEXTURE_LOAD_FAILED",
+    
+    // Game State Errors
+    SAVE_CORRUPTION = "SAVE_CORRUPTION",
+    LOAD_FAILURE = "LOAD_FAILURE",
+    STATE_DESYNC = "STATE_DESYNC",
+    
+    // Network Errors
+    CONNECTION_LOST = "CONNECTION_LOST",
+    TIMEOUT = "TIMEOUT",
+    SERVER_ERROR = "SERVER_ERROR",
+    
+    // Audio Errors
+    AUDIO_CONTEXT_FAILED = "AUDIO_CONTEXT_FAILED",
+    AUDIO_LOAD_FAILED = "AUDIO_LOAD_FAILED"
+}
+
+enum ErrorSeverity {
+    CRITICAL = "CRITICAL",        // Breaks core functionality
+    HIGH = "HIGH",               // Significant impact
+    MEDIUM = "MEDIUM",           // Moderate impact
+    LOW = "LOW"                  // Minor issues
+}
+```
+
+### **React Error Boundaries**
+```typescript
+class GeneratorErrorBoundary extends Component<Props, State> {
+    override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+        console.error(`🚨 [COMPONENT:CRITICAL] ${this.props.componentName} failed:
+            ❌ Error: ${error.message}
+            📍 Stack: ${error.stack}
+            ⚛️ Component Stack: ${errorInfo.componentStack}
+            🛡️ Fallback: Showing error UI...`);
+        
+        // Report to monitoring service
+        this.reportError(error, errorInfo);
+    }
+    
+    override render(): ReactNode {
+        if (this.state.hasError) {
+            return this.props.fallback || <DefaultErrorFallback />;
+        }
+        
+        return this.props.children;
+    }
+}
+```
+
+### **3D Rendering Error Recovery**
+```typescript
+class RenderingErrorHandler {
+    public handleWebGLContextLoss(canvas: HTMLCanvasElement): void {
+        console.error(`🎮 [WEBGL:CRITICAL] Context lost, attempting recovery...`);
+        
+        // Attempt context restoration
+        canvas.addEventListener('webglcontextrestored', () => {
+            console.log(`🎮 [WEBGL:RECOVERY] Context restored, reinitializing...`);
+            this.reinitializeRenderer();
+        });
+        
+        // Show user-friendly message
+        this.showContextLossMessage();
+    }
+    
+    public handleShaderError(error: Error, shaderType: string): void {
+        console.error(`🎨 [SHADER:HIGH] ${shaderType} shader compilation failed:
+            ❌ Error: ${error.message}
+            🛡️ Fallback: Using basic material...`);
+        
+        // Use fallback materials
+        this.useFallbackMaterial();
+    }
+}
+```
+
+### **Performance Recovery Strategies**
+```typescript
+class PerformanceRecovery {
+    public triggerPerformanceRecovery(): void {
+        console.warn(`⚡ [RECOVERY] Triggering performance recovery measures...`);
+        
+        // Progressive quality reduction
+        this.reduceParticleCount();
+        this.disableAdvancedShaders();
+        this.reduceRenderDistance();
+        this.enableAggressive LOD();
+        
+        // Memory cleanup
+        this.forceGarbageCollection();
+        this.unloadNonEssentialAssets();
+    }
+    
+    public emergencyCleanup(): void {
+        console.error(`🚨 [EMERGENCY] Executing emergency cleanup...`);
+        
+        // Force garbage collection if available
+        if ((window as any).gc) (window as any).gc();
+        
+        // Clear all caches
+        this.clearAllCaches();
+        
+        // Reduce quality to minimum
+        this.setMinimumQuality();
+        
+        // Restart critical systems
+        this.restartAudioSystem();
+        this.reinitializeRenderer();
+    }
+}
+```
+
+## 📊 **Monitoring Dashboard**
+
+### **System Health Metrics**
+```typescript
+interface SystemHealthMetrics {
+    // Performance
+    fps: number;
+    frameTime: number;
+    memoryUsage: number;
+    gpuMemory: number;
+    
+    // Errors
+    errorCount: number;
+    lastError: string;
+    recoveryAttempts: number;
+    
+    // Quality
+    currentQualityLevel: number;
+    autoAdjustments: number;
+}
+```
+
+### **Automatic Quality Adjustment**
+```typescript
+class QualityManager {
+    private qualityLevels = [
+        { name: 'Ultra',    particles: 1000, shadows: true,  antialiasing: 4 },
+        { name: 'High',     particles: 500,  shadows: true,  antialiasing: 2 },
+        { name: 'Medium',   particles: 250,  shadows: false, antialiasing: 1 },
+        { name: 'Low',      particles: 100,  shadows: false, antialiasing: 0 },
+        { name: 'Minimal', particles: 50,   shadows: false, antialiasing: 0 }
+    ];
+    
+    public adjustQualityBasedOnPerformance(fps: number, memoryUsage: number): void {
+        let targetQuality = this.currentQuality;
+        
+        // Reduce quality if performance is poor
+        if (fps < 45 || memoryUsage > 0.85) {
+            targetQuality = Math.max(0, targetQuality - 1);
+        }
+        // Increase quality if performance is good
+        else if (fps > 55 && memoryUsage < 0.6 && this.stableFor > 30) {
+            targetQuality = Math.min(this.qualityLevels.length - 1, targetQuality + 1);
+        }
+        
+        if (targetQuality !== this.currentQuality) {
+            this.setQualityLevel(targetQuality);
+        }
+    }
+}
+```
+
+## 🔧 **Implementation Requirements**
+
+### **Mandatory Patterns**
+1. **Every render loop must include FPS monitoring**
+2. **All asset loading must include memory checks**
+3. **Every component must have error boundaries**
+4. **All async operations must have timeout handling**
+5. **Every system must implement graceful degradation**
+
+### **Forbidden Anti-Patterns**
+❌ **NEVER** create objects in render loops
+❌ **NEVER** ignore memory cleanup
+❌ **NEVER** block the main thread for > 16ms
+❌ **NEVER** load assets synchronously
+❌ **NEVER** ignore error states
+
+### **Required Optimizations**
+✅ Use `requestAnimationFrame` for all animations
+✅ Implement object pooling for frequently created objects
+✅ Use Web Workers for heavy computations
+✅ Implement proper asset streaming and unloading
+✅ Use efficient data structures (TypedArrays when possible)
+
+This comprehensive system ensures stable performance and robust error recovery across all game systems.

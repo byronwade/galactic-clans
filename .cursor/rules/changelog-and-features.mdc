@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # Changelog and Feature Tracking
 
 This document outlines the process for maintaining a clear and up-to-date record of project changes and features.
@@ -61,8 +65,66 @@ The feature log should be a table with the following columns:
 ```
 
 When you are asked to work on a feature, update its status. If a feature is removed, mark it as `Deprecated`.
+# Changelog and Feature Tracking
 
-description:
-globs:
-alwaysApply: true
----
+This document outlines the process for maintaining a clear and up-to-date record of project changes and features.
+
+## Guiding Principles
+
+-   **Clarity**: Documentation should be easy to read and understand.
+-   **Consistency**: Follow the specified format for all entries.
+-   **Timeliness**: Update the documentation as soon as a significant milestone is reached or a feature's status changes.
+
+## Changelog for Significant Milestones
+
+When a significant milestone is completed (e.g., implementation of a major feature like "Resource Generation" or "Multiplayer Foundation"), a new entry should be added to a changelog file in the `docs/` directory.
+
+-   The file should be named according to the date and milestone, for example: `docs/2024-07-28-resource-generation.md`.
+-   The entry should provide a high-level summary of what was accomplished.
+-   It should link to any relevant design documents or other rule files.
+
+**Example Entry (`docs/2024-07-28-resource-generation.md`):**
+
+```markdown
+# Milestone: Resource Generation Implemented
+
+**Date:** 2024-07-28
+
+## Summary
+
+Completed the initial implementation of the resource generation system. This includes:
+-   Defining core resources (Minerals, Energy, Dark Matter).
+-   Creating a player inventory system.
+-   Integrating resource yields into the procedural planet generation.
+-   Implementing system claiming and idle resource accumulation.
+-   Displaying player resources in the UI.
+
+## Related Documents
+-   [Game Economy Design](mdc:.cursor/rules/economy-design.mdc)
+```
+
+## Feature Log
+
+A single file, `docs/FEATURES.md`, should be maintained to track the status of all major features in the game. This provides a quick overview of what is currently implemented.
+
+The feature log should be a table with the following columns:
+-   **Feature**: The name of the feature.
+-   **Status**: Can be `Implemented`, `In Progress`, `Planned`, or `Deprecated`.
+-   **Description**: A brief one-sentence description of the feature.
+-   **Last Updated**: The date of the last status change.
+
+**Example `docs/FEATURES.md`:**
+
+```markdown
+# Feature Log
+
+| Feature                | Status      | Description                                                 | Last Updated |
+| ---------------------- | ----------- | ----------------------------------------------------------- | ------------ |
+| Procedural Generation  | Implemented | Generates galaxies, solar systems, and planets dynamically. | 2024-07-27   |
+| Resource Generation    | Implemented | Allows players to claim systems and gather resources.       | 2024-07-28   |
+| Multiplayer Networking | In Progress | Foundational setup for client-server communication via WebSockets. | 2024-07-28   |
+| Player Combat          | Planned     | System for player-vs-player raids.                          | 2024-07-26   |
+
+```
+
+When you are asked to work on a feature, update its status. If a feature is removed, mark it as `Deprecated`.

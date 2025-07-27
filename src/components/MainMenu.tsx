@@ -7,7 +7,7 @@ import { Play, Settings, Trophy, Users, HelpCircle, Star, Home, Gamepad2 } from 
 import { useGameAudio } from "@/hooks/useGameAudio";
 
 // Dynamic import to prevent SSR issues
-const PlanetRenderer = dynamic(() => import("@/components/PlanetRenderer"), {
+const BackgroundPlanet = dynamic(() => import("@/components/BackgroundPlanet"), {
 	ssr: false,
 	loading: () => (
 		<div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-black flex items-center justify-center">
@@ -67,7 +67,7 @@ export const MainMenu: React.FC = () => {
 		<div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-black text-white overflow-hidden relative">
 			{/* Background Planet */}
 			<div className="absolute right-0 top-0 w-1/2 h-full">
-				<PlanetRenderer />
+				<BackgroundPlanet />
 			</div>
 
 			{/* Main Content */}

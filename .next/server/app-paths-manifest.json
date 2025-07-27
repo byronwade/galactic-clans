@@ -1,8 +1,5 @@
 {
   "/test/planet/page": "app/test/planet/page.js",
-  "/test/audio/page": "app/test/audio/page.js",
-  "/test/star/page": "app/test/star/page.js",
-  "/test/controller/page": "app/test/controller/page.js",
-  "/test/page": "app/test/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/test/page": "app/test/page.js"
 }
