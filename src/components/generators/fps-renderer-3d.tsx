@@ -100,23 +100,40 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 	// Handle pointer lock events
 	useEffect(() => {
 		const handlePointerLockChange = () => {
-			setIsPointerLocked(document.pointerLockElement === gl.domElement);
+			const isLocked = document.pointerLockElement === gl.domElement;
+			setIsPointerLocked(isLocked);
+			
+			if (isLocked) {
+				console.log('🎮 [FPS] Pointer lock activated');
+			} else {
+				console.log('🎮 [FPS] Pointer lock deactivated');
+			}
 		};
 
-		const handlePointerLockError = () => {
-			console.warn('🎮 [FPS] Pointer lock failed');
+		const handlePointerLockError = (event: Event) => {
+			console.warn('🎮 [FPS] Pointer lock failed:', event);
 			setIsPointerLocked(false);
 		};
 
-		const handleClick = () => {
-			if (!isPointerLocked) {
-				gl.domElement.requestPointerLock();
+		const handleClick = (event: MouseEvent) => {
+			event.preventDefault();
+			if (!isPointerLocked && document.pointerLockElement !== gl.domElement) {
+				try {
+					gl.domElement.requestPointerLock();
+				} catch (error) {
+					console.warn('🎮 [FPS] Failed to request pointer lock:', error);
+				}
 			}
 		};
 
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if (event.code === 'Escape' && isPointerLocked) {
-				document.exitPointerLock();
+				try {
+					document.exitPointerLock();
+				} catch (error) {
+					console.warn('🎮 [FPS] Failed to exit pointer lock:', error);
+					setIsPointerLocked(false);
+				}
 			}
 		};
 
@@ -136,28 +153,48 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 	// Manual mouse handling for FPS camera
 	useEffect(() => {
 		const handleMouseMove = (event: MouseEvent) => {
-			if (!isPointerLocked) return;
+			// Double-check pointer lock state to prevent race conditions
+			if (!isPointerLocked || document.pointerLockElement !== gl.domElement) {
+				return;
+			}
 
-			const sensitivity = config.player.mouseSensitivity * 0.002;
-			const deltaX = event.movementX * sensitivity;
-			const deltaY = event.movementY * sensitivity;
+			try {
+				const sensitivity = config.player.mouseSensitivity * 0.002;
+				const deltaX = event.movementX * sensitivity;
+				const deltaY = event.movementY * sensitivity;
 
-			// Update camera rotation
-			camera.rotation.y -= deltaX;
-			camera.rotation.x -= deltaY;
+				// Update camera rotation
+				camera.rotation.y -= deltaX;
+				camera.rotation.x -= deltaY;
 
-			// Clamp vertical rotation
-			camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+				// Clamp vertical rotation
+				camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+			} catch (error) {
+				console.warn('🎮 [FPS] Mouse movement error:', error);
+			}
 		};
 
-		if (isPointerLocked) {
+		if (isPointerLocked && document.pointerLockElement === gl.domElement) {
 			document.addEventListener('mousemove', handleMouseMove);
 		}
 
 		return () => {
 			document.removeEventListener('mousemove', handleMouseMove);
 		};
-	}, [isPointerLocked, camera, config.player.mouseSensitivity]);
+	}, [isPointerLocked, camera, config.player.mouseSensitivity, gl.domElement]);
+
+	// Cleanup pointer lock on unmount
+	useEffect(() => {
+		return () => {
+			try {
+				if (document.pointerLockElement === gl.domElement) {
+					document.exitPointerLock();
+				}
+			} catch (error) {
+				console.warn('🎮 [FPS] Cleanup pointer lock error:', error);
+			}
+		};
+	}, [gl.domElement]);
 
 	// Advanced movement mechanics
 	const handleAdvancedMovement = useCallback((inputState: any, velocity: THREE.Vector3, delta: number) => {
@@ -242,104 +279,111 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 
 	// Professional movement physics
 	useFrame((state, delta) => {
-		if (!inputManager?.getInputState) return;
-
-		const inputState = inputManager.getInputState();
-		const velocity = velocityRef.current;
-		const direction = directionRef.current;
-
-		// Update jump cooldown
-		jumpCooldownRef.current = Math.max(0, jumpCooldownRef.current - delta);
-
-		// Get camera direction vectors
-		camera.getWorldDirection(direction);
-		const rightVector = new THREE.Vector3();
-		rightVector.crossVectors(direction, camera.up).normalize();
-
-		// Calculate movement input
-		const moveDirection = new THREE.Vector3(0, 0, 0);
-		const isMoving = inputState.forward || inputState.backward || inputState.left || inputState.right;
-		
-		if (inputState.forward) moveDirection.add(direction);
-		if (inputState.backward) moveDirection.sub(direction);
-		if (inputState.left) moveDirection.sub(rightVector);
-		if (inputState.right) moveDirection.add(rightVector);
-
-		// Normalize horizontal movement
-		moveDirection.y = 0;
-		if (moveDirection.length() > 0) {
-			moveDirection.normalize();
+		// Validate essential state before processing
+		if (!inputManager?.getInputState || !camera || !gl.domElement) {
+			return;
 		}
 
-		// Calculate speed based on state
-		let currentSpeed = config.player.walkSpeed;
-		let staminaDrain = 0;
+		try {
+			const inputState = inputManager.getInputState();
+			const velocity = velocityRef.current;
+			const direction = directionRef.current;
 
-		// Enhanced speed calculations
-		if (movementState.isSliding) {
-			currentSpeed = config.player.runSpeed * 1.3; // Sliding is faster
-		} else if (inputState.run && playerState.stamina > 0 && isGroundedRef.current) {
-			currentSpeed = config.player.runSpeed;
-			staminaDrain = 25;
-			setPlayerState(prev => ({ ...prev, isRunning: true }));
-		} else {
-			setPlayerState(prev => ({ ...prev, isRunning: false }));
+			// Update jump cooldown
+			jumpCooldownRef.current = Math.max(0, jumpCooldownRef.current - delta);
+
+			// Get camera direction vectors
+			camera.getWorldDirection(direction);
+			const rightVector = new THREE.Vector3();
+			rightVector.crossVectors(direction, camera.up).normalize();
+
+			// Calculate movement input
+			const moveDirection = new THREE.Vector3(0, 0, 0);
+			const isMoving = inputState.forward || inputState.backward || inputState.left || inputState.right;
+			
+			if (inputState.forward) moveDirection.add(direction);
+			if (inputState.backward) moveDirection.sub(direction);
+			if (inputState.left) moveDirection.sub(rightVector);
+			if (inputState.right) moveDirection.add(rightVector);
+
+			// Normalize horizontal movement
+			moveDirection.y = 0;
+			if (moveDirection.length() > 0) {
+				moveDirection.normalize();
+			}
+
+			// Calculate speed based on state
+			let currentSpeed = config.player.walkSpeed;
+			let staminaDrain = 0;
+
+			// Enhanced speed calculations
+			if (movementState.isSliding) {
+				currentSpeed = config.player.runSpeed * 1.3; // Sliding is faster
+			} else if (inputState.run && playerState.stamina > 0 && isGroundedRef.current) {
+				currentSpeed = config.player.runSpeed;
+				staminaDrain = 25;
+				setPlayerState(prev => ({ ...prev, isRunning: true }));
+			} else {
+				setPlayerState(prev => ({ ...prev, isRunning: false }));
+			}
+
+			if (inputState.crouch && !movementState.isSliding) {
+				currentSpeed = config.player.crouchSpeed;
+				setPlayerState(prev => ({ ...prev, isCrouching: true }));
+			} else {
+				setPlayerState(prev => ({ ...prev, isCrouching: false }));
+			}
+
+			// Advanced movement physics with proper acceleration curves
+			const targetVelocity = moveDirection.multiplyScalar(currentSpeed);
+			const acceleration = isGroundedRef.current ? 20 : 5; // Less air control
+			
+			// Smooth acceleration with easing
+			const accelFactor = 1 - Math.pow(0.001, delta);
+			velocity.x = THREE.MathUtils.lerp(velocity.x, targetVelocity.x, acceleration * delta * accelFactor);
+			velocity.z = THREE.MathUtils.lerp(velocity.z, targetVelocity.z, acceleration * delta * accelFactor);
+
+			// Handle advanced movement mechanics
+			handleAdvancedMovement(inputState, velocity, delta);
+
+			// Gravity and vertical physics
+			if (!isGroundedRef.current) {
+				velocity.y -= 30 * delta; // Gravity
+			}
+
+			// Apply velocity to camera position
+			const newPosition = camera.position.clone();
+			newPosition.add(velocity.clone().multiplyScalar(delta));
+
+			// Terrain collision with enhanced detection
+			const terrainHeight = getTerrainHeight(newPosition.x, newPosition.z);
+			const playerHeight = movementState.isSliding ? 1.0 : (playerState.isCrouching ? 1.2 : 1.8);
+
+			if (newPosition.y <= terrainHeight + playerHeight) {
+				newPosition.y = terrainHeight + playerHeight;
+				velocity.y = 0;
+				isGroundedRef.current = true;
+				setPlayerState(prev => ({ ...prev, isJumping: false }));
+			} else {
+				isGroundedRef.current = false;
+			}
+
+			// Update camera position
+			camera.position.copy(newPosition);
+
+			// Update weapon sway and breathing
+			updateWeaponSway(delta, isMoving, inputState.aim || false);
+
+			// Update stamina with enhanced recovery
+			const staminaRecovery = playerState.isRunning ? 0 : (isMoving ? 10 : 20);
+			setPlayerState(prev => ({
+				...prev,
+				stamina: Math.max(0, Math.min(100, prev.stamina - staminaDrain * delta + staminaRecovery * delta)),
+				isAiming: inputState.aim || false,
+			}));
+		} catch (error) {
+			console.warn('🎮 [FPS] Frame update error:', error);
 		}
-
-		if (inputState.crouch && !movementState.isSliding) {
-			currentSpeed = config.player.crouchSpeed;
-			setPlayerState(prev => ({ ...prev, isCrouching: true }));
-		} else {
-			setPlayerState(prev => ({ ...prev, isCrouching: false }));
-		}
-
-		// Advanced movement physics with proper acceleration curves
-		const targetVelocity = moveDirection.multiplyScalar(currentSpeed);
-		const acceleration = isGroundedRef.current ? 20 : 5; // Less air control
-		
-		// Smooth acceleration with easing
-		const accelFactor = 1 - Math.pow(0.001, delta);
-		velocity.x = THREE.MathUtils.lerp(velocity.x, targetVelocity.x, acceleration * delta * accelFactor);
-		velocity.z = THREE.MathUtils.lerp(velocity.z, targetVelocity.z, acceleration * delta * accelFactor);
-
-		// Handle advanced movement mechanics
-		handleAdvancedMovement(inputState, velocity, delta);
-
-		// Gravity and vertical physics
-		if (!isGroundedRef.current) {
-			velocity.y -= 30 * delta; // Gravity
-		}
-
-		// Apply velocity to camera position
-		const newPosition = camera.position.clone();
-		newPosition.add(velocity.clone().multiplyScalar(delta));
-
-		// Terrain collision with enhanced detection
-		const terrainHeight = getTerrainHeight(newPosition.x, newPosition.z);
-		const playerHeight = movementState.isSliding ? 1.0 : (playerState.isCrouching ? 1.2 : 1.8);
-
-		if (newPosition.y <= terrainHeight + playerHeight) {
-			newPosition.y = terrainHeight + playerHeight;
-			velocity.y = 0;
-			isGroundedRef.current = true;
-			setPlayerState(prev => ({ ...prev, isJumping: false }));
-		} else {
-			isGroundedRef.current = false;
-		}
-
-		// Update camera position
-		camera.position.copy(newPosition);
-
-		// Update weapon sway and breathing
-		updateWeaponSway(delta, isMoving, inputState.aim || false);
-
-		// Update stamina with enhanced recovery
-		const staminaRecovery = playerState.isRunning ? 0 : (isMoving ? 10 : 20);
-		setPlayerState(prev => ({
-			...prev,
-			stamina: Math.max(0, Math.min(100, prev.stamina - staminaDrain * delta + staminaRecovery * delta)),
-			isAiming: inputState.aim || false,
-		}));
 	});
 
 	// Render click-to-activate overlay if pointer not locked
