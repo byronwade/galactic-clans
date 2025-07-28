@@ -47,14 +47,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			<head>
 				{/* Additional SEO and performance optimization */}
 				<meta name="theme-color" content="#000000" />
-				<meta name="apple-mobile-web-app-capable" content="yes" />
+				<meta name="mobile-web-app-capable" content="yes" />
 				<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 				<link rel="icon" type="image/png" href="/favicon.png" />
 				<link rel="apple-touch-icon" href="/favicon.png" />
-
-				{/* Preload critical resources */}
-				<link rel="preload" href="/audio/epic_march.wav" as="audio" type="audio/wav" />
-				<link rel="preload" href="/audio/space_ambient_improved.wav" as="audio" type="audio/wav" />
 
 				{/* JSON-LD Structured Data */}
 				<script
