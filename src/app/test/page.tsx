@@ -121,14 +121,14 @@ function TestCard({ test, onLaunch, isSelected = false }: { test: TestCard; onLa
 	};
 
 	return (
-		<div className={`group relative overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/5 ${isSelected ? "border-blue-500/50 bg-blue-500/10 ring-2 ring-blue-400/30 shadow-lg shadow-blue-500/20" : "border-gray-800 bg-gray-900/50 hover:border-blue-500/20"} backdrop-blur-sm`}>
+		<div className={`relative overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/5 ${isSelected ? "border-blue-500/50 bg-blue-500/10 ring-2 ring-blue-400/30 shadow-lg shadow-blue-500/20" : "border-gray-800 bg-gray-900/50 hover:border-blue-500/20"} backdrop-blur-sm`}>
 			<div className="p-6">
 				<div className="flex items-start justify-between mb-3">
 					<div className="text-3xl mb-2">{test.icon}</div>
 					<div className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor()}`}>{test.status}</div>
 				</div>
 
-				<h3 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors">{test.title}</h3>
+				<h3 className="text-lg font-semibold text-white mb-2 hover:text-blue-400 transition-colors">{test.title}</h3>
 
 				<p className="text-gray-400 text-sm mb-4 leading-relaxed">{test.description}</p>
 
