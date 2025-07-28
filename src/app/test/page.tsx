@@ -141,7 +141,7 @@ function TestCard({ test, onLaunch, isSelected = false }: { test: TestCard; onLa
 							console.log(`Launching ${test.title} -> ${test.href}`);
 							onLaunch(test.title, test.href);
 						}}
-						className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium cursor-pointer"
+						className="relative z-10 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium cursor-pointer"
 						style={{ pointerEvents: "auto" }}
 					>
 						<Play className="w-4 h-4 mr-2" />
@@ -149,8 +149,6 @@ function TestCard({ test, onLaunch, isSelected = false }: { test: TestCard; onLa
 					</button>
 				</div>
 			</div>
-
-			<div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 		</div>
 	);
 }
