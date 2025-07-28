@@ -1074,6 +1074,181 @@ export default function ControllerTestPage() {
 					box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 					border: 2px solid rgba(255, 255, 255, 0.1);
 				}
+
+				/* Enhanced gamepad.css button press animations */
+				.gamepad .button.pressed,
+				.gamepad .bumper.pressed,
+				.gamepad .trigger.pressed,
+				.gamepad .dpad.pressed {
+					transform: scale(0.95);
+					box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.3);
+					background: radial-gradient(circle at center, rgba(59, 130, 246, 0.8), transparent 50%);
+					animation: buttonPulse 0.2s ease-out;
+				}
+
+				/* Enhanced middle button animations with modern design */
+				.gamepad .start.pressed,
+				.gamepad .select.pressed,
+				.gamepad .home.pressed {
+					transform: scale(0.92) rotate(5deg);
+					box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.4), 0 0 25px rgba(34, 197, 94, 0.8), 0 0 50px rgba(34, 197, 94, 0.4), 0 0 75px rgba(34, 197, 94, 0.2);
+					background: linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(16, 185, 129, 0.8) 50%, rgba(5, 150, 105, 0.7) 100%);
+					border: 2px solid rgba(34, 197, 94, 0.6);
+					animation: premiumPulse 0.6s ease-in-out;
+				}
+
+				/* Special home button enhancement */
+				.gamepad .home.pressed {
+					background: linear-gradient(135deg, rgba(147, 51, 234, 0.9) 0%, rgba(126, 34, 206, 0.8) 50%, rgba(107, 33, 168, 0.7) 100%);
+					box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.4), 0 0 25px rgba(147, 51, 234, 0.8), 0 0 50px rgba(147, 51, 234, 0.4), 0 0 75px rgba(147, 51, 234, 0.2);
+					border: 2px solid rgba(147, 51, 234, 0.6);
+					transform: scale(0.88) rotate(-3deg);
+				}
+
+				/* Smooth stick movements */
+				.gamepad .stick.pressed {
+					transform: scale(1.1);
+					box-shadow: 0 0 15px rgba(236, 72, 153, 0.7), 0 0 30px rgba(236, 72, 153, 0.3);
+					background: radial-gradient(circle at center, rgba(236, 72, 153, 0.8) 0%, rgba(219, 39, 119, 0.6) 50%, transparent 70%);
+					animation: stickGlow 0.4s ease-out;
+				}
+
+				/* Enhanced keyframe animations */
+				@keyframes buttonPulse {
+					0% {
+						transform: scale(1);
+						box-shadow: none;
+					}
+					50% {
+						transform: scale(0.92);
+						box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(59, 130, 246, 0.8);
+					}
+					100% {
+						transform: scale(0.95);
+						box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.6);
+					}
+				}
+
+				@keyframes premiumPulse {
+					0% {
+						transform: scale(1) rotate(0deg);
+						box-shadow: 0 0 5px rgba(34, 197, 94, 0.3);
+					}
+					25% {
+						transform: scale(0.88) rotate(3deg);
+						box-shadow: 0 0 35px rgba(34, 197, 94, 1), 0 0 70px rgba(34, 197, 94, 0.6);
+					}
+					50% {
+						transform: scale(0.85) rotate(8deg);
+						box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 40px rgba(34, 197, 94, 0.9), 0 0 80px rgba(34, 197, 94, 0.5);
+					}
+					75% {
+						transform: scale(0.88) rotate(6deg);
+						box-shadow: 0 0 30px rgba(34, 197, 94, 0.8), 0 0 60px rgba(34, 197, 94, 0.4);
+					}
+					100% {
+						transform: scale(0.92) rotate(5deg);
+						box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.4), 0 0 25px rgba(34, 197, 94, 0.8);
+					}
+				}
+
+				@keyframes stickGlow {
+					0% {
+						transform: scale(1);
+						box-shadow: none;
+					}
+					50% {
+						transform: scale(1.15);
+						box-shadow: 0 0 25px rgba(236, 72, 153, 0.9), 0 0 50px rgba(236, 72, 153, 0.5);
+					}
+					100% {
+						transform: scale(1.1);
+						box-shadow: 0 0 15px rgba(236, 72, 153, 0.7), 0 0 30px rgba(236, 72, 153, 0.3);
+					}
+				}
+
+				/* Enhanced button design improvements */
+				.gamepad .button,
+				.gamepad .bumper,
+				.gamepad .trigger,
+				.gamepad .dpad {
+					transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+					border-radius: 50%;
+					position: relative;
+					overflow: hidden;
+				}
+
+				.gamepad .start,
+				.gamepad .select,
+				.gamepad .home {
+					transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+					border-radius: 8px;
+					position: relative;
+					overflow: hidden;
+					background: linear-gradient(135deg, rgba(71, 85, 105, 0.8) 0%, rgba(51, 65, 85, 0.9) 100%);
+					border: 1px solid rgba(148, 163, 184, 0.3);
+				}
+
+				/* Ripple effect for premium buttons */
+				.gamepad .start::before,
+				.gamepad .select::before,
+				.gamepad .home::before {
+					content: "";
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					width: 0;
+					height: 0;
+					background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
+					border-radius: 50%;
+					transform: translate(-50%, -50%);
+					transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+					opacity: 0;
+				}
+
+				.gamepad .start.pressed::before,
+				.gamepad .select.pressed::before,
+				.gamepad .home.pressed::before {
+					width: 200%;
+					height: 200%;
+					opacity: 1;
+					animation: rippleEffect 0.6s ease-out;
+				}
+
+				@keyframes rippleEffect {
+					0% {
+						width: 0;
+						height: 0;
+						opacity: 1;
+					}
+					50% {
+						width: 150%;
+						height: 150%;
+						opacity: 0.8;
+					}
+					100% {
+						width: 200%;
+						height: 200%;
+						opacity: 0;
+					}
+				}
+
+				/* Enhanced visual feedback */
+				.gamepad .button:not(.pressed):hover,
+				.gamepad .bumper:not(.pressed):hover,
+				.gamepad .trigger:not(.pressed):hover,
+				.gamepad .dpad:not(.pressed):hover {
+					transform: scale(1.05);
+					box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+				}
+
+				.gamepad .start:not(.pressed):hover,
+				.gamepad .select:not(.pressed):hover,
+				.gamepad .home:not(.pressed):hover {
+					transform: scale(1.02);
+					box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+					background: linear-gradient(135deg, rgba(71, 85, 105, 0.9) 0%, rgba(51, 65, 85, 1) 100%);
+				}
 			`}</style>
 		</div>
 	);
