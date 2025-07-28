@@ -66,7 +66,7 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 			camera.fov = config.player.fov;
 			camera.near = 0.1;
 			camera.far = 1000;
-			camera.position.set(0, 10, 0); // Start above ground
+			camera.position.set(0, 15, 0); // Start higher to ensure we're above any terrain
 			camera.updateProjectionMatrix();
 		}
 	}, [camera, config.player.fov]);
@@ -285,6 +285,16 @@ function TerrainSystem({ config }: { config: FPSConfig }) {
 	
 	const noise = useMemo(() => createNoise2D(), []);
 
+	// Terrain height calculation function
+	const getTerrainHeight = useCallback((x: number, z: number) => {
+		let height = 0;
+		height += noise(x * 0.02, z * 0.02) * 15;  // Main landscape
+		height += noise(x * 0.05, z * 0.05) * 8;   // Hills
+		height += noise(x * 0.1, z * 0.1) * 3;     // Details
+		height += noise(x * 0.3, z * 0.3) * 1;     // Fine noise
+		return Math.max(height, -5);
+	}, [noise]);
+
 	// Generate high-quality terrain chunk
 	const generateTerrainChunk = useCallback((chunkX: number, chunkZ: number, detail: number = 64) => {
 		const chunkSize = 50;
@@ -300,23 +310,19 @@ function TerrainSystem({ config }: { config: FPSConfig }) {
 			const x = (vertices[i] ?? 0) + chunkX * chunkSize;
 			const z = (vertices[i + 2] ?? 0) + chunkZ * chunkSize;
 
-			// Multi-octave noise for realistic terrain
-			let height = 0;
-			height += noise(x * 0.02, z * 0.02) * 15;  // Main landscape
-			height += noise(x * 0.05, z * 0.05) * 8;   // Hills
-			height += noise(x * 0.1, z * 0.1) * 3;     // Details
-			height += noise(x * 0.3, z * 0.3) * 1;     // Fine noise
-
-			vertices[i + 1] = Math.max(height, 0);
+			// Use the shared terrain height function
+			vertices[i + 1] = getTerrainHeight(x, z);
 		}
 
 		positionAttribute.needsUpdate = true;
 		geometry.computeVertexNormals();
 
-		// Professional terrain material with texture-like appearance
+		// Enhanced terrain material with better visibility
 		const material = new THREE.MeshLambertMaterial({
-			color: new THREE.Color(0.4, 0.6, 0.3),
+			color: new THREE.Color(0.2, 0.8, 0.3), // Brighter, more visible green
 			transparent: false,
+			side: THREE.DoubleSide, // Ensure visibility from both sides
+			wireframe: false, // Set to true for debugging terrain generation
 		});
 
 		const mesh = new THREE.Mesh(geometry, material);
@@ -325,17 +331,52 @@ function TerrainSystem({ config }: { config: FPSConfig }) {
 		mesh.receiveShadow = true;
 		mesh.castShadow = false;
 
+		// Debug logging
+		console.log(`Generated terrain chunk at (${chunkX}, ${chunkZ}) with ${vertices.length / 3} vertices`);
+
 		return mesh;
 	}, [noise]);
+
+	// Ensure initial chunks are loaded immediately
+	useEffect(() => {
+		const initialChunks: [number, number][] = [
+			[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1],
+			[-1, -1], [-1, 1], [1, -1], [1, 1]
+		];
+
+		console.log('Loading initial terrain chunks...');
+		
+		initialChunks.forEach((chunk) => {
+			const [x, z] = chunk;
+			const chunkKey = `${x},${z}`;
+			if (!chunksRef.current.has(chunkKey)) {
+				const terrainChunk = generateTerrainChunk(x, z, 64);
+				if (terrainChunk && terrainRef.current) {
+					terrainRef.current.add(terrainChunk);
+					chunksRef.current.set(chunkKey, terrainChunk);
+					console.log(`Added initial chunk: ${chunkKey}`);
+				}
+			}
+		});
+	}, [generateTerrainChunk]);
 
 	// Dynamic chunk loading with LOD
 	useFrame(() => {
 		const playerPos = camera.position;
 		const chunkSize = 50;
-		const renderDistance = 4;
+		const renderDistance = 5; // Increased render distance
 
 		const playerChunkX = Math.floor(playerPos.x / chunkSize);
 		const playerChunkZ = Math.floor(playerPos.z / chunkSize);
+
+		// Debug: Log player position and chunk info occasionally
+		if (Math.random() < 0.01) { // Log once every ~100 frames
+			console.log(`Player position: (${playerPos.x.toFixed(1)}, ${playerPos.y.toFixed(1)}, ${playerPos.z.toFixed(1)})`);
+			console.log(`Current chunk: (${playerChunkX}, ${playerChunkZ}), Loaded chunks: ${chunksRef.current.size}`);
+			
+			const terrainHeight = getTerrainHeight(playerPos.x, playerPos.z);
+			console.log(`Terrain height at player position: ${terrainHeight.toFixed(2)}`);
+		}
 
 		// Load chunks around player
 		for (let x = playerChunkX - renderDistance; x <= playerChunkX + renderDistance; x++) {
@@ -362,7 +403,7 @@ function TerrainSystem({ config }: { config: FPSConfig }) {
 			if (x !== undefined && z !== undefined) {
 				const distance = Math.sqrt((x - playerChunkX) ** 2 + (z - playerChunkZ) ** 2);
 				
-				if (distance > renderDistance + 1) {
+				if (distance > renderDistance + 2) { // Slightly larger unload distance
 					chunksToRemove.push(key);
 					if (terrainRef.current) {
 						terrainRef.current.remove(chunk);
@@ -376,7 +417,15 @@ function TerrainSystem({ config }: { config: FPSConfig }) {
 		chunksToRemove.forEach(key => chunksRef.current.delete(key));
 	});
 
-	return <group ref={terrainRef} />;
+	return (
+		<group ref={terrainRef}>
+			{/* Base ground plane to ensure there's always something visible */}
+			<mesh position={[0, -10, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+				<planeGeometry args={[2000, 2000]} />
+				<meshLambertMaterial color={new THREE.Color(0.2, 0.4, 0.1)} />
+			</mesh>
+		</group>
+	);
 }
 
 // Professional Lighting and Environment
