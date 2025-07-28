@@ -134,10 +134,19 @@ function TestCard({ test, onLaunch, isSelected = false }: { test: TestCard; onLa
 				<div className="flex items-center justify-between">
 					<span className="text-xs text-gray-500 bg-gray-800/50 px-2 py-1 rounded">{test.category}</span>
 
-					<Link href={test.href} onClick={() => onLaunch(test.title, test.href)} className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium group/btn">
-						<Play className="w-4 h-4 mr-2 group-hover/btn:translate-x-0.5 transition-transform" />
+					{/* Simple button with direct navigation */}
+					<button
+						onClick={() => {
+							console.log(`Launching ${test.title} -> ${test.href}`);
+							onLaunch(test.title, test.href);
+							window.location.href = test.href;
+						}}
+						className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium cursor-pointer"
+						style={{ pointerEvents: "auto" }}
+					>
+						<Play className="w-4 h-4 mr-2" />
 						Launch
-					</Link>
+					</button>
 				</div>
 			</div>
 
