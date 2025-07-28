@@ -72,6 +72,7 @@ export interface FPSInputManagerRef {
 	enable: () => void;
 	disable: () => void;
 	getInputState: () => InputState;
+	isGamepadConnected: () => boolean;
 	setKeyBinding: (action: keyof KeyBindings, keys: string[]) => void;
 	resetToDefaults: () => void;
 }
@@ -252,6 +253,7 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 			inputState.crouch = state.buttons[1] || false; // B/Circle button
 			inputState.run = state.buttons[7] || false; // Right trigger
 			inputState.interact = state.buttons[2] || false; // X/Square button
+			inputState.menu = state.buttons[9] || false; // Start/Options button
 
 			// Mouse look (right stick)
 			const lookSensitivity = config.mouseSensitivity * 0.05;
@@ -340,6 +342,7 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 			enable,
 			disable,
 			getInputState: () => inputStateRef.current,
+			isGamepadConnected: () => gamepadStateRef.current.connected,
 			setKeyBinding: (action: keyof KeyBindings, keys: string[]) => {
 				keyBindingsRef.current[action] = keys;
 			},

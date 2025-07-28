@@ -222,6 +222,7 @@ export default function FPSExplorerGenerator() {
 	const [isExploring, setIsExploring] = useState(false);
 	const [showSettings, setShowSettings] = useState(false);
 	const [showInfo, setShowInfo] = useState(false);
+	const [isGamepadConnected, setIsGamepadConnected] = useState(false);
 	const [performanceMetrics, setPerformanceMetrics] = useState<FPSPerformanceMetrics>({
 		frameRate: 60,
 		frameTime: 16.67,
@@ -303,6 +304,21 @@ export default function FPSExplorerGenerator() {
 		return () => clearInterval(interval);
 	}, [isExploring, handleStopExploration]);
 
+	// Monitor gamepad connection status
+	useEffect(() => {
+		if (!isExploring || !inputManagerRef.current) return;
+
+		const checkGamepadStatus = () => {
+			const connected = inputManagerRef.current?.isGamepadConnected() || false;
+			setIsGamepadConnected(connected);
+		};
+
+		// Check immediately and then every 500ms
+		checkGamepadStatus();
+		const interval = setInterval(checkGamepadStatus, 500);
+		return () => clearInterval(interval);
+	}, [isExploring]);
+
 	return (
 		<div className="absolute inset-0 w-full h-full bg-black">
 			<ComponentErrorBoundary>
@@ -382,27 +398,60 @@ export default function FPSExplorerGenerator() {
 					<div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-4 max-w-md z-20">
 						<h4 className="text-white font-semibold mb-2 flex items-center">
 							<span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
-							FPS Controls
+							{isGamepadConnected ? "🎮 Controller" : "⌨️ Keyboard"} Controls
 						</h4>
 						<div className="text-sm text-slate-300 space-y-1">
-							<p>
-								<span className="text-green-400 font-medium">WASD:</span> Move around
-							</p>
-							<p>
-								<span className="text-green-400 font-medium">Mouse:</span> Look around
-							</p>
-							<p>
-								<span className="text-green-400 font-medium">Shift:</span> Run
-							</p>
-							<p>
-								<span className="text-green-400 font-medium">Space:</span> Jump
-							</p>
-							<p>
-								<span className="text-green-400 font-medium">C:</span> Crouch
-							</p>
-							<p>
-								<span className="text-red-400 font-medium">ESC:</span> Exit exploration
-							</p>
+							{isGamepadConnected ? (
+								// Gamepad Controls
+								<>
+									<p>
+										<span className="text-green-400 font-medium">Left Stick:</span> Move around
+									</p>
+									<p>
+										<span className="text-green-400 font-medium">Right Stick:</span> Look around
+									</p>
+									<p>
+										<span className="text-green-400 font-medium">Right Trigger:</span> Run
+									</p>
+									<p>
+										<span className="text-green-400 font-medium">A/X Button:</span> Jump
+									</p>
+									<p>
+										<span className="text-green-400 font-medium">B/Circle:</span> Crouch
+									</p>
+									<p>
+										<span className="text-blue-400 font-medium">X/Square:</span> Interact
+									</p>
+									<p>
+										<span className="text-red-400 font-medium">Start/Options:</span> Exit exploration
+									</p>
+								</>
+							) : (
+								// Keyboard Controls
+								<>
+									<p>
+										<span className="text-green-400 font-medium">WASD:</span> Move around
+									</p>
+									<p>
+										<span className="text-green-400 font-medium">Mouse:</span> Look around
+									</p>
+									<p>
+										<span className="text-green-400 font-medium">Shift:</span> Run
+									</p>
+									<p>
+										<span className="text-green-400 font-medium">Space:</span> Jump
+									</p>
+									<p>
+										<span className="text-green-400 font-medium">C:</span> Crouch
+									</p>
+									<p>
+										<span className="text-blue-400 font-medium">E:</span> Interact
+									</p>
+									<p>
+										<span className="text-red-400 font-medium">ESC:</span> Exit exploration
+									</p>
+								</>
+							)}
 						</div>
 					</div>
 				)}
