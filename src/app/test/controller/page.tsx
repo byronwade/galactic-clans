@@ -358,82 +358,325 @@ export default function ControllerTestPage() {
 
 	// Render gamepad visualization using gamepad.css
 	const renderGamepadVisualization = () => {
-		const cssClass = getGamepadCSSClass(controllerType);
+		if (controllerType === "Xbox" || controllerType === "Generic") {
+			return (
+				<div className="gamepad-container flex justify-center items-center min-h-[400px]">
+					<div className="relative">
+						{/* Xbox Controller Layout */}
+						<div className="bg-gray-800 rounded-3xl p-8 relative w-80 h-48">
+							{/* Face Buttons (Right side) */}
+							<div className="absolute right-8 top-12 grid grid-cols-3 gap-1 w-16 h-16">
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--y ${buttonStates.y ? "pressed" : ""}`}>Y</i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--x ${buttonStates.x ? "pressed" : ""}`}>X</i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--b ${buttonStates.b ? "pressed" : ""}`}>B</i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--a ${buttonStates.a ? "pressed" : ""}`}>A</i>
+								</div>
+								<div></div>
+							</div>
 
+							{/* D-Pad (Left side) */}
+							<div className="absolute left-8 top-12 grid grid-cols-3 gap-1 w-16 h-16">
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--arrow gamepad-button--arrow-up ${buttonStates.up ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--arrow gamepad-button--arrow-left ${buttonStates.left ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--arrow gamepad-button--arrow-right ${buttonStates.right ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--arrow gamepad-button--arrow-down ${buttonStates.down ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+							</div>
+
+							{/* Shoulder Buttons */}
+							<div className="absolute left-6 -top-2">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--lb ${buttonStates.lb ? "pressed" : ""}`}>LB</i>
+								</div>
+							</div>
+							<div className="absolute right-6 -top-2">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--rb ${buttonStates.rb ? "pressed" : ""}`}>RB</i>
+								</div>
+							</div>
+
+							{/* Triggers */}
+							<div className="absolute left-8 -top-8">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--lt ${axesStates.leftTrigger > 0.1 ? "pressed" : ""}`}>LT</i>
+								</div>
+							</div>
+							<div className="absolute right-8 -top-8">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--rt ${axesStates.rightTrigger > 0.1 ? "pressed" : ""}`}>RT</i>
+								</div>
+							</div>
+
+							{/* Analog Sticks */}
+							<div className="absolute left-12 bottom-4">
+								<div className="gamepad-button-wrapper">
+									<i
+										className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--l3 ${buttonStates.ls ? "pressed" : ""}`}
+										style={{
+											transform: `translate(${axesStates.leftStick.x * 3}px, ${axesStates.leftStick.y * 3}px)`,
+										}}
+									>
+										L3
+									</i>
+								</div>
+							</div>
+							<div className="absolute right-12 bottom-4">
+								<div className="gamepad-button-wrapper">
+									<i
+										className={`gamepad-button gamepad-button-xbox gamepad-button-xbox--r3 ${buttonStates.rs ? "pressed" : ""}`}
+										style={{
+											transform: `translate(${axesStates.rightStick.x * 3}px, ${axesStates.rightStick.y * 3}px)`,
+										}}
+									>
+										R3
+									</i>
+								</div>
+							</div>
+
+							{/* Center Buttons */}
+							<div className="absolute left-1/2 top-6 transform -translate-x-1/2 flex space-x-8">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--size-small ${buttonStates.select ? "pressed" : ""}`}>⊞</i>
+								</div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--size-small ${buttonStates.start ? "pressed" : ""}`}>☰</i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			);
+		} else if (controllerType === "PlayStation") {
+			return (
+				<div className="gamepad-container flex justify-center items-center min-h-[400px]">
+					<div className="relative">
+						{/* PlayStation Controller Layout */}
+						<div className="bg-gray-800 rounded-3xl p-8 relative w-80 h-48">
+							{/* Face Buttons (Right side) */}
+							<div className="absolute right-8 top-12 grid grid-cols-3 gap-1 w-16 h-16">
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--triangle ${buttonStates.triangle ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--square ${buttonStates.square ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--circle ${buttonStates.circle ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--cross ${buttonStates.cross ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+							</div>
+
+							{/* D-Pad (Left side) */}
+							<div className="absolute left-8 top-12 grid grid-cols-3 gap-1 w-16 h-16">
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--arrow gamepad-button--arrow-up ${buttonStates.up ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--arrow gamepad-button--arrow-left ${buttonStates.left ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--arrow gamepad-button--arrow-right ${buttonStates.right ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--arrow gamepad-button--arrow-down ${buttonStates.down ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+							</div>
+
+							{/* Shoulder Buttons */}
+							<div className="absolute left-6 -top-2">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--l1 ${buttonStates.l1 ? "pressed" : ""}`}>L1</i>
+								</div>
+							</div>
+							<div className="absolute right-6 -top-2">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--r1 ${buttonStates.r1 ? "pressed" : ""}`}>R1</i>
+								</div>
+							</div>
+
+							{/* Triggers */}
+							<div className="absolute left-8 -top-8">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--l2 ${axesStates.leftTrigger > 0.1 ? "pressed" : ""}`}>L2</i>
+								</div>
+							</div>
+							<div className="absolute right-8 -top-8">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--r2 ${axesStates.rightTrigger > 0.1 ? "pressed" : ""}`}>R2</i>
+								</div>
+							</div>
+
+							{/* Analog Sticks */}
+							<div className="absolute left-12 bottom-4">
+								<div className="gamepad-button-wrapper">
+									<i
+										className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--l3 ${buttonStates.l3 ? "pressed" : ""}`}
+										style={{
+											transform: `translate(${axesStates.leftStick.x * 3}px, ${axesStates.leftStick.y * 3}px)`,
+										}}
+									>
+										L3
+									</i>
+								</div>
+							</div>
+							<div className="absolute right-12 bottom-4">
+								<div className="gamepad-button-wrapper">
+									<i
+										className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--r3 ${buttonStates.rs ? "pressed" : ""}`}
+										style={{
+											transform: `translate(${axesStates.rightStick.x * 3}px, ${axesStates.rightStick.y * 3}px)`,
+										}}
+									>
+										R3
+									</i>
+								</div>
+							</div>
+
+							{/* Center Buttons */}
+							<div className="absolute left-1/2 top-6 transform -translate-x-1/2 flex space-x-8">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--select ${buttonStates.select ? "pressed" : ""}`}>SELECT</i>
+								</div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-playstation gamepad-button-playstation--start ${buttonStates.start ? "pressed" : ""}`}>START</i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			);
+		} else if (controllerType === "Nintendo") {
+			return (
+				<div className="gamepad-container flex justify-center items-center min-h-[400px]">
+					<div className="relative">
+						{/* Nintendo Switch Controller Layout */}
+						<div className="bg-gray-800 rounded-3xl p-8 relative w-80 h-48">
+							{/* Face Buttons (Right side) */}
+							<div className="absolute right-8 top-12 grid grid-cols-3 gap-1 w-16 h-16">
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--x ${buttonStates.x ? "pressed" : ""}`}>X</i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--y ${buttonStates.y ? "pressed" : ""}`}>Y</i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--a ${buttonStates.a ? "pressed" : ""}`}>A</i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--b ${buttonStates.b ? "pressed" : ""}`}>B</i>
+								</div>
+								<div></div>
+							</div>
+
+							{/* D-Pad (Left side) - Switch style circular buttons */}
+							<div className="absolute left-8 top-12 grid grid-cols-3 gap-1 w-16 h-16">
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--variant-switch gamepad-button--arrow gamepad-button--arrow-up ${buttonStates.up ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--variant-switch gamepad-button--arrow gamepad-button--arrow-left ${buttonStates.left ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--variant-switch gamepad-button--arrow gamepad-button--arrow-right ${buttonStates.right ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--variant-switch gamepad-button--arrow gamepad-button--arrow-down ${buttonStates.down ? "pressed" : ""}`}></i>
+								</div>
+								<div></div>
+							</div>
+
+							{/* Shoulder Buttons */}
+							<div className="absolute left-6 -top-2">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--l ${buttonStates.l ? "pressed" : ""}`}>L</i>
+								</div>
+							</div>
+							<div className="absolute right-6 -top-2">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--r ${buttonStates.r ? "pressed" : ""}`}>R</i>
+								</div>
+							</div>
+
+							{/* Triggers */}
+							<div className="absolute left-8 -top-8">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--zl ${buttonStates.zl ? "pressed" : ""}`}>ZL</i>
+								</div>
+							</div>
+							<div className="absolute right-8 -top-8">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button-nintendo gamepad-button-nintendo--zr ${buttonStates.zr ? "pressed" : ""}`}>ZR</i>
+								</div>
+							</div>
+
+							{/* Center Buttons */}
+							<div className="absolute left-1/2 top-6 transform -translate-x-1/2 flex space-x-8">
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--size-small ${buttonStates.minus ? "pressed" : ""}`}>-</i>
+								</div>
+								<div className="gamepad-button-wrapper">
+									<i className={`gamepad-button gamepad-button--size-small ${buttonStates.plus ? "pressed" : ""}`}>+</i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			);
+		}
+
+		// Fallback for unknown controller types
 		return (
 			<div className="gamepad-container flex justify-center items-center min-h-[400px]">
-				<div className={`gamepad ${cssClass} scale-150 transform transition-all duration-200`}>
-					{/* Face buttons */}
-					{controllerType === "Xbox" || controllerType === "Generic" ? (
-						<>
-							<div className={`button a ${buttonStates.a ? "pressed" : ""}`}></div>
-							<div className={`button b ${buttonStates.b ? "pressed" : ""}`}></div>
-							<div className={`button x ${buttonStates.x ? "pressed" : ""}`}></div>
-							<div className={`button y ${buttonStates.y ? "pressed" : ""}`}></div>
-						</>
-					) : controllerType === "PlayStation" ? (
-						<>
-							<div className={`button cross ${buttonStates.cross ? "pressed" : ""}`}></div>
-							<div className={`button circle ${buttonStates.circle ? "pressed" : ""}`}></div>
-							<div className={`button square ${buttonStates.square ? "pressed" : ""}`}></div>
-							<div className={`button triangle ${buttonStates.triangle ? "pressed" : ""}`}></div>
-						</>
-					) : controllerType === "Nintendo" ? (
-						<>
-							<div className={`button a ${buttonStates.a ? "pressed" : ""}`}></div>
-							<div className={`button b ${buttonStates.b ? "pressed" : ""}`}></div>
-							<div className={`button x ${buttonStates.x ? "pressed" : ""}`}></div>
-							<div className={`button y ${buttonStates.y ? "pressed" : ""}`}></div>
-						</>
-					) : null}
-
-					{/* D-pad */}
-					<div className={`dpad up ${buttonStates.up ? "pressed" : ""}`}></div>
-					<div className={`dpad down ${buttonStates.down ? "pressed" : ""}`}></div>
-					<div className={`dpad left ${buttonStates.left ? "pressed" : ""}`}></div>
-					<div className={`dpad right ${buttonStates.right ? "pressed" : ""}`}></div>
-
-					{/* Shoulder buttons */}
-					{controllerType === "Xbox" || controllerType === "Generic" ? (
-						<>
-							<div className={`bumper lb ${buttonStates.lb ? "pressed" : ""}`}></div>
-							<div className={`bumper rb ${buttonStates.rb ? "pressed" : ""}`}></div>
-							<div className={`trigger lt ${axesStates.leftTrigger > 0.1 ? "pressed" : ""}`}></div>
-							<div className={`trigger rt ${axesStates.rightTrigger > 0.1 ? "pressed" : ""}`}></div>
-						</>
-					) : controllerType === "PlayStation" ? (
-						<>
-							<div className={`bumper l1 ${buttonStates.l1 ? "pressed" : ""}`}></div>
-							<div className={`bumper r1 ${buttonStates.r1 ? "pressed" : ""}`}></div>
-							<div className={`trigger l2 ${axesStates.leftTrigger > 0.1 ? "pressed" : ""}`}></div>
-							<div className={`trigger r2 ${axesStates.rightTrigger > 0.1 ? "pressed" : ""}`}></div>
-						</>
-					) : controllerType === "Nintendo" ? (
-						<>
-							<div className={`bumper l ${buttonStates.l ? "pressed" : ""}`}></div>
-							<div className={`bumper r ${buttonStates.r ? "pressed" : ""}`}></div>
-							<div className={`trigger zl ${buttonStates.zl ? "pressed" : ""}`}></div>
-							<div className={`trigger zr ${buttonStates.zr ? "pressed" : ""}`}></div>
-						</>
-					) : null}
-
-					{/* Control buttons */}
-					<div className={`button start ${buttonStates.start ? "pressed" : ""}`}></div>
-					<div className={`button select ${buttonStates.select ? "pressed" : ""}`}></div>
-
-					{/* Analog sticks */}
-					<div
-						className={`stick left ${buttonStates.ls ? "pressed" : ""}`}
-						style={{
-							transform: `translate(${axesStates.leftStick.x * 10}px, ${axesStates.leftStick.y * 10}px)`,
-						}}
-					></div>
-					<div
-						className={`stick right ${buttonStates.rs ? "pressed" : ""}`}
-						style={{
-							transform: `translate(${axesStates.rightStick.x * 10}px, ${axesStates.rightStick.y * 10}px)`,
-						}}
-					></div>
+				<div className="text-center space-y-4">
+					<Gamepad2 className="w-20 h-20 text-slate-600 mx-auto" />
+					<div>
+						<h3 className="text-lg font-medium text-slate-400 mb-2">Controller Connected</h3>
+						<p className="text-slate-500">Basic controller support active</p>
+						<p className="text-slate-600 text-sm mt-2">Gamepad.css visualization not available for this controller type</p>
+					</div>
 				</div>
 			</div>
 		);
@@ -758,26 +1001,78 @@ export default function ControllerTestPage() {
 				}
 
 				/* Enhanced gamepad.css styles */
-				.gamepad {
-					position: relative;
-					transition: all 0.2s ease;
-				}
-
-				.gamepad .button.pressed,
-				.gamepad .bumper.pressed,
-				.gamepad .trigger.pressed,
-				.gamepad .dpad.pressed {
-					filter: brightness(1.5) saturate(1.2);
-					transform: scale(0.95);
-					box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-				}
-
-				.gamepad .stick {
-					transition: transform 0.05s ease;
-				}
-
 				.gamepad-container {
 					background: radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+				}
+
+				/* Pressed button effects */
+				.gamepad-button.pressed,
+				.gamepad-button-wrapper:has(.pressed) .gamepad-button {
+					filter: brightness(1.4) saturate(1.3) drop-shadow(0 0 8px rgba(59, 130, 246, 0.8));
+					transform: scale(0.95) translateY(1px);
+					transition: all 0.1s ease;
+				}
+
+				/* Enhanced button glow effects */
+				.gamepad-button-xbox--a.pressed {
+					box-shadow: 0 0 15px #a3e82d;
+				}
+				.gamepad-button-xbox--b.pressed {
+					box-shadow: 0 0 15px #ff613e;
+				}
+				.gamepad-button-xbox--x.pressed {
+					box-shadow: 0 0 15px #1d9aff;
+				}
+				.gamepad-button-xbox--y.pressed {
+					box-shadow: 0 0 15px #ffde30;
+				}
+
+				.gamepad-button-playstation--cross.pressed {
+					box-shadow: 0 0 15px #9da5d5;
+				}
+				.gamepad-button-playstation--circle.pressed {
+					box-shadow: 0 0 15px #e94b0e;
+				}
+				.gamepad-button-playstation--square.pressed {
+					box-shadow: 0 0 15px #d592bd;
+				}
+				.gamepad-button-playstation--triangle.pressed {
+					box-shadow: 0 0 15px #20af93;
+				}
+
+				/* Analog stick movement enhancements */
+				.gamepad-button-xbox--l3,
+				.gamepad-button-xbox--r3,
+				.gamepad-button-playstation--l3,
+				.gamepad-button-playstation--r3 {
+					transition: transform 0.05s ease !important;
+				}
+
+				/* D-pad pressed effects */
+				.gamepad-button--arrow.pressed {
+					filter: brightness(1.6) drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+				}
+
+				/* Trigger and bumper effects */
+				.gamepad-button-xbox--lb.pressed,
+				.gamepad-button-xbox--rb.pressed,
+				.gamepad-button-xbox--lt.pressed,
+				.gamepad-button-xbox--rt.pressed,
+				.gamepad-button-playstation--l1.pressed,
+				.gamepad-button-playstation--r1.pressed,
+				.gamepad-button-playstation--l2.pressed,
+				.gamepad-button-playstation--r2.pressed,
+				.gamepad-button-nintendo--l.pressed,
+				.gamepad-button-nintendo--r.pressed,
+				.gamepad-button-nintendo--zl.pressed,
+				.gamepad-button-nintendo--zr.pressed {
+					filter: brightness(1.4) drop-shadow(0 0 8px rgba(255, 165, 0, 0.8));
+				}
+
+				/* Controller background styling */
+				.gamepad-container > div > div {
+					box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+					border: 2px solid rgba(255, 255, 255, 0.1);
 				}
 			`}</style>
 		</div>
