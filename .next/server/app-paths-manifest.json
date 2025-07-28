@@ -1,5 +1,18 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/websocket/route": "app/api/websocket/route.js",
+  "/credits/page": "app/credits/page.js",
+  "/test-suite/page": "app/test-suite/page.js",
+  "/page": "app/page.js",
+  "/test/blackhole/page": "app/test/blackhole/page.js",
+  "/test/audio/page": "app/test/audio/page.js",
   "/test/fps-explorer/page": "app/test/fps-explorer/page.js",
+  "/test/menu/page": "app/test/menu/page.js",
   "/test/controller/page": "app/test/controller/page.js",
-  "/test/page": "app/test/page.js"
+  "/test/galaxy/page": "app/test/galaxy/page.js",
+  "/test/page": "app/test/page.js",
+  "/test/solar-system/page": "app/test/solar-system/page.js",
+  "/test/planet/page": "app/test/planet/page.js",
+  "/test/settings/page": "app/test/settings/page.js",
+  "/test/star/page": "app/test/star/page.js"
 }

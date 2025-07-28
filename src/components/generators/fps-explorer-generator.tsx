@@ -15,13 +15,14 @@
 
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { FPSRenderer3D } from "./fps-renderer-3d";
+import { FPSInputManager, type FPSInputManagerRef } from "./fps-input-manager";
 import { FPSControls } from "./fps-controls";
 import { FPSSettings } from "./fps-settings";
 import { FPSInfo } from "./fps-info";
 import { FPSStats } from "./fps-stats";
-import { FPSInputManager } from "./fps-input-manager";
+import { ComponentErrorBoundary } from "../ErrorBoundary";
 import { PlanetClass } from "@/shared/procgen/planet/planet-types";
 
 // Core configuration interfaces
@@ -230,7 +231,7 @@ export default function FPSExplorerGenerator() {
 		cpuUsage: 0,
 	});
 
-	const inputManagerRef = useRef<any>(null);
+	const inputManagerRef = useRef<FPSInputManagerRef>(null);
 	const rendererRef = useRef<any>(null);
 
 	// Available exploration modes
@@ -252,28 +253,84 @@ export default function FPSExplorerGenerator() {
 		description: "Explore freely without restrictions",
 	};
 
-	return (
-		<div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-green-950 to-black">
-			{/* Loading State */}
-			{isLoading && (
-				<div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-					<div className="text-center space-y-4">
-						<div className="w-16 h-16 border-4 border-green-400/30 border-t-green-400 rounded-full animate-spin mx-auto" />
-						<h3 className="text-xl font-semibold text-white">Initializing FPS Explorer</h3>
-						<p className="text-slate-300">Loading terrain, physics, and rendering systems...</p>
-					</div>
-				</div>
-			)}
+	// Connect input manager to renderer when both are ready
+	useEffect(() => {
+		if (inputManagerRef.current && rendererRef.current) {
+			rendererRef.current.setInputManager(inputManagerRef.current);
+			console.log("🎮 [FPS] Input manager connected to renderer");
+		}
+	}, [isExploring]);
 
-			{/* Main Content Area */}
-			<div className="relative w-full h-full">
-				{/* FPS Input Manager */}
+	// Start exploration handler
+	const handleStartExploration = useCallback(() => {
+		setIsExploring(true);
+		setIsLoading(true);
+
+		// Enable input manager when exploration starts
+		if (inputManagerRef.current) {
+			inputManagerRef.current.enable();
+		}
+
+		// Simulate initialization
+		setTimeout(() => setIsLoading(false), 2000);
+	}, []);
+
+	// Stop exploration handler
+	const handleStopExploration = useCallback(() => {
+		setIsExploring(false);
+
+		// Disable input manager when exploration stops
+		if (inputManagerRef.current) {
+			inputManagerRef.current.disable();
+		}
+	}, []);
+
+	// Monitor for ESC key to exit exploration mode
+	useEffect(() => {
+		if (!isExploring || !inputManagerRef.current) return;
+
+		const checkForExit = () => {
+			const inputState = inputManagerRef.current?.getInputState();
+			if (inputState?.menu) {
+				// Small delay to prevent immediate re-triggering
+				setTimeout(() => {
+					handleStopExploration();
+				}, 100);
+			}
+		};
+
+		const interval = setInterval(checkForExit, 100); // Check every 100ms
+		return () => clearInterval(interval);
+	}, [isExploring, handleStopExploration]);
+
+	return (
+		<div className="absolute inset-0 w-full h-full bg-black">
+			<ComponentErrorBoundary>
+				{/* Loading State */}
+				{isLoading && (
+					<div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+						<div className="text-center space-y-4">
+							<div className="w-16 h-16 border-4 border-green-400/30 border-t-green-400 rounded-full animate-spin mx-auto" />
+							<h3 className="text-xl font-semibold text-white">Initializing FPS Explorer</h3>
+							<p className="text-slate-300">Loading terrain, physics, and rendering systems...</p>
+						</div>
+					</div>
+				)}
+
+				{/* FPS Input Manager (headless component) */}
 				<FPSInputManager ref={inputManagerRef} config={config.player} enabled={isExploring} onConfigChange={(updates) => handleConfigChange({ player: { ...config.player, ...updates } })} />
 
-				{/* Professional FPS Renderer */}
-				<FPSRenderer3D ref={rendererRef} config={config} onPerformanceUpdate={setPerformanceMetrics} />
+				{/* 3D Renderer */}
+				<FPSRenderer3D
+					ref={rendererRef}
+					config={config}
+					onPerformanceUpdate={setPerformanceMetrics}
+					onCameraUpdate={(position, rotation) => {
+						// Optional: handle camera updates for minimap, etc.
+					}}
+				/>
 
-				{/* FPS Controls Header */}
+				{/* Header Controls */}
 				<FPSControls
 					config={config}
 					onConfigChange={handleConfigChange}
@@ -282,13 +339,8 @@ export default function FPSExplorerGenerator() {
 					status={isLoading ? "loading" : isExploring ? "exploring" : "ready"}
 					availableModes={EXPLORATION_MODES}
 					planetPresets={PLANET_PRESETS}
-					onStartExploration={() => {
-						setIsExploring(true);
-						setIsLoading(true);
-						// Simulate initialization
-						setTimeout(() => setIsLoading(false), 2000);
-					}}
-					onStopExploration={() => setIsExploring(false)}
+					onStartExploration={handleStartExploration}
+					onStopExploration={handleStopExploration}
 					onApplyPreset={(preset) => {
 						// Apply the planet preset to the config
 						handleConfigChange({
@@ -327,31 +379,34 @@ export default function FPSExplorerGenerator() {
 
 				{/* Instructions Overlay */}
 				{isExploring && !isLoading && (
-					<div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-4 max-w-md">
-						<h4 className="text-white font-semibold mb-2">FPS Controls</h4>
+					<div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-4 max-w-md z-20">
+						<h4 className="text-white font-semibold mb-2 flex items-center">
+							<span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
+							FPS Controls
+						</h4>
 						<div className="text-sm text-slate-300 space-y-1">
 							<p>
-								<span className="text-green-400">WASD:</span> Move around
+								<span className="text-green-400 font-medium">WASD:</span> Move around
 							</p>
 							<p>
-								<span className="text-green-400">Mouse:</span> Look around
+								<span className="text-green-400 font-medium">Mouse:</span> Look around
 							</p>
 							<p>
-								<span className="text-green-400">Shift:</span> Run
+								<span className="text-green-400 font-medium">Shift:</span> Run
 							</p>
 							<p>
-								<span className="text-green-400">Space:</span> Jump
+								<span className="text-green-400 font-medium">Space:</span> Jump
 							</p>
 							<p>
-								<span className="text-green-400">C:</span> Crouch
+								<span className="text-green-400 font-medium">C:</span> Crouch
 							</p>
 							<p>
-								<span className="text-green-400">ESC:</span> Exit
+								<span className="text-red-400 font-medium">ESC:</span> Exit exploration
 							</p>
 						</div>
 					</div>
 				)}
-			</div>
+			</ComponentErrorBoundary>
 		</div>
 	);
 }
