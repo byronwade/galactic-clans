@@ -558,7 +558,7 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 			cameraRotation.current.targetYaw = 0;
 			cameraRotation.current.targetPitch = 0;
 		}
-	}, [camera, getInitialPosition]);
+	}, [camera]); // Only depend on camera, getInitialPosition is stable
 	
 	// Professional keyboard controls
 	useEffect(() => {
@@ -598,7 +598,7 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 			document.removeEventListener('keydown', handleKeyDown);
 			document.removeEventListener('keyup', handleKeyUp);
 		};
-	}, []);
+	}, []); // Empty dependency array - event handlers don't depend on props
 	
 	// Professional pointer lock setup
 	useEffect(() => {
@@ -620,7 +620,7 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 			document.removeEventListener('pointerlockchange', handlePointerLockChange);
 			gl.domElement.removeEventListener('click', handleClick);
 		};
-	}, [gl.domElement, isPointerLocked]);
+	}, [gl.domElement, isPointerLocked]); // Consistent dependency array
 	
 	// Professional mouse look with industry-standard sensitivity
 	useEffect(() => {
@@ -642,7 +642,7 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 
 		document.addEventListener('mousemove', handleMouseMove);
 		return () => document.removeEventListener('mousemove', handleMouseMove);
-	}, [isPointerLocked, config.player.mouseSensitivity]);
+	}, [isPointerLocked, config.player.mouseSensitivity]); // Consistent dependency array
 	
 	// Professional physics and movement
 	useFrame((state, delta) => {
