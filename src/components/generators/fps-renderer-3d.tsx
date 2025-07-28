@@ -25,237 +25,116 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sky, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
-import { Physics, useBox, usePlane } from "use-cannon";
 import type { FPSConfig, FPSPerformanceMetrics } from "./fps-explorer-generator";
 import { Html } from "@react-three/drei";
+import { RealTimePerformanceMonitor } from "../../shared/core/performance-monitor";
 
-// Simplified FPS Player Controller using Cannon.js Physics
-function FPSPlayer({ config }: { config: FPSConfig }) {
-	const { camera, gl } = useThree();
-	const [isPointerLocked, setIsPointerLocked] = useState(false);
+// Performance monitoring hook - MUST be inside Canvas
+function usePerformanceMonitor(onUpdate?: (metrics: any) => void) {
+	const { gl, camera, scene } = useThree();
+	const monitorRef = useRef<RealTimePerformanceMonitor | null>(null);
 	
-	// Physics body for player collision
-	const [playerRef, playerApi] = useBox(() => ({
-		mass: 1,
-		position: [0, 10, 0],
-		args: [1, 2, 1], // Player collision box
-	}));
-
-	// Movement state
-	const movement = useRef({
-		forward: false,
-		backward: false,
-		left: false,
-		right: false,
-		jump: false,
-		run: false,
-	});
-
-	// Setup keyboard controls
+	// Initialize monitor
 	useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			switch (event.code) {
-				case 'KeyW': movement.current.forward = true; break;
-				case 'KeyS': movement.current.backward = true; break;
-				case 'KeyA': movement.current.left = true; break;
-				case 'KeyD': movement.current.right = true; break;
-				case 'Space': movement.current.jump = true; event.preventDefault(); break;
-				case 'ShiftLeft': movement.current.run = true; break;
-				case 'Escape':
-					if (document.pointerLockElement) {
-						document.exitPointerLock();
-					}
-					break;
-			}
-		};
-
-		const handleKeyUp = (event: KeyboardEvent) => {
-			switch (event.code) {
-				case 'KeyW': movement.current.forward = false; break;
-				case 'KeyS': movement.current.backward = false; break;
-				case 'KeyA': movement.current.left = false; break;
-				case 'KeyD': movement.current.right = false; break;
-				case 'Space': movement.current.jump = false; break;
-				case 'ShiftLeft': movement.current.run = false; break;
-			}
-		};
-
-		document.addEventListener('keydown', handleKeyDown);
-		document.addEventListener('keyup', handleKeyUp);
-
+		if (!monitorRef.current) {
+			monitorRef.current = new RealTimePerformanceMonitor();
+		}
+		
+		const monitor = monitorRef.current;
+		monitor.setRenderer(gl);
+		monitor.setCamera(camera);
+		monitor.setScene(scene);
+		
 		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-			document.removeEventListener('keyup', handleKeyUp);
+			// Cleanup if needed
 		};
-	}, []);
-
-	// Setup pointer lock
-	useEffect(() => {
-		const handlePointerLockChange = () => {
-			setIsPointerLocked(document.pointerLockElement === gl.domElement);
-		};
-
-		const handleClick = () => {
-			if (!isPointerLocked) {
-				gl.domElement.requestPointerLock();
-			}
-		};
-
-		document.addEventListener('pointerlockchange', handlePointerLockChange);
-		gl.domElement.addEventListener('click', handleClick);
-
-		return () => {
-			document.removeEventListener('pointerlockchange', handlePointerLockChange);
-			gl.domElement.removeEventListener('click', handleClick);
-		};
-	}, [gl.domElement, isPointerLocked]);
-
-	// Mouse look controls
-	useEffect(() => {
-		if (!isPointerLocked) return;
-
-		const handleMouseMove = (event: MouseEvent) => {
-			const sensitivity = config.player.mouseSensitivity * 0.002;
-			
-			camera.rotation.y -= event.movementX * sensitivity;
-			camera.rotation.x -= event.movementY * sensitivity;
-			camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
-		};
-
-		document.addEventListener('mousemove', handleMouseMove);
-		return () => document.removeEventListener('mousemove', handleMouseMove);
-	}, [isPointerLocked, camera, config.player.mouseSensitivity]);
-
-	// Physics-based movement
+	}, [gl, camera, scene]);
+	
+	// Update performance metrics every frame
 	useFrame(() => {
-		if (!playerRef.current || !isPointerLocked) return;
-
-		// Get movement direction from camera
-		const direction = new THREE.Vector3(0, 0, -1);
-		direction.applyQuaternion(camera.quaternion);
-		direction.y = 0;
-		direction.normalize();
-
-		const right = new THREE.Vector3(1, 0, 0);
-		right.applyQuaternion(camera.quaternion);
-		right.normalize();
-
-		// Calculate movement vector
-		const moveVector = new THREE.Vector3(0, 0, 0);
-		if (movement.current.forward) moveVector.add(direction);
-		if (movement.current.backward) moveVector.sub(direction);
-		if (movement.current.left) moveVector.sub(right);
-		if (movement.current.right) moveVector.add(right);
-
-		// Apply speed multiplier
-		const speed = movement.current.run ? config.player.runSpeed : config.player.walkSpeed;
-		moveVector.multiplyScalar(speed);
-
-		// Apply physics velocity
-		if (moveVector.length() > 0) {
-			playerApi.velocity.set(moveVector.x, 0, moveVector.z);
-		} else {
-			playerApi.velocity.set(0, 0, 0);
-		}
-
-		// Jump
-		if (movement.current.jump) {
-			playerApi.velocity.set(0, 12, 0);
-			movement.current.jump = false; // Prevent continuous jumping
-		}
-
-		// Sync camera with physics body
-		if (playerRef.current) {
-			camera.position.copy(playerRef.current.position as THREE.Vector3);
-			camera.position.y += 1.6; // Eye height offset
+		if (monitorRef.current && onUpdate) {
+			const metrics = monitorRef.current.update();
+			onUpdate(metrics);
 		}
 	});
-
-	// Render pointer lock overlay
-	if (!isPointerLocked) {
-		return (
-			<Html center>
-				<div className="pointer-events-auto text-center p-6 bg-black/80 backdrop-blur-sm rounded-lg border border-green-400/30">
-					<div className="text-white mb-2 text-lg font-semibold">🎮 Simplified FPS</div>
-					<div className="text-green-400 text-sm mb-3">Click to activate • Physics-based movement</div>
-					<div className="text-xs text-slate-300">
-						WASD to move • Mouse to look • Shift to run • Space to jump
-					</div>
-				</div>
-			</Html>
-		);
-	}
-
-	return <primitive object={playerRef} />;
+	
+	return monitorRef.current;
 }
 
-// Simplified Terrain System
+// Performance Monitor Component - INSIDE Canvas
+function PerformanceTracker({ onMetricsUpdate }: { onMetricsUpdate: (metrics: any) => void }) {
+	usePerformanceMonitor(onMetricsUpdate);
+	return null;
+}
+
+// Simplified FPS Player Controller - No Physics Library
+function FPSPlayer({ config }: { config: FPSConfig }) {
+	const playerRef = useRef<THREE.Group>(null);
+	const [position, setPosition] = useState<THREE.Vector3>(new THREE.Vector3(0, 15, 0));
+	const [velocity, setVelocity] = useState<THREE.Vector3>(new THREE.Vector3());
+	
+	// Simple physics simulation
+	useFrame((state, delta) => {
+		if (!playerRef.current) return;
+		
+		// Apply gravity
+		const newVelocity = velocity.clone();
+		newVelocity.y -= config.environment.gravity * delta;
+		
+		// Ground collision (simple)
+		const newPosition = position.clone().add(newVelocity.clone().multiplyScalar(delta));
+		if (newPosition.y < 2) {
+			newPosition.y = 2;
+			newVelocity.y = 0;
+		}
+		
+		setPosition(newPosition);
+		setVelocity(newVelocity);
+		
+		// Update camera position
+		state.camera.position.copy(newPosition);
+	});
+	
+	return (
+		<group ref={playerRef} position={[position.x, position.y, position.z]}>
+			{/* Player representation (invisible) */}
+			<mesh visible={false}>
+				<capsuleGeometry args={[config.player.playerRadius, config.player.playerHeight]} />
+				<meshBasicMaterial />
+			</mesh>
+		</group>
+	);
+}
+
+// Simplified Terrain without Physics
 function SimplifiedTerrain() {
+	const terrainRef = useRef<THREE.Mesh>(null);
 	const noise = useMemo(() => createNoise2D(), []);
 	
-	// Create ground plane with physics
-	const [groundRef] = usePlane(() => ({
-		rotation: [-Math.PI / 2, 0, 0],
-		position: [0, 0, 0],
-	}));
-
-	// Generate simple heightmap terrain
+	// Generate simple terrain geometry
 	const terrainGeometry = useMemo(() => {
-		const size = 100;
-		const segments = 50;
-		const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
-		
+		const geometry = new THREE.PlaneGeometry(200, 200, 64, 64);
 		const positionAttribute = geometry.attributes.position;
+		
 		if (!positionAttribute) return geometry;
 		
-		const positions = positionAttribute.array as Float32Array;
-		
-		for (let i = 0; i < positions.length; i += 3) {
-			const x = positions[i];
-			const z = positions[i + 2];
-			
-			if (x !== undefined && z !== undefined) {
-				// Simple terrain height using noise
-				let height = 0;
-				height += noise(x * 0.02, z * 0.02) * 8;
-				height += noise(x * 0.05, z * 0.05) * 4;
-				height += noise(x * 0.1, z * 0.1) * 2;
-				
-				positions[i + 1] = height;
-			}
+		// Apply noise to vertices
+		for (let i = 0; i < positionAttribute.count; i++) {
+			const x = positionAttribute.getX(i);
+			const z = positionAttribute.getZ(i);
+			const height = noise(x * 0.01, z * 0.01) * 10;
+			positionAttribute.setY(i, height);
 		}
 		
 		geometry.computeVertexNormals();
 		return geometry;
 	}, [noise]);
-
+	
 	return (
-		<group>
-			{/* Physics ground plane */}
-			<mesh ref={groundRef} visible={false}>
-				<planeGeometry args={[200, 200]} />
-			</mesh>
-			
-			{/* Visual terrain */}
-			<mesh geometry={terrainGeometry} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-				<meshLambertMaterial 
-					color={new THREE.Color(0.3, 0.6, 0.2)}
-					wireframe={false}
-				/>
-			</mesh>
-			
-			{/* Simple trees */}
-			{Array.from({ length: 20 }, (_, i) => (
-				<SimpleTree 
-					key={i} 
-					position={[
-						(Math.random() - 0.5) * 80,
-						0,
-						(Math.random() - 0.5) * 80
-					]} 
-				/>
-			))}
-		</group>
+		<mesh ref={terrainRef} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+			<primitive object={terrainGeometry} />
+			<meshLambertMaterial color="#2d5a2d" side={THREE.DoubleSide} />
+		</mesh>
 	);
 }
 
@@ -265,14 +144,13 @@ function SimpleTree({ position }: { position: [number, number, number] }) {
 		<group position={position}>
 			{/* Trunk */}
 			<mesh position={[0, 2, 0]} castShadow>
-				<cylinderGeometry args={[0.3, 0.4, 4, 8]} />
-				<meshLambertMaterial color={new THREE.Color(0.4, 0.2, 0.1)} />
+				<cylinderGeometry args={[0.2, 0.3, 4]} />
+				<meshLambertMaterial color="#8B4513" />
 			</mesh>
-			
 			{/* Leaves */}
 			<mesh position={[0, 5, 0]} castShadow>
-				<sphereGeometry args={[2.5, 8, 6]} />
-				<meshLambertMaterial color={new THREE.Color(0.2, 0.5, 0.1)} />
+				<sphereGeometry args={[2]} />
+				<meshLambertMaterial color="#228B22" />
 			</mesh>
 		</group>
 	);
@@ -280,53 +158,52 @@ function SimpleTree({ position }: { position: [number, number, number] }) {
 
 // Simplified Environment
 function SimplifiedEnvironment() {
-	const [timeOfDay, setTimeOfDay] = useState(0.3);
-
-	useFrame((state, delta) => {
-		setTimeOfDay(prev => (prev + delta * 0.002) % 1);
-	});
-
-	const sunAngle = timeOfDay * Math.PI * 2;
-	const sunHeight = Math.sin(sunAngle);
-	const sunPosition = new THREE.Vector3(
-		Math.cos(sunAngle) * 100,
-		Math.max(10, sunHeight * 50),
-		Math.sin(sunAngle) * 100
-	);
+	// Generate random tree positions
+	const treePositions = useMemo(() => {
+		const positions: [number, number, number][] = [];
+		for (let i = 0; i < 20; i++) {
+			const x = (Math.random() - 0.5) * 100;
+			const z = (Math.random() - 0.5) * 100;
+			positions.push([x, 0, z]);
+		}
+		return positions;
+	}, []);
 
 	return (
-		<group>
+		<>
 			{/* Sky */}
 			<Sky
 				distance={450000}
-				sunPosition={sunPosition}
+				sunPosition={[0.2, 1, 0.2]}
 				inclination={0}
 				azimuth={0.25}
 			/>
-
+			
+			{/* Stars */}
+			<Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+			
 			{/* Lighting */}
 			<ambientLight intensity={0.4} />
 			<directionalLight
-				position={sunPosition}
-				intensity={0.8}
+				position={[50, 50, 50]}
+				intensity={1}
 				castShadow
-				shadow-mapSize-width={1024}
-				shadow-mapSize-height={1024}
-				shadow-camera-far={100}
+				shadow-mapSize={[2048, 2048]}
+				shadow-camera-far={500}
 				shadow-camera-left={-50}
 				shadow-camera-right={50}
 				shadow-camera-top={50}
 				shadow-camera-bottom={-50}
 			/>
-
-			{/* Stars at night */}
-			{sunHeight < 0.1 && (
-				<Stars radius={300} depth={50} count={3000} factor={4} />
-			)}
-
-			{/* Simple fog */}
-			<fog attach="fog" args={[0x87CEEB, 30, 150]} />
-		</group>
+			
+			{/* Fog */}
+			<fog attach="fog" args={["#87CEEB", 10, 200]} />
+			
+			{/* Trees */}
+			{treePositions.map((pos, index) => (
+				<SimpleTree key={index} position={pos} />
+			))}
+		</>
 	);
 }
 
@@ -337,9 +214,26 @@ export interface FPSRenderer3DProps {
 	onCameraUpdate?: (position: THREE.Vector3, rotation: THREE.Euler) => void;
 }
 
-export const FPSRenderer3D = forwardRef<any, FPSRenderer3DProps>(({ config }, ref) => {
+export const FPSRenderer3D = forwardRef<any, FPSRenderer3DProps>(({ config, onPerformanceUpdate }, ref) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const inputManagerRef = useRef<any>(null);
+
+	// Handle performance metrics updates
+	const handlePerformanceUpdate = useCallback((metrics: any) => {
+		if (onPerformanceUpdate) {
+			// Convert to the expected format
+			const fpsMetrics: FPSPerformanceMetrics = {
+				frameRate: metrics.fps,
+				frameTime: metrics.frameTime,
+				memoryUsage: metrics.memoryUsage.used,
+				drawCalls: metrics.drawCalls,
+				triangles: metrics.triangles,
+				cpuUsage: metrics.cpuUsage,
+			};
+			
+			onPerformanceUpdate(fpsMetrics);
+		}
+	}, [onPerformanceUpdate]);
 
 	useImperativeHandle(ref, () => ({
 		setInputManager: (manager: any) => {
@@ -359,14 +253,25 @@ export const FPSRenderer3D = forwardRef<any, FPSRenderer3DProps>(({ config }, re
 					position: [0, 15, 0],
 				}}
 				shadows
-				gl={{ antialias: true }}
+				gl={{ 
+					antialias: true,
+					powerPreference: "high-performance"
+				}}
 				style={{ width: "100%", height: "100%" }}
+				onCreated={({ gl }) => {
+					// Configure shadow mapping
+					gl.shadowMap.enabled = true;
+					gl.shadowMap.type = THREE.PCFSoftShadowMap;
+				}}
 			>
-				{/* Physics World */}
-				<Physics gravity={[0, -30, 0]}>
-					<FPSPlayer config={config} />
-					<SimplifiedTerrain />
-				</Physics>
+				{/* Performance Monitor - INSIDE Canvas */}
+				<PerformanceTracker onMetricsUpdate={handlePerformanceUpdate} />
+				
+				{/* Player */}
+				<FPSPlayer config={config} />
+				
+				{/* Terrain */}
+				<SimplifiedTerrain />
 				
 				{/* Environment */}
 				<SimplifiedEnvironment />

@@ -3,7 +3,11 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { CriticalErrorBoundary } from "@/components/ErrorBoundary";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+	subsets: ["latin"],
+	display: 'swap',
+	preload: true
+});
 
 export const metadata: Metadata = {
 	title: "Galactic Clans - Epic Space Strategy Game",
@@ -40,6 +44,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<html lang="en" className="dark">
 			<head>
+				{/* Font preconnect - Fix for preload warnings */}
+				<link rel="preconnect" href="https://fonts.googleapis.com" />
+				<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+				<link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+				<link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+				
 				{/* Preserve existing game meta tags */}
 				<meta charSet="UTF-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />

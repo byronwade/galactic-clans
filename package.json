@@ -46,7 +46,6 @@
     "tailwind-merge": "^3.3.1",
     "three": "^0.166.1",
     "three-stdlib": "^2.36.0",
-    "use-cannon": "^0.5.3",
     "zustand": "^5.0.6"
   }
 }
