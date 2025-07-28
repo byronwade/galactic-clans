@@ -12,5 +12,11 @@
     "files": [
       "static/chunks/_app-pages-browser_src_components_generators_fps-explorer-generator_tsx.js"
     ]
+  },
+  "app/test/solar-system/page.tsx -> @/components/generators/solar-system-generator": {
+    "id": "app/test/solar-system/page.tsx -> @/components/generators/solar-system-generator",
+    "files": [
+      "static/chunks/_app-pages-browser_src_components_generators_solar-system-generator_tsx.js"
+    ]
   }
 }

@@ -28,6 +28,7 @@
   "dependencies": {
     "@react-three/drei": "^10.6.1",
     "@react-three/fiber": "^9.2.0",
+    "@react-three/postprocessing": "^3.0.4",
     "@react-three/rapier": "^2.1.0",
     "@tailwindcss/postcss": "^4.1.11",
     "@tauri-apps/api": "^2.7.0",
