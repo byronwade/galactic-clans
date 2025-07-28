@@ -4,7 +4,11 @@ import "./globals.css";
 import { CriticalErrorBoundary } from "@/components/ErrorBoundary";
 import { GlobalInputAlert } from "@/components/GlobalInputAlert";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+	subsets: ["latin"],
+	display: "swap",
+	preload: true,
+});
 
 export const metadata: Metadata = {
 	title: "Cosmic - Galactic Clans Universe Explorer",
@@ -15,23 +19,17 @@ export const metadata: Metadata = {
 		title: "Cosmic - Galactic Clans Universe Explorer",
 		description: "Explore procedurally generated galaxies, planets, and cosmic phenomena in this immersive 3D universe.",
 		type: "website",
-		images: [
-			{
-				url: "/favicon.png",
-				width: 512,
-				height: 512,
-				alt: "Cosmic Logo",
-			},
-		],
+		siteName: "Cosmic",
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "Cosmic - Galactic Clans Universe Explorer",
 		description: "Explore procedurally generated galaxies, planets, and cosmic phenomena in this immersive 3D universe.",
-		images: ["/favicon.png"],
 	},
-	robots: "index, follow",
-	manifest: "/manifest.json",
+	robots: {
+		index: true,
+		follow: true,
+	},
 	metadataBase: new URL("http://localhost:5173"),
 };
 
