@@ -92,7 +92,7 @@ export default function ControllerTestPage() {
 	};
 
 	const mapButtonToGamepadCSS = (buttonIndex: number, controllerType: string): string => {
-		// Xbox/Generic mapping
+		// Xbox/Generic mapping - Extended to support ALL possible Xbox controller buttons
 		if (controllerType === "Xbox" || controllerType === "Generic") {
 			const xboxMap: { [key: number]: string } = {
 				0: "a", // A button
@@ -103,65 +103,114 @@ export default function ControllerTestPage() {
 				5: "rb", // Right bumper
 				6: "lt", // Left trigger
 				7: "rt", // Right trigger
-				8: "select", // Back/Select
-				9: "start", // Start/Menu
-				10: "ls", // Left stick click
-				11: "rs", // Right stick click
+				8: "select", // Back/Select/Share
+				9: "start", // Start/Menu/Options
+				10: "ls", // Left stick click (L3)
+				11: "rs", // Right stick click (R3)
 				12: "up", // D-pad up
 				13: "down", // D-pad down
 				14: "left", // D-pad left
 				15: "right", // D-pad right
+				16: "home", // Xbox/Guide button
+				17: "capture", // Capture/Screenshot button (Xbox Series)
+				18: "paddle1", // Paddle 1 (Elite controllers)
+				19: "paddle2", // Paddle 2 (Elite controllers)
+				20: "paddle3", // Paddle 3 (Elite controllers)
+				21: "paddle4", // Paddle 4 (Elite controllers)
+				22: "touchpad", // Touchpad click (some Xbox controllers)
+				23: "mic", // Microphone mute button
 			};
-			return xboxMap[buttonIndex] || "";
+			return xboxMap[buttonIndex] || `button${buttonIndex}`;
 		}
 
-		// PlayStation mapping
+		// PlayStation mapping - Extended to support ALL possible PlayStation controller buttons
 		if (controllerType === "PlayStation") {
 			const psMap: { [key: number]: string } = {
 				0: "cross", // Cross (X)
 				1: "circle", // Circle
 				2: "square", // Square
 				3: "triangle", // Triangle
-				4: "l1", // L1
-				5: "r1", // R1
-				6: "l2", // L2
-				7: "r2", // R2
-				8: "select", // Share
-				9: "start", // Options
-				10: "l3", // L3
-				11: "r3", // R3
+				4: "l1", // L1 bumper
+				5: "r1", // R1 bumper
+				6: "l2", // L2 trigger
+				7: "r2", // R2 trigger
+				8: "select", // Share button
+				9: "start", // Options button
+				10: "l3", // Left stick click (L3)
+				11: "r3", // Right stick click (R3)
 				12: "up", // D-pad up
 				13: "down", // D-pad down
 				14: "left", // D-pad left
 				15: "right", // D-pad right
+				16: "home", // PlayStation/PS button
+				17: "touchpad", // Touchpad click
+				18: "mic", // Microphone mute button (DualSense)
+				19: "create", // Create button (DualSense)
+				20: "paddle1", // Paddle 1 (custom/pro controllers)
+				21: "paddle2", // Paddle 2 (custom/pro controllers)
+				22: "paddle3", // Paddle 3 (custom/pro controllers)
+				23: "paddle4", // Paddle 4 (custom/pro controllers)
 			};
-			return psMap[buttonIndex] || "";
+			return psMap[buttonIndex] || `button${buttonIndex}`;
 		}
 
-		// Nintendo Switch mapping
+		// Nintendo Switch mapping - Extended to support ALL possible Switch controller buttons
 		if (controllerType === "Nintendo") {
 			const switchMap: { [key: number]: string } = {
-				0: "a", // A button
-				1: "b", // B button
-				2: "x", // X button
-				3: "y", // Y button
+				0: "a", // A button (right side)
+				1: "b", // B button (bottom)
+				2: "x", // X button (top)
+				3: "y", // Y button (left side)
 				4: "l", // L bumper
 				5: "r", // R bumper
 				6: "zl", // ZL trigger
 				7: "zr", // ZR trigger
-				8: "minus", // Minus
-				9: "plus", // Plus
+				8: "minus", // Minus button
+				9: "plus", // Plus button
 				10: "ls", // Left stick click
 				11: "rs", // Right stick click
 				12: "up", // D-pad up
 				13: "down", // D-pad down
 				14: "left", // D-pad left
 				15: "right", // D-pad right
+				16: "home", // Home button
+				17: "capture", // Capture button
+				18: "sl_left", // SL button (left Joy-Con)
+				19: "sr_left", // SR button (left Joy-Con)
+				20: "sl_right", // SL button (right Joy-Con)
+				21: "sr_right", // SR button (right Joy-Con)
 			};
-			return switchMap[buttonIndex] || "";
+			return switchMap[buttonIndex] || `button${buttonIndex}`;
 		}
 
-		return "";
+		// Generic fallback for any unmapped controller type
+		const genericMap: { [key: number]: string } = {
+			0: "a",
+			1: "b",
+			2: "x",
+			3: "y",
+			4: "lb",
+			5: "rb",
+			6: "lt",
+			7: "rt",
+			8: "select",
+			9: "start",
+			10: "ls",
+			11: "rs",
+			12: "up",
+			13: "down",
+			14: "left",
+			15: "right",
+			16: "home",
+			17: "capture",
+			18: "paddle1",
+			19: "paddle2",
+			20: "paddle3",
+			21: "paddle4",
+			22: "touchpad",
+			23: "mic",
+		};
+		return genericMap[buttonIndex] || `button${buttonIndex}`;
 	};
 
 	const pollGamepads = () => {
@@ -188,15 +237,15 @@ export default function ControllerTestPage() {
 					addEventLog(`Controller ${i} connected: ${gamepad.id}`, "success");
 				}
 
-				// Update button states
+				// Update button states - Handle ALL buttons, not just the first 16
 				gamepad.buttons.forEach((button, index) => {
 					const buttonName = mapButtonToGamepadCSS(index, controllerType);
 					if (buttonName) {
 						newButtonStates[buttonName] = button.pressed;
 
-						// Log button press events
+						// Log button press events with index and name for debugging
 						if (button.pressed && !buttonStates[buttonName]) {
-							addEventLog(`Button ${buttonName.toUpperCase()} pressed`, "info");
+							addEventLog(`Button ${index} (${buttonName.toUpperCase()}) pressed`, "info");
 						}
 					}
 				});
@@ -863,9 +912,25 @@ export default function ControllerTestPage() {
 										<span className="text-slate-400">Connected:</span>
 										<span className="text-white font-mono">{connectedGamepads.size}</span>
 									</div>
+									{isConnected && connectedGamepads.size > 0 && (
+										<>
+											<div className="flex items-center justify-between">
+												<span className="text-slate-400">Total Buttons:</span>
+												<span className="text-white font-mono">{Array.from(connectedGamepads.values())[0]?.buttons.length || 0}</span>
+											</div>
+											<div className="flex items-center justify-between">
+												<span className="text-slate-400">Total Axes:</span>
+												<span className="text-white font-mono">{Array.from(connectedGamepads.values())[0]?.axes.length || 0}</span>
+											</div>
+										</>
+									)}
 									<div className="flex items-center justify-between">
 										<span className="text-slate-400">Active Buttons:</span>
 										<span className="text-white font-mono">{Object.values(buttonStates).filter(Boolean).length}</span>
+									</div>
+									<div className="flex items-center justify-between">
+										<span className="text-slate-400">Mapped Buttons:</span>
+										<span className="text-white font-mono">{Object.keys(buttonStates).length}</span>
 									</div>
 								</div>
 							</div>
