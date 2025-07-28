@@ -29,8 +29,8 @@ interface FPSControlsProps {
 	showInfo: boolean;
 }
 
-export function FPSControls({ config, isExploring, isInitializing, status, availableModes, planetPresets, onStartExploration, onStopExploration, onConfigChange, onApplyPreset, onToggleSettings, onToggleInfo, showSettings, showInfo }: FPSControlsProps) {
-	const currentMode = availableModes.find((m) => m.value === config.gameplay.explorationMode) || availableModes[0];
+export function FPSControls({ config, isExploring, isInitializing, status, availableModes = [], planetPresets = [], onStartExploration, onStopExploration, onConfigChange, onApplyPreset, onToggleSettings, onToggleInfo, showSettings, showInfo }: FPSControlsProps) {
+	const currentMode = availableModes?.find((m) => m.value === config.gameplay.explorationMode) || availableModes[0];
 
 	return (
 		<>

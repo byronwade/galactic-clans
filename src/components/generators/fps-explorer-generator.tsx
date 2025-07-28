@@ -121,44 +121,39 @@ export interface FPSPerformanceMetrics {
 	cpuUsage: number;
 }
 
-export const EXPLORATION_MODES = [
-	{ value: "free", label: "Free Exploration", description: "Unrestricted exploration of the planet surface" },
-	{ value: "guided", label: "Guided Tour", description: "Structured exploration with points of interest" },
-	{ value: "survival", label: "Survival Mode", description: "Realistic survival mechanics with limited resources" },
-];
-
-export const PLANET_PRESETS = [
+// Planet presets for quick environment setup
+const PLANET_PRESETS = [
 	{
-		name: "Earth-like Temperate",
-		planetClass: PlanetClass.TERRESTRIAL,
+		name: "Earth-like",
+		planetClass: "terrestrial" as const,
 		atmosphere: true,
 		weatherType: "clear" as const,
 		vegetation: true,
 	},
 	{
-		name: "Mars-like Desert",
-		planetClass: PlanetClass.DESERT,
+		name: "Desert World",
+		planetClass: "desert" as const,
 		atmosphere: false,
 		weatherType: "clear" as const,
 		vegetation: false,
 	},
 	{
 		name: "Jungle World",
-		planetClass: PlanetClass.TERRESTRIAL,
+		planetClass: "terrestrial" as const,
 		atmosphere: true,
 		weatherType: "rain" as const,
 		vegetation: true,
 	},
 	{
 		name: "Ice Planet",
-		planetClass: PlanetClass.ICE,
+		planetClass: "ice" as const,
 		atmosphere: true,
 		weatherType: "snow" as const,
 		vegetation: false,
 	},
 	{
 		name: "Volcanic World",
-		planetClass: PlanetClass.VOLCANIC,
+		planetClass: "volcanic" as const,
 		atmosphere: true,
 		weatherType: "storm" as const,
 		vegetation: false,
@@ -182,7 +177,7 @@ export default function FPSExplorerGenerator() {
 			stepHeight: 0.3,
 			stamina: 100,
 			breathingEffect: true,
-			headBobIntensity: 0.5,
+			headBobIntensity: 1.0,
 		},
 		environment: {
 			planetClass: PlanetClass.TERRESTRIAL,
@@ -191,9 +186,9 @@ export default function FPSExplorerGenerator() {
 			atmosphere: true,
 			terrainDetail: 0.8,
 			terrainScale: 50.0,
-			heightVariation: 10.0,
+			heightVariation: 20.0,
 			enableVegetation: true,
-			vegetationDensity: 0.7,
+			vegetationDensity: 0.5,
 			treeTypes: ["Oak", "Pine", "Birch"],
 			weatherEnabled: true,
 			weatherType: "clear",
@@ -222,14 +217,10 @@ export default function FPSExplorerGenerator() {
 		},
 	});
 
-	// UI state
-	const [showSettings, setShowSettings] = useState(false);
-	const [showInfo, setShowInfo] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isExploring, setIsExploring] = useState(false);
-	const [status, setStatus] = useState("Ready to explore planetary surface");
-
-	// Performance monitoring
+	const [showSettings, setShowSettings] = useState(false);
+	const [showInfo, setShowInfo] = useState(false);
 	const [performanceMetrics, setPerformanceMetrics] = useState<FPSPerformanceMetrics>({
 		frameRate: 60,
 		frameTime: 16.67,
@@ -239,85 +230,27 @@ export default function FPSExplorerGenerator() {
 		cpuUsage: 0,
 	});
 
-	// Input management
 	const inputManagerRef = useRef<any>(null);
 	const rendererRef = useRef<any>(null);
 
-	// Event handlers
-	const handleStartExploration = useCallback(() => {
-		setIsExploring(true);
-		setIsLoading(true);
-		// Simulate initialization
-		setTimeout(() => setIsLoading(false), 2000);
-	}, []);
+	// Available exploration modes
+	const EXPLORATION_MODES = [
+		{ value: "free", label: "Free Exploration", description: "Explore freely without restrictions" },
+		{ value: "guided", label: "Guided Tour", description: "Follow waypoints and objectives" },
+		{ value: "survival", label: "Survival Mode", description: "Limited resources and challenging gameplay" },
+	];
 
-	const handleStopExploration = useCallback(() => {
-		setIsExploring(false);
-		setStatus("Exploration ended - Ready to reconfigure");
-	}, []);
-
+	// Configuration update handler
 	const handleConfigChange = useCallback((updates: Partial<FPSConfig>) => {
-		setConfig((prev) => ({
-			...prev,
-			...updates,
-			player: { ...prev.player, ...(updates.player || {}) },
-			environment: { ...prev.environment, ...(updates.environment || {}) },
-			gameplay: { ...prev.gameplay, ...(updates.gameplay || {}) },
-		}));
+		setConfig((prev) => ({ ...prev, ...updates }));
 	}, []);
-
-	const applyPlanetPreset = useCallback(
-		(preset: (typeof PLANET_PRESETS)[0]) => {
-			handleConfigChange({
-				environment: {
-					...config.environment,
-					planetClass: preset.planetClass,
-					atmosphere: preset.atmosphere,
-					weatherType: preset.weatherType,
-					enableVegetation: preset.vegetation,
-					vegetationDensity: preset.vegetation ? 0.7 : 0.0,
-				},
-			});
-			setStatus(`Applied ${preset.name} preset`);
-		},
-		[config.environment, handleConfigChange]
-	);
-
-	const handlePerformanceUpdate = useCallback((metrics: FPSPerformanceMetrics) => {
-		setPerformanceMetrics(metrics);
-	}, []);
-
-	// Input system initialization
-	useEffect(() => {
-		if (isExploring && inputManagerRef.current) {
-			inputManagerRef.current.enable();
-		} else if (inputManagerRef.current) {
-			inputManagerRef.current.disable();
-		}
-	}, [isExploring]);
-
-	// Performance monitoring
-	useEffect(() => {
-		if (!isExploring) return;
-
-		const interval = setInterval(() => {
-			// Simulate performance metrics (would be real data from renderer)
-			setPerformanceMetrics((prev) => ({
-				...prev,
-				frameRate: 58 + Math.random() * 4,
-				frameTime: 16 + Math.random() * 2,
-				drawCalls: 150 + Math.floor(Math.random() * 50),
-				triangles: 250000 + Math.floor(Math.random() * 50000),
-				memoryUsage: 512 + Math.random() * 128,
-				cpuUsage: 45 + Math.random() * 15,
-			}));
-		}, 1000);
-
-		return () => clearInterval(interval);
-	}, [isExploring]);
 
 	// Get current exploration mode
-	const currentMode = EXPLORATION_MODES.find((m) => m.value === config.gameplay.explorationMode) || EXPLORATION_MODES[0];
+	const currentMode = EXPLORATION_MODES.find((m) => m.value === config.gameplay.explorationMode) ?? {
+		value: "free",
+		label: "Free Exploration",
+		description: "Explore freely without restrictions",
+	};
 
 	return (
 		<div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-green-950 to-black">
@@ -335,7 +268,7 @@ export default function FPSExplorerGenerator() {
 			{/* Main Content Area */}
 			<div className="relative w-full h-full">
 				{/* FPS Input Manager */}
-				<FPSInputManager ref={inputManagerRef} config={config.player} enabled={isExploring} onConfigChange={(updates) => setConfig((prev) => ({ ...prev, player: { ...prev.player, ...updates } }))} />
+				<FPSInputManager ref={inputManagerRef} config={config.player} enabled={isExploring} onConfigChange={(updates) => handleConfigChange({ player: { ...config.player, ...updates } })} />
 
 				{/* Professional FPS Renderer */}
 				<FPSRenderer3D ref={rendererRef} config={config} onPerformanceUpdate={setPerformanceMetrics} />
@@ -343,9 +276,12 @@ export default function FPSExplorerGenerator() {
 				{/* FPS Controls Header */}
 				<FPSControls
 					config={config}
-					onConfigChange={setConfig}
-					performanceMetrics={performanceMetrics}
+					onConfigChange={handleConfigChange}
 					isExploring={isExploring}
+					isInitializing={isLoading}
+					status={isLoading ? "loading" : isExploring ? "exploring" : "ready"}
+					availableModes={EXPLORATION_MODES}
+					planetPresets={PLANET_PRESETS}
 					onStartExploration={() => {
 						setIsExploring(true);
 						setIsLoading(true);
@@ -353,16 +289,30 @@ export default function FPSExplorerGenerator() {
 						setTimeout(() => setIsLoading(false), 2000);
 					}}
 					onStopExploration={() => setIsExploring(false)}
+					onApplyPreset={(preset) => {
+						// Apply the planet preset to the config
+						handleConfigChange({
+							environment: {
+								...config.environment,
+								weatherType: preset.weatherType,
+								enableVegetation: preset.vegetation,
+							},
+						});
+					}}
+					onToggleSettings={() => setShowSettings(!showSettings)}
+					onToggleInfo={() => setShowInfo(!showInfo)}
+					showSettings={showSettings}
+					showInfo={showInfo}
 				/>
 
 				{/* Settings Panel */}
-				{showSettings && <FPSSettings config={config} onConfigChange={setConfig} onClose={() => setShowSettings(false)} />}
+				{showSettings && <FPSSettings config={config} onConfigChange={handleConfigChange} onClose={() => setShowSettings(false)} availableModes={EXPLORATION_MODES} planetPresets={PLANET_PRESETS} />}
 
 				{/* Info Panel */}
-				{showInfo && <FPSInfo config={config} performanceMetrics={performanceMetrics} isExploring={isExploring} onClose={() => setShowInfo(false)} />}
+				{showInfo && <FPSInfo config={config} currentMode={currentMode} onClose={() => setShowInfo(false)} />}
 
 				{/* Stats Panel */}
-				<FPSStats config={config} performanceMetrics={performanceMetrics} isExploring={isExploring} />
+				<FPSStats config={config} performanceMetrics={performanceMetrics} isExploring={isExploring} currentMode={currentMode} />
 
 				{/* FPS Crosshair */}
 				{isExploring && config.gameplay.showCrosshair && (
