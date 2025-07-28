@@ -28,7 +28,6 @@
   "dependencies": {
     "@react-three/drei": "^10.6.1",
     "@react-three/fiber": "^9.2.0",
-    "@tailwindcss/postcss": "^4.1.11",
     "@tauri-apps/api": "^2.7.0",
     "bitecs": "^0.3.40",
     "class-variance-authority": "^0.7.1",
