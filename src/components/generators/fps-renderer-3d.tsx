@@ -454,8 +454,12 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		}
 	}, [movementState]);
 
-	// Weapon sway and breathing system
+	// Weapon sway and breathing system (disabled for now - should only apply with weapons)
 	const updateWeaponSway = useCallback((delta: number, isMoving: boolean, isAiming: boolean) => {
+		// DISABLED: Weapon sway should only be applied when holding a weapon
+		// Currently this is causing unwanted camera movement
+		
+		/*
 		const sway = weaponSwayRef.current;
 		sway.time += delta;
 
@@ -485,6 +489,7 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		camera.rotation.x += totalSway.x;
 		camera.rotation.y += totalSway.y;
 		camera.rotation.z += totalSway.z;
+		*/
 	}, [camera, playerState.isRunning]);
 
 	// Professional movement physics
@@ -581,8 +586,8 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 			// Update camera position
 			camera.position.copy(newPosition);
 
-			// Update weapon sway and breathing
-			updateWeaponSway(delta, isMoving, inputState.aim || false);
+			// Update weapon sway and breathing (disabled for now)
+			// updateWeaponSway(delta, isMoving, inputState.aim || false);
 
 			// Update stamina with enhanced recovery
 			const staminaRecovery = playerState.isRunning ? 0 : (isMoving ? 10 : 20);
