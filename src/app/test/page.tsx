@@ -9,7 +9,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Play, Gamepad2, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Play, Gamepad2, User, Home } from "lucide-react";
 import { useGamepadController } from "@/hooks/useGamepadController";
 import { InputMethodIndicator } from "@/components/InputMethodIndicator";
 
@@ -139,7 +140,6 @@ function TestCard({ test, onLaunch, isSelected = false }: { test: TestCard; onLa
 						onClick={() => {
 							console.log(`Launching ${test.title} -> ${test.href}`);
 							onLaunch(test.title, test.href);
-							window.location.href = test.href;
 						}}
 						className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium cursor-pointer"
 						style={{ pointerEvents: "auto" }}
@@ -156,16 +156,18 @@ function TestCard({ test, onLaunch, isSelected = false }: { test: TestCard; onLa
 }
 
 export default function TestSuitePage() {
-	const [selectedCategory, setSelectedCategory] = useState<string>("All");
-	const [selectedTestIndex, setSelectedTestIndex] = useState<number>(0);
-	const [showControllerHelp, setShowControllerHelp] = useState<boolean>(false);
+	const router = useRouter();
+	const [selectedCategory, setSelectedCategory] = useState("All");
+	const [selectedTestIndex, setSelectedTestIndex] = useState(0);
+	const [showControllerHelp, setShowControllerHelp] = useState(false);
 
 	const categories = ["All", ...Array.from(new Set(testPages.map((test) => test.category)))];
 
 	const filteredTests = selectedCategory === "All" ? testPages : testPages.filter((test) => test.category === selectedCategory);
 
 	const handleTestLaunch = (name: string, href: string) => {
-		console.log(`🚀 Launching test: ${name} at ${href}`);
+		console.log(`🚀 Launching test: ${name} -> ${href}`);
+		router.push(href);
 	};
 
 	// Enhanced controller support
@@ -203,12 +205,11 @@ export default function TestSuitePage() {
 				const selectedTest = filteredTests[selectedTestIndex];
 				if (selectedTest) {
 					handleTestLaunch(selectedTest.title, selectedTest.href);
-					window.location.href = selectedTest.href;
 					triggerHapticFeedback(0.6, 200);
 				}
 			},
 			onSecondaryAction: () => {
-				window.history.back();
+				router.back();
 				triggerHapticFeedback(0.5, 150);
 			},
 			onMenuToggle: () => {
@@ -228,7 +229,81 @@ export default function TestSuitePage() {
 	}, [isConnected]);
 
 	return (
-		<div className="min-h-screen bg-black text-white">
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900">
+			{/* Debug Section - Simple buttons with inline styles */}
+			<div
+				style={{
+					position: "fixed",
+					top: "10px",
+					right: "10px",
+					backgroundColor: "#1a1a1a",
+					padding: "15px",
+					borderRadius: "8px",
+					border: "1px solid #333",
+					zIndex: 1000,
+				}}
+			>
+				<div style={{ color: "#fff", marginBottom: "10px", fontSize: "14px" }}>Debug Navigation:</div>
+				<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+					<button
+						onClick={() => {
+							console.log("Debug: Going to Audio Test");
+							router.push("/test/audio");
+						}}
+						style={{
+							padding: "8px 12px",
+							backgroundColor: "#0066cc",
+							color: "#fff",
+							border: "none",
+							borderRadius: "4px",
+							cursor: "pointer",
+							fontSize: "12px",
+							pointerEvents: "auto",
+						}}
+					>
+						Audio Test
+					</button>
+					<button
+						onClick={() => {
+							console.log("Debug: Going to Debug Page");
+							router.push("/test/debug");
+						}}
+						style={{
+							padding: "8px 12px",
+							backgroundColor: "#cc6600",
+							color: "#fff",
+							border: "none",
+							borderRadius: "4px",
+							cursor: "pointer",
+							fontSize: "12px",
+							pointerEvents: "auto",
+						}}
+					>
+						Debug Page
+					</button>
+				</div>
+			</div>
+
+			{/* Fixed Header */}
+			<header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-slate-700/30 bg-slate-900/95 backdrop-blur-sm">
+				<div className="flex h-full items-center justify-between px-6">
+					<div className="flex items-center space-x-4">
+						<ArrowLeft className="h-6 w-6 text-blue-400" />
+						<div>
+							<h1 className="text-2xl font-bold text-white">Cosmic Test Suite</h1>
+							<p className="text-sm text-gray-400">Interactive testing environment</p>
+						</div>
+					</div>
+
+					<div className="flex items-center space-x-4">
+						<Link href="/" className="flex items-center space-x-2 rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2 text-sm text-white transition-colors hover:bg-slate-700/50">
+							<Home className="h-4 w-4" />
+							<span>Back to Home</span>
+						</Link>
+					</div>
+				</div>
+			</header>
+
 			{/* Controller Help Overlay */}
 			{showControllerHelp && isConnected && (
 				<div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
@@ -280,35 +355,6 @@ export default function TestSuitePage() {
 					</div>
 				</div>
 			)}
-
-			{/* Header */}
-			<header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="flex items-center justify-between h-16">
-						<div className="flex items-center space-x-4">
-							<Link href="/" className="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors">
-								<ArrowLeft className="w-5 h-5" />
-								<span className="font-medium">Back to Home</span>
-							</Link>
-						</div>
-
-						<div className="flex items-center space-x-4">
-							<h1 className="text-xl font-bold">Cosmic Test Suite</h1>
-							{isConnected && (
-								<div className="flex items-center space-x-2 text-sm">
-									<Gamepad2 className="w-4 h-4 text-green-400" />
-									<span className="text-green-400">Controller Connected</span>
-								</div>
-							)}
-						</div>
-
-						<div className="flex items-center space-x-2">
-							<User className="w-5 h-5 text-gray-400" />
-							<span className="text-sm text-gray-400">Developer Mode</span>
-						</div>
-					</div>
-				</div>
-			</header>
 
 			{/* Category Filter */}
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
