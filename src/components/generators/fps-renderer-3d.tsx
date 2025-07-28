@@ -22,22 +22,7 @@ import { EffectComposer, SSAO, Bloom, Vignette, ChromaticAberration } from "@rea
 import * as THREE from "three";
 import { createNoise2D, createNoise3D } from "simplex-noise";
 import { useGamepadController } from "@/hooks/useGamepadController";
-
-// FPS Config interface
-interface FPSConfig {
-	player: {
-		mouseSensitivity: number;
-		walkSpeed: number;
-		runSpeed: number;
-		jumpHeight: number;
-		playerRadius: number;
-		playerHeight: number;
-		fov: number;
-	};
-	environment: {
-		gravity: number;
-	};
-}
+import { FPSConfig } from '@/components/generators/fps-explorer-generator';
 
 // Advanced Terrain System inspired by Unity's Terrain Editor
 // Reference: https://learn.unity.com/tutorial/working-with-the-terrain-editor-1
