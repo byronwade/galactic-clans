@@ -1,16 +1,15 @@
 /**
  * @file fps-input-manager.tsx
- * @description AAA-Quality Input Management System for FPS Exploration
- * @version 2.0.0
+ * @description Advanced Input Management System for FPS Exploration
+ * @version 1.0.0
  * @author Galactic Clans Development Team
  *
- * Features:
- * - Smooth mouse interpolation with adjustable sensitivity
- * - Advanced gamepad support with proper deadzone handling
- * - Customizable key bindings with conflict detection
- * - Input buffering for responsive controls
- * - Separate X/Y mouse sensitivity settings
- * - Mouse acceleration and smoothing options
+ * Implements:
+ * - Mouse look with smooth interpolation
+ * - WASD movement with momentum
+ * - Gamepad support
+ * - Customizable key bindings
+ * - Input buffering and filtering
  */
 
 "use client";
@@ -27,42 +26,25 @@ interface InputState {
 	jump: boolean;
 	crouch: boolean;
 	run: boolean;
-	walk: boolean; // Slow walk modifier
 
-	// Mouse (smoothed values)
+	// Mouse
 	mouseX: number;
 	mouseY: number;
 	mouseDeltaX: number;
 	mouseDeltaY: number;
 	mousePressed: boolean;
-	mouseRightPressed: boolean;
-
-	// Advanced movement
-	lean_left: boolean;
-	lean_right: boolean;
-	prone: boolean;
 
 	// Interaction
 	interact: boolean;
 	scan: boolean;
 	sample: boolean;
-	reload: boolean;
-	throw_grenade: boolean;
 
 	// UI
 	menu: boolean;
 	inventory: boolean;
-	map: boolean;
-	flashlight: boolean;
-	zoom: boolean;
-
-	// Weapon
-	fire: boolean;
-	aim: boolean;
-	melee: boolean;
 }
 
-interface AdvancedKeyBindings {
+interface KeyBindings {
 	forward: string[];
 	backward: string[];
 	left: string[];
@@ -70,31 +52,11 @@ interface AdvancedKeyBindings {
 	jump: string[];
 	crouch: string[];
 	run: string[];
-	walk: string[];
-	lean_left: string[];
-	lean_right: string[];
-	prone: string[];
 	interact: string[];
 	scan: string[];
 	sample: string[];
-	reload: string[];
-	throw_grenade: string[];
 	menu: string[];
 	inventory: string[];
-	map: string[];
-	flashlight: string[];
-	zoom: string[];
-	fire: string[];
-	aim: string[];
-	melee: string[];
-}
-
-interface MouseSettings {
-	sensitivityX: number;
-	sensitivityY: number;
-	smoothing: number;
-	acceleration: number;
-	invertY: boolean;
 }
 
 interface GamepadState {
@@ -103,21 +65,15 @@ interface GamepadState {
 	leftStickY: number;
 	rightStickX: number;
 	rightStickY: number;
-	leftTrigger: number;
-	rightTrigger: number;
 	buttons: boolean[];
-	vibration: boolean;
 }
 
 export interface FPSInputManagerRef {
 	enable: () => void;
 	disable: () => void;
 	getInputState: () => InputState;
-	setKeyBinding: (action: keyof AdvancedKeyBindings, keys: string[]) => void;
-	setMouseSettings: (settings: Partial<MouseSettings>) => void;
+	setKeyBinding: (action: keyof KeyBindings, keys: string[]) => void;
 	resetToDefaults: () => void;
-	isPointerLocked: () => boolean;
-	triggerVibration: (intensity: number, duration: number) => void;
 }
 
 interface FPSInputManagerProps {
@@ -127,7 +83,7 @@ interface FPSInputManagerProps {
 }
 
 export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerProps>(({ config, enabled, onConfigChange }, ref) => {
-	// Enhanced state management
+	// State management
 	const inputStateRef = useRef<InputState>({
 		forward: false,
 		backward: false,
@@ -136,32 +92,19 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 		jump: false,
 		crouch: false,
 		run: false,
-		walk: false,
 		mouseX: 0,
 		mouseY: 0,
 		mouseDeltaX: 0,
 		mouseDeltaY: 0,
 		mousePressed: false,
-		mouseRightPressed: false,
-		lean_left: false,
-		lean_right: false,
-		prone: false,
 		interact: false,
 		scan: false,
 		sample: false,
-		reload: false,
-		throw_grenade: false,
 		menu: false,
 		inventory: false,
-		map: false,
-		flashlight: false,
-		zoom: false,
-		fire: false,
-		aim: false,
-		melee: false,
 	});
 
-	const keyBindingsRef = useRef<AdvancedKeyBindings>({
+	const keyBindingsRef = useRef<KeyBindings>({
 		forward: ["KeyW", "ArrowUp"],
 		backward: ["KeyS", "ArrowDown"],
 		left: ["KeyA", "ArrowLeft"],
@@ -169,31 +112,11 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 		jump: ["Space"],
 		crouch: ["KeyC", "ControlLeft"],
 		run: ["ShiftLeft"],
-		walk: ["AltLeft"],
-		lean_left: ["KeyQ"],
-		lean_right: ["KeyE"],
-		prone: ["KeyZ"],
-		interact: ["KeyF"],
-		scan: ["KeyV"],
+		interact: ["KeyE"],
+		scan: ["KeyF"],
 		sample: ["KeyR"],
-		reload: ["KeyR"],
-		throw_grenade: ["KeyG"],
 		menu: ["Escape"],
 		inventory: ["KeyI", "Tab"],
-		map: ["KeyM"],
-		flashlight: ["KeyT"],
-		zoom: ["KeyX"],
-		fire: ["MouseLeft"],
-		aim: ["MouseRight"],
-		melee: ["KeyF"],
-	});
-
-	const mouseSettingsRef = useRef<MouseSettings>({
-		sensitivityX: config.mouseSensitivity || 1.0,
-		sensitivityY: config.mouseSensitivity || 1.0,
-		smoothing: 0.1,
-		acceleration: 1.0,
-		invertY: false,
 	});
 
 	const gamepadStateRef = useRef<GamepadState>({
@@ -202,18 +125,15 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 		leftStickY: 0,
 		rightStickX: 0,
 		rightStickY: 0,
-		leftTrigger: 0,
-		rightTrigger: 0,
 		buttons: new Array(16).fill(false),
-		vibration: true,
 	});
 
-	// Mouse smoothing buffer
-	const mouseDeltaBuffer = useRef<Array<{ x: number; y: number }>>([]);
 	const enabledRef = useRef(enabled);
 	const pointerLockedRef = useRef(false);
+	const lastMouseXRef = useRef(0);
+	const lastMouseYRef = useRef(0);
 
-	// Enhanced input event handlers
+	// Input event handlers
 	const handleKeyDown = useCallback((event: KeyboardEvent) => {
 		if (!enabledRef.current) return;
 
@@ -247,61 +167,32 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 		});
 	}, []);
 
-	const handleMouseMove = useCallback((event: MouseEvent) => {
-		if (!enabledRef.current || !pointerLockedRef.current) return;
+	const handleMouseMove = useCallback(
+		(event: MouseEvent) => {
+			if (!enabledRef.current || !pointerLockedRef.current) return;
 
-		const settings = mouseSettingsRef.current;
+			const sensitivity = config.mouseSensitivity * 0.001;
 
-		// Apply base sensitivity
-		let deltaX = event.movementX * settings.sensitivityX * 0.002;
-		let deltaY = event.movementY * settings.sensitivityY * 0.002;
+			// Calculate mouse delta with sensitivity
+			const deltaX = event.movementX * sensitivity;
+			const deltaY = event.movementY * sensitivity;
 
-		// Apply Y inversion
-		if (settings.invertY) {
-			deltaY = -deltaY;
-		}
+			// Update input state
+			inputStateRef.current.mouseDeltaX = deltaX;
+			inputStateRef.current.mouseDeltaY = deltaY;
+			inputStateRef.current.mouseX += deltaX;
+			inputStateRef.current.mouseY += deltaY;
 
-		// Apply mouse acceleration
-		const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-		const accelerationFactor = 1 + magnitude * settings.acceleration * 0.1;
-		deltaX *= accelerationFactor;
-		deltaY *= accelerationFactor;
-
-		// Add to smoothing buffer
-		mouseDeltaBuffer.current.push({ x: deltaX, y: deltaY });
-		if (mouseDeltaBuffer.current.length > 5) {
-			mouseDeltaBuffer.current.shift();
-		}
-
-		// Apply smoothing
-		const avgDelta = mouseDeltaBuffer.current.reduce((acc, curr) => ({ x: acc.x + curr.x, y: acc.y + curr.y }), { x: 0, y: 0 });
-		avgDelta.x /= mouseDeltaBuffer.current.length;
-		avgDelta.y /= mouseDeltaBuffer.current.length;
-
-		// Interpolate between raw and smoothed input
-		const smoothedDeltaX = deltaX * (1 - settings.smoothing) + avgDelta.x * settings.smoothing;
-		const smoothedDeltaY = deltaY * (1 - settings.smoothing) + avgDelta.y * settings.smoothing;
-
-		// Update input state
-		inputStateRef.current.mouseDeltaX = smoothedDeltaX;
-		inputStateRef.current.mouseDeltaY = smoothedDeltaY;
-		inputStateRef.current.mouseX += smoothedDeltaX;
-		inputStateRef.current.mouseY += smoothedDeltaY;
-
-		// Clamp vertical look to prevent over-rotation
-		inputStateRef.current.mouseY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, inputStateRef.current.mouseY));
-	}, []);
+			// Clamp vertical look to prevent over-rotation
+			inputStateRef.current.mouseY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, inputStateRef.current.mouseY));
+		},
+		[config.mouseSensitivity]
+	);
 
 	const handleMouseDown = useCallback((event: MouseEvent) => {
 		if (!enabledRef.current) return;
 
-		if (event.button === 0) {
-			inputStateRef.current.mousePressed = true;
-			inputStateRef.current.fire = true;
-		} else if (event.button === 2) {
-			inputStateRef.current.mouseRightPressed = true;
-			inputStateRef.current.aim = true;
-		}
+		inputStateRef.current.mousePressed = true;
 
 		// Request pointer lock on first click
 		if (!pointerLockedRef.current) {
@@ -311,19 +202,11 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 
 	const handleMouseUp = useCallback((event: MouseEvent) => {
 		if (!enabledRef.current) return;
-
-		if (event.button === 0) {
-			inputStateRef.current.mousePressed = false;
-			inputStateRef.current.fire = false;
-		} else if (event.button === 2) {
-			inputStateRef.current.mouseRightPressed = false;
-			inputStateRef.current.aim = false;
-		}
+		inputStateRef.current.mousePressed = false;
 	}, []);
 
 	const handlePointerLockChange = useCallback(() => {
 		pointerLockedRef.current = document.pointerLockElement === document.body;
-		console.log("🎯 [FPS] Pointer lock:", pointerLockedRef.current ? "ENABLED" : "DISABLED");
 	}, []);
 
 	const handleContextMenu = useCallback((event: Event) => {
@@ -332,7 +215,7 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 		}
 	}, []);
 
-	// Enhanced gamepad handling
+	// Gamepad handling
 	const updateGamepad = useCallback(() => {
 		if (!enabledRef.current) return;
 
@@ -343,55 +226,37 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 			const state = gamepadStateRef.current;
 			state.connected = true;
 
-			// Advanced analog sticks with configurable deadzone
-			const deadzone = 0.08; // Lower deadzone for precision
-			const applyDeadzone = (value: number) => {
-				return Math.abs(value) > deadzone ? value : 0;
-			};
-
-			state.leftStickX = applyDeadzone(gamepad.axes[0] || 0);
-			state.leftStickY = applyDeadzone(-(gamepad.axes[1] || 0)); // Invert Y
-			state.rightStickX = applyDeadzone(gamepad.axes[2] || 0);
-			state.rightStickY = applyDeadzone(-(gamepad.axes[3] || 0)); // Invert Y
-
-			// Triggers
-			state.leftTrigger = gamepad.axes[6] || 0;
-			state.rightTrigger = gamepad.axes[7] || 0;
+			// Analog sticks with deadzone
+			const deadzone = 0.1;
+			state.leftStickX = Math.abs(gamepad.axes[0] || 0) > deadzone ? gamepad.axes[0] || 0 : 0;
+			state.leftStickY = Math.abs(gamepad.axes[1] || 0) > deadzone ? -(gamepad.axes[1] || 0) : 0;
+			state.rightStickX = Math.abs(gamepad.axes[2] || 0) > deadzone ? gamepad.axes[2] || 0 : 0;
+			state.rightStickY = Math.abs(gamepad.axes[3] || 0) > deadzone ? -(gamepad.axes[3] || 0) : 0;
 
 			// Buttons
 			for (let i = 0; i < gamepad.buttons.length; i++) {
 				state.buttons[i] = gamepad.buttons[i]?.pressed || false;
 			}
 
-			// Map gamepad inputs to movement (Xbox controller layout)
+			// Map gamepad inputs to movement
 			const inputState = inputStateRef.current;
 
-			// Movement (left stick + d-pad)
+			// Movement (left stick)
 			inputState.forward = state.leftStickY > 0.1 || state.buttons[12] || false; // DPad Up
 			inputState.backward = state.leftStickY < -0.1 || state.buttons[13] || false; // DPad Down
 			inputState.left = state.leftStickX < -0.1 || state.buttons[14] || false; // DPad Left
 			inputState.right = state.leftStickX > 0.1 || state.buttons[15] || false; // DPad Right
 
 			// Actions
-			inputState.jump = state.buttons[0] || false; // A button
-			inputState.crouch = state.buttons[1] || false; // B button
-			inputState.interact = state.buttons[2] || false; // X button
-			inputState.reload = state.buttons[3] || false; // Y button
+			inputState.jump = state.buttons[0] || false; // A/X button
+			inputState.crouch = state.buttons[1] || false; // B/Circle button
+			inputState.run = state.buttons[7] || false; // Right trigger
+			inputState.interact = state.buttons[2] || false; // X/Square button
 
-			// Triggers
-			inputState.aim = state.leftTrigger > 0.5; // Left trigger
-			inputState.fire = state.rightTrigger > 0.5; // Right trigger
-			inputState.run = state.buttons[4] || false; // Left bumper
-			inputState.melee = state.buttons[5] || false; // Right bumper
-
-			// Menu controls
-			inputState.menu = state.buttons[9] || false; // Menu button
-			inputState.map = state.buttons[8] || false; // View button
-
-			// Mouse look (right stick) with higher sensitivity
-			const lookSensitivity = mouseSettingsRef.current.sensitivityX * 0.08;
+			// Mouse look (right stick)
+			const lookSensitivity = config.mouseSensitivity * 0.05;
 			inputState.mouseDeltaX = state.rightStickX * lookSensitivity;
-			inputState.mouseDeltaY = state.rightStickY * lookSensitivity * (mouseSettingsRef.current.invertY ? -1 : 1);
+			inputState.mouseDeltaY = state.rightStickY * lookSensitivity;
 			inputState.mouseX += inputState.mouseDeltaX;
 			inputState.mouseY += inputState.mouseDeltaY;
 
@@ -400,28 +265,7 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 		} else {
 			gamepadStateRef.current.connected = false;
 		}
-	}, []);
-
-	// Vibration function
-	const triggerVibration = useCallback((intensity: number, duration: number) => {
-		if (!gamepadStateRef.current.connected || !gamepadStateRef.current.vibration) return;
-
-		const gamepads = navigator.getGamepads();
-		const gamepad = gamepads[0];
-
-		if (gamepad && gamepad.vibrationActuator) {
-			gamepad.vibrationActuator
-				.playEffect("dual-rumble", {
-					startDelay: 0,
-					duration: duration,
-					weakMagnitude: intensity * 0.5,
-					strongMagnitude: intensity,
-				})
-				.catch(() => {
-					// Vibration not supported
-				});
-		}
-	}, []);
+	}, [config.mouseSensitivity]);
 
 	// Update enabled state
 	useEffect(() => {
@@ -441,7 +285,10 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 		document.addEventListener("pointerlockchange", handlePointerLockChange);
 		document.addEventListener("contextmenu", handleContextMenu);
 
-		console.log("🎮 [FPS] Enhanced input system enabled");
+		// Request pointer lock
+		document.body.requestPointerLock();
+
+		console.log("🎮 [FPS] Input system enabled");
 	}, [handleKeyDown, handleKeyUp, handleMouseMove, handleMouseDown, handleMouseUp, handlePointerLockChange, handleContextMenu]);
 
 	const disable = useCallback(() => {
@@ -471,7 +318,7 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 		console.log("🎮 [FPS] Input system disabled");
 	}, [handleKeyDown, handleKeyUp, handleMouseMove, handleMouseDown, handleMouseUp, handlePointerLockChange, handleContextMenu]);
 
-	// Enhanced gamepad polling
+	// Gamepad polling
 	useEffect(() => {
 		if (!enabled) return;
 
@@ -486,18 +333,15 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 		};
 	}, [disable]);
 
-	// Expose enhanced ref methods
+	// Expose ref methods
 	useImperativeHandle(
 		ref,
 		() => ({
 			enable,
 			disable,
 			getInputState: () => inputStateRef.current,
-			setKeyBinding: (action: keyof AdvancedKeyBindings, keys: string[]) => {
+			setKeyBinding: (action: keyof KeyBindings, keys: string[]) => {
 				keyBindingsRef.current[action] = keys;
-			},
-			setMouseSettings: (settings: Partial<MouseSettings>) => {
-				mouseSettingsRef.current = { ...mouseSettingsRef.current, ...settings };
 			},
 			resetToDefaults: () => {
 				keyBindingsRef.current = {
@@ -508,39 +352,16 @@ export const FPSInputManager = forwardRef<FPSInputManagerRef, FPSInputManagerPro
 					jump: ["Space"],
 					crouch: ["KeyC", "ControlLeft"],
 					run: ["ShiftLeft"],
-					walk: ["AltLeft"],
-					lean_left: ["KeyQ"],
-					lean_right: ["KeyE"],
-					prone: ["KeyZ"],
-					interact: ["KeyF"],
-					scan: ["KeyV"],
+					interact: ["KeyE"],
+					scan: ["KeyF"],
 					sample: ["KeyR"],
-					reload: ["KeyR"],
-					throw_grenade: ["KeyG"],
 					menu: ["Escape"],
 					inventory: ["KeyI", "Tab"],
-					map: ["KeyM"],
-					flashlight: ["KeyT"],
-					zoom: ["KeyX"],
-					fire: ["MouseLeft"],
-					aim: ["MouseRight"],
-					melee: ["KeyF"],
-				};
-				mouseSettingsRef.current = {
-					sensitivityX: 1.0,
-					sensitivityY: 1.0,
-					smoothing: 0.1,
-					acceleration: 1.0,
-					invertY: false,
 				};
 			},
-			isPointerLocked: () => pointerLockedRef.current,
-			triggerVibration,
 		}),
-		[enable, disable, triggerVibration]
+		[enable, disable]
 	);
 
 	return null; // This component doesn't render anything
 });
-
-FPSInputManager.displayName = "FPSInputManager";

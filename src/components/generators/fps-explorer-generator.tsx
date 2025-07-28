@@ -225,7 +225,7 @@ export default function FPSExplorerGenerator() {
 	// UI state
 	const [showSettings, setShowSettings] = useState(false);
 	const [showInfo, setShowInfo] = useState(false);
-	const [isInitializing, setIsInitializing] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isExploring, setIsExploring] = useState(false);
 	const [status, setStatus] = useState("Ready to explore planetary surface");
 
@@ -245,20 +245,10 @@ export default function FPSExplorerGenerator() {
 
 	// Event handlers
 	const handleStartExploration = useCallback(() => {
-		setIsInitializing(true);
-		setStatus("Initializing planetary surface...");
-
-		setTimeout(() => {
-			setStatus("Loading terrain and vegetation...");
-			setTimeout(() => {
-				setStatus("Starting first-person exploration...");
-				setIsInitializing(false);
-				setIsExploring(true);
-				setTimeout(() => {
-					setStatus("Exploration active - Use WASD to move, mouse to look");
-				}, 1000);
-			}, 800);
-		}, 500);
+		setIsExploring(true);
+		setIsLoading(true);
+		// Simulate initialization
+		setTimeout(() => setIsLoading(false), 2000);
 	}, []);
 
 	const handleStopExploration = useCallback(() => {
@@ -330,24 +320,88 @@ export default function FPSExplorerGenerator() {
 	const currentMode = EXPLORATION_MODES.find((m) => m.value === config.gameplay.explorationMode) || EXPLORATION_MODES[0];
 
 	return (
-		<div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-green-950 to-black overflow-hidden">
-			{/* Input Manager */}
-			<FPSInputManager ref={inputManagerRef} config={config.player} enabled={isExploring} onConfigChange={(playerUpdates) => handleConfigChange({ player: playerUpdates })} />
+		<div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-green-950 to-black">
+			{/* Loading State */}
+			{isLoading && (
+				<div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+					<div className="text-center space-y-4">
+						<div className="w-16 h-16 border-4 border-green-400/30 border-t-green-400 rounded-full animate-spin mx-auto" />
+						<h3 className="text-xl font-semibold text-white">Initializing FPS Explorer</h3>
+						<p className="text-slate-300">Loading terrain, physics, and rendering systems...</p>
+					</div>
+				</div>
+			)}
 
-			{/* Header Controls */}
-			<FPSControls config={config} isExploring={isExploring} isInitializing={isInitializing} status={status} availableModes={EXPLORATION_MODES} planetPresets={PLANET_PRESETS} onStartExploration={handleStartExploration} onStopExploration={handleStopExploration} onConfigChange={handleConfigChange} onApplyPreset={applyPlanetPreset} onToggleSettings={() => setShowSettings(!showSettings)} onToggleInfo={() => setShowInfo(!showInfo)} showSettings={showSettings} showInfo={showInfo} />
+			{/* Main Content Area */}
+			<div className="relative w-full h-full">
+				{/* FPS Input Manager */}
+				<FPSInputManager ref={inputManagerRef} config={config.player} enabled={isExploring} onConfigChange={(updates) => setConfig((prev) => ({ ...prev, player: { ...prev.player, ...updates } }))} />
 
-			{/* 3D Renderer */}
-			<FPSRenderer3D ref={rendererRef} config={config} isExploring={isExploring} isInitializing={isInitializing} inputManager={inputManagerRef.current} onPerformanceUpdate={handlePerformanceUpdate} onLoadingChange={setIsInitializing} />
+				{/* Professional FPS Renderer */}
+				<FPSRenderer3D ref={rendererRef} config={config} onPerformanceUpdate={setPerformanceMetrics} />
 
-			{/* Settings Panel */}
-			{showSettings && !isExploring && <FPSSettings config={config} onConfigChange={handleConfigChange} onClose={() => setShowSettings(false)} availableModes={EXPLORATION_MODES} planetPresets={PLANET_PRESETS} />}
+				{/* FPS Controls Header */}
+				<FPSControls
+					config={config}
+					onConfigChange={setConfig}
+					performanceMetrics={performanceMetrics}
+					isExploring={isExploring}
+					onStartExploration={() => {
+						setIsExploring(true);
+						setIsLoading(true);
+						// Simulate initialization
+						setTimeout(() => setIsLoading(false), 2000);
+					}}
+					onStopExploration={() => setIsExploring(false)}
+				/>
 
-			{/* Info Panel */}
-			{showInfo && !isExploring && <FPSInfo config={config} currentMode={currentMode} onClose={() => setShowInfo(false)} />}
+				{/* Settings Panel */}
+				{showSettings && <FPSSettings config={config} onConfigChange={setConfig} onClose={() => setShowSettings(false)} />}
 
-			{/* Stats Panel - Always visible for performance monitoring */}
-			<FPSStats config={config} currentMode={currentMode} performanceMetrics={performanceMetrics} isExploring={isExploring} />
+				{/* Info Panel */}
+				{showInfo && <FPSInfo config={config} performanceMetrics={performanceMetrics} isExploring={isExploring} onClose={() => setShowInfo(false)} />}
+
+				{/* Stats Panel */}
+				<FPSStats config={config} performanceMetrics={performanceMetrics} isExploring={isExploring} />
+
+				{/* FPS Crosshair */}
+				{isExploring && config.gameplay.showCrosshair && (
+					<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
+						<div className="w-6 h-6 flex items-center justify-center">
+							<div className="w-1 h-1 bg-white rounded-full opacity-80" />
+							<div className="absolute w-4 h-px bg-white opacity-60" />
+							<div className="absolute w-px h-4 bg-white opacity-60" />
+						</div>
+					</div>
+				)}
+
+				{/* Instructions Overlay */}
+				{isExploring && !isLoading && (
+					<div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-4 max-w-md">
+						<h4 className="text-white font-semibold mb-2">FPS Controls</h4>
+						<div className="text-sm text-slate-300 space-y-1">
+							<p>
+								<span className="text-green-400">WASD:</span> Move around
+							</p>
+							<p>
+								<span className="text-green-400">Mouse:</span> Look around
+							</p>
+							<p>
+								<span className="text-green-400">Shift:</span> Run
+							</p>
+							<p>
+								<span className="text-green-400">Space:</span> Jump
+							</p>
+							<p>
+								<span className="text-green-400">C:</span> Crouch
+							</p>
+							<p>
+								<span className="text-green-400">ESC:</span> Exit
+							</p>
+						</div>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

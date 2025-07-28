@@ -1,7 +1,7 @@
 /**
  * @file page.tsx
  * @description Enhanced FPS Explorer Test Page with Controller Support
- * @version 5.0.0
+ * @version 2.0.0
  * @author Galactic Clans Development Team
  */
 
@@ -32,7 +32,6 @@ const FPSExplorerGenerator = dynamic(() => import("@/components/generators/fps-e
 export default function FPSExplorerTestPage() {
 	// Controller configuration for FPS exploration
 	const controllerActions = {
-		// FPS movement is handled by the FPS input manager internally
 		onSecondaryAction: () => {
 			window.history.back();
 		},
@@ -42,38 +41,36 @@ export default function FPSExplorerTestPage() {
 	};
 
 	const fpsControllerHelp = [
-		{ control: "Left Stick", action: "Move (WASD)", category: "3D Navigation" as const },
+		{ control: "Left Stick", action: "Move around (WASD)", category: "3D Navigation" as const },
 		{ control: "Right Stick", action: "Look around (Mouse)", category: "3D Navigation" as const },
-		{ control: "Right Trigger", action: "Run/Sprint", category: "Actions" as const },
-		{ control: "Left Trigger", action: "Walk slowly", category: "Actions" as const },
-		{ control: "A/X Button", action: "Jump", category: "Actions" as const },
-		{ control: "Left Bumper", action: "Crouch", category: "Actions" as const },
-		{ control: "Right Bumper", action: "Interact", category: "Actions" as const },
-		{ control: "B/Circle", action: "Back to test suite", category: "System" as const },
-		{ control: "Y/Triangle", action: "Toggle flashlight", category: "Actions" as const },
-		{ control: "X/Square", action: "Scan environment", category: "Actions" as const },
+		{ control: "A/X Button", action: "Jump (Space)", category: "Actions" as const },
+		{ control: "Right Trigger", action: "Run (Shift)", category: "Actions" as const },
+		{ control: "Left Trigger", action: "Crouch (C)", category: "Actions" as const },
+		{ control: "X/Square", action: "Interact (E)", category: "Actions" as const },
+		{ control: "Y/Triangle", action: "Scan (F)", category: "Actions" as const },
+		{ control: "B/Circle", action: "Exit exploration", category: "Actions" as const },
 		{ control: "Start/Options", action: "Toggle help", category: "System" as const },
-		{ control: "Select/Back", action: "Toggle settings", category: "System" as const },
+		{ control: "Select/Back", action: "Menu", category: "System" as const },
 	];
 
 	return (
 		<div className="fixed inset-0">
-			{/* FPS Explorer - Full Screen */}
+			{/* FPS Explorer Generator - Full Screen */}
 			<FPSExplorerGenerator />
 
 			{/* Universal Controller Support */}
 			<ControllerIndicator
-				position="top-right"
+				position="bottom-right"
 				accentColor="green"
 				pageTitle="FPS Explorer"
 				actions={controllerActions}
 				helpItems={fpsControllerHelp}
 				controllerOptions={{
-					sensitivity: 1.5, // Higher sensitivity for FPS controls
-					deadzone: 0.08, // Lower deadzone for precise aiming
+					sensitivity: 2.0, // Higher sensitivity for FPS
+					deadzone: 0.1,    // Lower deadzone for precise control
 					enableHaptics: true,
 				}}
-				autoHideDelay={6000} // Show help longer for complex FPS controls
+				autoHideDelay={5000} // Show help longer for FPS
 			/>
 
 			{/* Back Button */}

@@ -1,4 +1,4 @@
-/* Game-specific styles for 3D canvas and UI components */
+@import "tailwindcss";
 
 html,
 body {

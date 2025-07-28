@@ -40,7 +40,7 @@ export const useGameAudio = (options: UseGameAudioOptions = {}): UseGameAudioRet
 
 	// Initialize audio system
 	useEffect(() => {
-		if (!autoInitialize || audioSystemRef.current) return;
+		if (!autoInitialize) return;
 
 		const initializeAudio = async () => {
 			try {
@@ -71,7 +71,7 @@ export const useGameAudio = (options: UseGameAudioOptions = {}): UseGameAudioRet
 				setIsInitialized(false);
 			}
 		};
-	}, [autoInitialize]); // Remove unstable JSON.stringify dependency
+	}, [autoInitialize, JSON.stringify(preloadSounds)]);
 
 	// Update audio config when state changes
 	useEffect(() => {

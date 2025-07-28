@@ -2,78 +2,93 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CriticalErrorBoundary } from "@/components/ErrorBoundary";
-import { GlobalInputAlert } from "@/components/GlobalInputAlert";
 
-const inter = Inter({
-	subsets: ["latin"],
-	display: "swap",
-	variable: "--font-inter",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "Cosmic - Galactic Clans Universe Explorer",
-	description: "Explore procedurally generated galaxies, planets, and cosmic phenomena in this immersive 3D universe.",
-	keywords: ["space", "galaxy", "procedural", "3D", "exploration", "cosmic", "universe"],
-	authors: [{ name: "Galactic Clans Development Team" }],
-	openGraph: {
-		title: "Cosmic - Galactic Clans Universe Explorer",
-		description: "Explore procedurally generated galaxies, planets, and cosmic phenomena in this immersive 3D universe.",
-		type: "website",
-		siteName: "Cosmic",
+	title: "Galactic Clans - Epic Space Strategy Game",
+	description: "Build your galactic empire, explore procedurally generated worlds, and dominate the cosmos in this revolutionary space strategy game.",
+	keywords: ["space game", "strategy", "galactic", "clans", "multiplayer", "procedural generation"],
+	authors: [{ name: "Cosmic Gaming Development Team" }],
+	creator: "Cosmic Gaming",
+	publisher: "Cosmic Gaming",
+	formatDetection: {
+		email: false,
+		address: false,
+		telephone: false,
 	},
-	twitter: {
-		card: "summary_large_image",
-		title: "Cosmic - Galactic Clans Universe Explorer",
-		description: "Explore procedurally generated galaxies, planets, and cosmic phenomena in this immersive 3D universe.",
+
+	manifest: "/manifest.json",
+	icons: {
+		icon: "/favicon.ico",
+		shortcut: "/favicon-16x16.png",
+		apple: "/apple-touch-icon.png",
 	},
-	robots: {
-		index: true,
-		follow: true,
-	},
-	metadataBase: new URL("http://localhost:5173"),
 };
 
 export const viewport: Viewport = {
 	width: "device-width",
 	initialScale: 1,
-	themeColor: "#000000",
+	maximumScale: 1,
+	themeColor: [
+		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
+		{ media: "(prefers-color-scheme: dark)", color: "#000000" },
+	],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en" className="dark">
 			<head>
-				{/* Core meta tags */}
-				<meta name="theme-color" content="#000000" />
-				<meta name="mobile-web-app-capable" content="yes" />
-				<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-				<link rel="icon" type="image/png" href="/favicon.png" />
-				<link rel="apple-touch-icon" href="/favicon.png" />
+				{/* Preserve existing game meta tags */}
+				<meta charSet="UTF-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+				{/* WebGL and game-specific meta tags */}
+				<meta name="webgl" content="required" />
+				<meta name="renderer" content="three.js" />
+
+				{/* Preload critical game resources */}
+				<link rel="preload" href="/assets/audio/menu-ambient.ogg" as="audio" type="audio/ogg" />
+				<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" />
+
+				{/* Game-specific stylesheets */}
+				<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+				{/* Tailwind CSS - will be optimized by Next.js */}
+				<script src="https://cdn.tailwindcss.com"></script>
+
+				{/* Three.js CDN for compatibility */}
+				<script
+					type="importmap"
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify({
+							imports: {
+								three: "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+								"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/",
+							},
+						}),
+					}}
+				/>
 			</head>
 			<body className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}>
+				{/* Game UI container - preserve existing structure */}
 				<div id="game-ui">
 					<CriticalErrorBoundary>{children}</CriticalErrorBoundary>
-
-					{/* Global Input Detection and Alert System */}
-					<GlobalInputAlert />
 				</div>
 
-				{/* Service Worker Registration */}
+				{/* Performance monitoring script */}
 				<script
 					dangerouslySetInnerHTML={{
 						__html: `
-							if ('serviceWorker' in navigator) {
-								window.addEventListener('load', function() {
-									navigator.serviceWorker.register('/sw.js')
-										.then(function(registration) {
-											console.log('SW registered: ', registration);
-										})
-										.catch(function(registrationError) {
-											console.log('SW registration failed: ', registrationError);
-										});
-								});
-							}
-						`,
+            // Performance monitoring for game
+            if (typeof window !== 'undefined') {
+              window.addEventListener('load', () => {
+                console.log('🎮 [NEXTJS] Galactic Clans loaded with Next.js');
+                console.log('📊 [PERFORMANCE] Page load time:', performance.now().toFixed(2) + 'ms');
+              });
+            }
+          `,
 					}}
 				/>
 			</body>
