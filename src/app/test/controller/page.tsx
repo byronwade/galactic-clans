@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Gamepad2, Zap, Target, Activity, Settings2, Trash2, RotateCcw, Eye, EyeOff, Download, Share2, ChevronDown, ChevronUp, CircuitBoard, Gauge, Timer, MousePointer2, Wifi, WifiOff, Play, Pause } from "lucide-react";
+import "gamepad.css/styles.min.css";
 
 interface ControllerMetrics {
 	latency: number;
@@ -12,12 +13,30 @@ interface ControllerMetrics {
 	performanceScore: number;
 }
 
+interface ButtonState {
+	[key: string]: boolean;
+}
+
+interface AxesState {
+	leftStick: { x: number; y: number };
+	rightStick: { x: number; y: number };
+	leftTrigger: number;
+	rightTrigger: number;
+}
+
 export default function ControllerTestPage() {
 	const [connectedGamepads, setConnectedGamepads] = useState<Map<number, Gamepad>>(new Map());
 	const [controllerType, setControllerType] = useState<string>("Unknown");
 	const [isConnected, setIsConnected] = useState<boolean>(false);
 	const [isControlsExpanded, setIsControlsExpanded] = useState(true);
 	const [isStatsVisible, setIsStatsVisible] = useState(true);
+	const [buttonStates, setButtonStates] = useState<ButtonState>({});
+	const [axesStates, setAxesStates] = useState<AxesState>({
+		leftStick: { x: 0, y: 0 },
+		rightStick: { x: 0, y: 0 },
+		leftTrigger: 0,
+		rightTrigger: 0,
+	});
 	const [metrics, setMetrics] = useState<ControllerMetrics>({
 		latency: 0,
 		response: 0,
@@ -33,7 +52,7 @@ export default function ControllerTestPage() {
 		duration: 1000,
 	});
 
-	const gamepadPollingRef = useRef<number>();
+	const gamepadPollingRef = useRef<number | undefined>(undefined);
 	const metricsRef = useRef<ControllerMetrics>(metrics);
 
 	// Update ref when metrics change
@@ -55,9 +74,102 @@ export default function ControllerTestPage() {
 		return "Generic";
 	};
 
+	const getGamepadCSSClass = (type: string): string => {
+		switch (type) {
+			case "Xbox":
+				return "xbox360";
+			case "PlayStation":
+				return "ps3";
+			case "Nintendo":
+				return "switch";
+			default:
+				return "xbox360"; // Default fallback
+		}
+	};
+
+	const mapButtonToGamepadCSS = (buttonIndex: number, controllerType: string): string => {
+		// Xbox/Generic mapping
+		if (controllerType === "Xbox" || controllerType === "Generic") {
+			const xboxMap: { [key: number]: string } = {
+				0: "a", // A button
+				1: "b", // B button
+				2: "x", // X button
+				3: "y", // Y button
+				4: "lb", // Left bumper
+				5: "rb", // Right bumper
+				6: "lt", // Left trigger
+				7: "rt", // Right trigger
+				8: "select", // Back/Select
+				9: "start", // Start/Menu
+				10: "ls", // Left stick click
+				11: "rs", // Right stick click
+				12: "up", // D-pad up
+				13: "down", // D-pad down
+				14: "left", // D-pad left
+				15: "right", // D-pad right
+			};
+			return xboxMap[buttonIndex] || "";
+		}
+
+		// PlayStation mapping
+		if (controllerType === "PlayStation") {
+			const psMap: { [key: number]: string } = {
+				0: "cross", // Cross (X)
+				1: "circle", // Circle
+				2: "square", // Square
+				3: "triangle", // Triangle
+				4: "l1", // L1
+				5: "r1", // R1
+				6: "l2", // L2
+				7: "r2", // R2
+				8: "select", // Share
+				9: "start", // Options
+				10: "l3", // L3
+				11: "r3", // R3
+				12: "up", // D-pad up
+				13: "down", // D-pad down
+				14: "left", // D-pad left
+				15: "right", // D-pad right
+			};
+			return psMap[buttonIndex] || "";
+		}
+
+		// Nintendo Switch mapping
+		if (controllerType === "Nintendo") {
+			const switchMap: { [key: number]: string } = {
+				0: "a", // A button
+				1: "b", // B button
+				2: "x", // X button
+				3: "y", // Y button
+				4: "l", // L bumper
+				5: "r", // R bumper
+				6: "zl", // ZL trigger
+				7: "zr", // ZR trigger
+				8: "minus", // Minus
+				9: "plus", // Plus
+				10: "ls", // Left stick click
+				11: "rs", // Right stick click
+				12: "up", // D-pad up
+				13: "down", // D-pad down
+				14: "left", // D-pad left
+				15: "right", // D-pad right
+			};
+			return switchMap[buttonIndex] || "";
+		}
+
+		return "";
+	};
+
 	const pollGamepads = () => {
 		const gamepads = navigator.getGamepads();
 		const currentGamepads = new Map<number, Gamepad>();
+		const newButtonStates: ButtonState = {};
+		const newAxesStates: AxesState = {
+			leftStick: { x: 0, y: 0 },
+			rightStick: { x: 0, y: 0 },
+			leftTrigger: 0,
+			rightTrigger: 0,
+		};
 
 		for (let i = 0; i < gamepads.length; i++) {
 			const gamepad = gamepads[i];
@@ -70,6 +182,41 @@ export default function ControllerTestPage() {
 					setControllerType(type);
 					setIsConnected(true);
 					addEventLog(`Controller ${i} connected: ${gamepad.id}`, "success");
+				}
+
+				// Update button states
+				gamepad.buttons.forEach((button, index) => {
+					const buttonName = mapButtonToGamepadCSS(index, controllerType);
+					if (buttonName) {
+						newButtonStates[buttonName] = button.pressed;
+
+						// Log button press events
+						if (button.pressed && !buttonStates[buttonName]) {
+							addEventLog(`Button ${buttonName.toUpperCase()} pressed`, "info");
+						}
+					}
+				});
+
+				// Update axes states
+				if (gamepad.axes.length >= 4) {
+					newAxesStates.leftStick = {
+						x: gamepad.axes[0] || 0,
+						y: gamepad.axes[1] || 0,
+					};
+					newAxesStates.rightStick = {
+						x: gamepad.axes[2] || 0,
+						y: gamepad.axes[3] || 0,
+					};
+				}
+
+				// Handle triggers (varies by controller)
+				if (gamepad.axes.length >= 6) {
+					newAxesStates.leftTrigger = ((gamepad.axes[4] ?? 0) + 1) / 2; // Convert from -1..1 to 0..1
+					newAxesStates.rightTrigger = ((gamepad.axes[5] ?? 0) + 1) / 2;
+				} else {
+					// Fallback to button-based triggers
+					newAxesStates.leftTrigger = gamepad.buttons[6]?.value ?? 0;
+					newAxesStates.rightTrigger = gamepad.buttons[7]?.value ?? 0;
 				}
 
 				// Update metrics
@@ -86,6 +233,8 @@ export default function ControllerTestPage() {
 
 		setConnectedGamepads(currentGamepads);
 		setIsConnected(currentGamepads.size > 0);
+		setButtonStates(newButtonStates);
+		setAxesStates(newAxesStates);
 
 		if (currentGamepads.size === 0) {
 			setControllerType("Unknown");
@@ -103,8 +252,8 @@ export default function ControllerTestPage() {
 		const accuracy = Math.min(100, (leftStickMagnitude + rightStickMagnitude) * 50);
 
 		// Calculate trigger sensitivity
-		const leftTrigger = gamepad.axes[4] ? (gamepad.axes[4] + 1) / 2 : 0;
-		const rightTrigger = gamepad.axes[5] ? (gamepad.axes[5] + 1) / 2 : 0;
+		const leftTrigger = axesStates.leftTrigger;
+		const rightTrigger = axesStates.rightTrigger;
 		const sensitivity = Math.min(100, (leftTrigger + rightTrigger) * 50);
 
 		// Calculate overall performance score
@@ -205,7 +354,90 @@ export default function ControllerTestPage() {
 			window.removeEventListener("gamepadconnected", handleGamepadConnected);
 			window.removeEventListener("gamepaddisconnected", handleGamepadDisconnected);
 		};
-	}, []);
+	}, [buttonStates, controllerType]);
+
+	// Render gamepad visualization using gamepad.css
+	const renderGamepadVisualization = () => {
+		const cssClass = getGamepadCSSClass(controllerType);
+
+		return (
+			<div className="gamepad-container flex justify-center items-center min-h-[400px]">
+				<div className={`gamepad ${cssClass} scale-150 transform transition-all duration-200`}>
+					{/* Face buttons */}
+					{controllerType === "Xbox" || controllerType === "Generic" ? (
+						<>
+							<div className={`button a ${buttonStates.a ? "pressed" : ""}`}></div>
+							<div className={`button b ${buttonStates.b ? "pressed" : ""}`}></div>
+							<div className={`button x ${buttonStates.x ? "pressed" : ""}`}></div>
+							<div className={`button y ${buttonStates.y ? "pressed" : ""}`}></div>
+						</>
+					) : controllerType === "PlayStation" ? (
+						<>
+							<div className={`button cross ${buttonStates.cross ? "pressed" : ""}`}></div>
+							<div className={`button circle ${buttonStates.circle ? "pressed" : ""}`}></div>
+							<div className={`button square ${buttonStates.square ? "pressed" : ""}`}></div>
+							<div className={`button triangle ${buttonStates.triangle ? "pressed" : ""}`}></div>
+						</>
+					) : controllerType === "Nintendo" ? (
+						<>
+							<div className={`button a ${buttonStates.a ? "pressed" : ""}`}></div>
+							<div className={`button b ${buttonStates.b ? "pressed" : ""}`}></div>
+							<div className={`button x ${buttonStates.x ? "pressed" : ""}`}></div>
+							<div className={`button y ${buttonStates.y ? "pressed" : ""}`}></div>
+						</>
+					) : null}
+
+					{/* D-pad */}
+					<div className={`dpad up ${buttonStates.up ? "pressed" : ""}`}></div>
+					<div className={`dpad down ${buttonStates.down ? "pressed" : ""}`}></div>
+					<div className={`dpad left ${buttonStates.left ? "pressed" : ""}`}></div>
+					<div className={`dpad right ${buttonStates.right ? "pressed" : ""}`}></div>
+
+					{/* Shoulder buttons */}
+					{controllerType === "Xbox" || controllerType === "Generic" ? (
+						<>
+							<div className={`bumper lb ${buttonStates.lb ? "pressed" : ""}`}></div>
+							<div className={`bumper rb ${buttonStates.rb ? "pressed" : ""}`}></div>
+							<div className={`trigger lt ${axesStates.leftTrigger > 0.1 ? "pressed" : ""}`}></div>
+							<div className={`trigger rt ${axesStates.rightTrigger > 0.1 ? "pressed" : ""}`}></div>
+						</>
+					) : controllerType === "PlayStation" ? (
+						<>
+							<div className={`bumper l1 ${buttonStates.l1 ? "pressed" : ""}`}></div>
+							<div className={`bumper r1 ${buttonStates.r1 ? "pressed" : ""}`}></div>
+							<div className={`trigger l2 ${axesStates.leftTrigger > 0.1 ? "pressed" : ""}`}></div>
+							<div className={`trigger r2 ${axesStates.rightTrigger > 0.1 ? "pressed" : ""}`}></div>
+						</>
+					) : controllerType === "Nintendo" ? (
+						<>
+							<div className={`bumper l ${buttonStates.l ? "pressed" : ""}`}></div>
+							<div className={`bumper r ${buttonStates.r ? "pressed" : ""}`}></div>
+							<div className={`trigger zl ${buttonStates.zl ? "pressed" : ""}`}></div>
+							<div className={`trigger zr ${buttonStates.zr ? "pressed" : ""}`}></div>
+						</>
+					) : null}
+
+					{/* Control buttons */}
+					<div className={`button start ${buttonStates.start ? "pressed" : ""}`}></div>
+					<div className={`button select ${buttonStates.select ? "pressed" : ""}`}></div>
+
+					{/* Analog sticks */}
+					<div
+						className={`stick left ${buttonStates.ls ? "pressed" : ""}`}
+						style={{
+							transform: `translate(${axesStates.leftStick.x * 10}px, ${axesStates.leftStick.y * 10}px)`,
+						}}
+					></div>
+					<div
+						className={`stick right ${buttonStates.rs ? "pressed" : ""}`}
+						style={{
+							transform: `translate(${axesStates.rightStick.x * 10}px, ${axesStates.rightStick.y * 10}px)`,
+						}}
+					></div>
+				</div>
+			</div>
+		);
+	};
 
 	return (
 		<div className="fixed inset-0 bg-black overflow-hidden">
@@ -224,7 +456,7 @@ export default function ControllerTestPage() {
 								</div>
 								<div>
 									<h1 className="text-sm font-semibold text-white">Controller Test</h1>
-									<p className="text-xs text-slate-300">Input validation</p>
+									<p className="text-xs text-slate-300">Input validation with gamepad.css</p>
 								</div>
 							</div>
 						</div>
@@ -261,28 +493,23 @@ export default function ControllerTestPage() {
 									</div>
 								</div>
 
-								{/* Controller Layout */}
-								<div className="relative bg-gradient-to-br from-slate-950 to-slate-900 rounded-xl p-8 border border-slate-700/30 min-h-[400px] flex items-center justify-center">
+								{/* Controller Layout with gamepad.css */}
+								<div className="relative bg-gradient-to-br from-slate-950 to-slate-900 rounded-xl p-8 border border-slate-700/30 min-h-[500px] flex items-center justify-center">
 									{isConnected ? (
-										<div className="text-center space-y-6">
-											<div className="relative">
-												<Gamepad2 className="w-24 h-24 text-green-400 mx-auto" />
-												<div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-900 animate-pulse flex items-center justify-center">
-													<div className="w-2 h-2 bg-white rounded-full" />
-												</div>
-											</div>
-											<div>
-												<h3 className="text-xl font-semibold text-white mb-2">{controllerType} Controller</h3>
-												<p className="text-slate-400">Real-time visualization active</p>
-											</div>
-											<div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+										<div className="w-full">
+											{renderGamepadVisualization()}
+
+											{/* Real-time stick and trigger values */}
+											<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-4xl mx-auto">
 												<div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
 													<div className="flex items-center space-x-2 mb-2">
 														<MousePointer2 className="w-4 h-4 text-blue-400" />
 														<span className="text-blue-400 text-sm font-medium">Left Stick</span>
 													</div>
 													<div className="font-mono text-white text-sm">
-														{Array.from(connectedGamepads.values())[0]?.axes[0]?.toFixed(2) || "0.00"}, {Array.from(connectedGamepads.values())[0]?.axes[1]?.toFixed(2) || "0.00"}
+														X: {axesStates.leftStick.x.toFixed(2)}
+														<br />
+														Y: {axesStates.leftStick.y.toFixed(2)}
 													</div>
 												</div>
 												<div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
@@ -291,7 +518,33 @@ export default function ControllerTestPage() {
 														<span className="text-green-400 text-sm font-medium">Right Stick</span>
 													</div>
 													<div className="font-mono text-white text-sm">
-														{Array.from(connectedGamepads.values())[0]?.axes[2]?.toFixed(2) || "0.00"}, {Array.from(connectedGamepads.values())[0]?.axes[3]?.toFixed(2) || "0.00"}
+														X: {axesStates.rightStick.x.toFixed(2)}
+														<br />
+														Y: {axesStates.rightStick.y.toFixed(2)}
+													</div>
+												</div>
+												<div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
+													<div className="flex items-center space-x-2 mb-2">
+														<Zap className="w-4 h-4 text-purple-400" />
+														<span className="text-purple-400 text-sm font-medium">Left Trigger</span>
+													</div>
+													<div className="font-mono text-white text-sm">
+														{(axesStates.leftTrigger * 100).toFixed(0)}%
+														<div className="w-full bg-slate-700 rounded-full h-2 mt-1">
+															<div className="bg-purple-500 h-2 rounded-full transition-all duration-100" style={{ width: `${axesStates.leftTrigger * 100}%` }}></div>
+														</div>
+													</div>
+												</div>
+												<div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
+													<div className="flex items-center space-x-2 mb-2">
+														<Zap className="w-4 h-4 text-orange-400" />
+														<span className="text-orange-400 text-sm font-medium">Right Trigger</span>
+													</div>
+													<div className="font-mono text-white text-sm">
+														{(axesStates.rightTrigger * 100).toFixed(0)}%
+														<div className="w-full bg-slate-700 rounded-full h-2 mt-1">
+															<div className="bg-orange-500 h-2 rounded-full transition-all duration-100" style={{ width: `${axesStates.rightTrigger * 100}%` }}></div>
+														</div>
 													</div>
 												</div>
 											</div>
@@ -302,6 +555,7 @@ export default function ControllerTestPage() {
 											<div>
 												<h3 className="text-lg font-medium text-slate-400 mb-2">No Controller Connected</h3>
 												<p className="text-slate-500">Connect a controller to see real-time visualization</p>
+												<p className="text-slate-600 text-sm mt-2">Supports Xbox, PlayStation, and Nintendo controllers</p>
 											</div>
 										</div>
 									)}
@@ -309,7 +563,7 @@ export default function ControllerTestPage() {
 							</div>
 						</div>
 
-						{/* Control Panel */}
+						{/* Control Panel - keeping the existing functionality */}
 						<div className="space-y-4">
 							{/* Connection Status */}
 							<div className="bg-slate-900/40 backdrop-blur-xl border border-slate-700/30 rounded-xl p-4">
@@ -325,6 +579,10 @@ export default function ControllerTestPage() {
 									<div className="flex items-center justify-between">
 										<span className="text-slate-400">Connected:</span>
 										<span className="text-white font-mono">{connectedGamepads.size}</span>
+									</div>
+									<div className="flex items-center justify-between">
+										<span className="text-slate-400">Active Buttons:</span>
+										<span className="text-white font-mono">{Object.values(buttonStates).filter(Boolean).length}</span>
 									</div>
 								</div>
 							</div>
@@ -363,16 +621,6 @@ export default function ControllerTestPage() {
 														<input type="range" min="0" max="1" step="0.1" value={vibrationSettings.rightIntensity} onChange={(e) => setVibrationSettings((prev) => ({ ...prev, rightIntensity: parseFloat(e.target.value) || 0.5 }))} className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
 														<span className="text-xs text-slate-300 w-10">{Math.round(vibrationSettings.rightIntensity * 100)}%</span>
 													</div>
-												</div>
-
-												<div>
-													<label className="text-xs font-medium text-slate-300 uppercase tracking-wide">Pattern</label>
-													<select value={vibrationSettings.pattern} onChange={(e) => setVibrationSettings((prev) => ({ ...prev, pattern: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-600/30 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50">
-														<option value="constant">Constant</option>
-														<option value="pulse">Pulse</option>
-														<option value="wave">Wave</option>
-														<option value="random">Random</option>
-													</select>
 												</div>
 
 												<button onClick={testVibration} disabled={!isConnected} className="flex items-center justify-center space-x-2 w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white rounded-lg font-medium text-sm transition-colors">
@@ -492,7 +740,7 @@ export default function ControllerTestPage() {
 				</div>
 			</div>
 
-			{/* Custom Scrollbar Styles */}
+			{/* Custom Scrollbar Styles + gamepad.css enhancements */}
 			<style jsx>{`
 				.custom-scrollbar::-webkit-scrollbar {
 					width: 6px;
@@ -507,6 +755,29 @@ export default function ControllerTestPage() {
 				}
 				.custom-scrollbar::-webkit-scrollbar-thumb:hover {
 					background: rgba(148, 163, 184, 0.5);
+				}
+
+				/* Enhanced gamepad.css styles */
+				.gamepad {
+					position: relative;
+					transition: all 0.2s ease;
+				}
+
+				.gamepad .button.pressed,
+				.gamepad .bumper.pressed,
+				.gamepad .trigger.pressed,
+				.gamepad .dpad.pressed {
+					filter: brightness(1.5) saturate(1.2);
+					transform: scale(0.95);
+					box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+				}
+
+				.gamepad .stick {
+					transition: transform 0.05s ease;
+				}
+
+				.gamepad-container {
+					background: radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
 				}
 			`}</style>
 		</div>
