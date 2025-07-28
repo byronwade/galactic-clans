@@ -110,39 +110,114 @@ function TestCard({ test, onLaunch, isSelected = false }: { test: TestCard; onLa
 	const getStatusColor = () => {
 		switch (test.status) {
 			case "stable":
-				return "bg-green-500/20 text-green-400 border-green-400/30";
+				return "#22c55e"; // green-500
 			case "beta":
-				return "bg-yellow-500/20 text-yellow-400 border-yellow-400/30";
+				return "#eab308"; // yellow-500
 			case "alpha":
-				return "bg-red-500/20 text-red-400 border-red-400/30";
+				return "#ef4444"; // red-500
 			default:
-				return "bg-gray-500/20 text-gray-400 border-gray-400/30";
+				return "#6b7280"; // gray-500
 		}
 	};
 
+	const cardStyle: React.CSSProperties = {
+		position: "relative",
+		overflow: "hidden",
+		borderRadius: "12px",
+		border: isSelected ? "2px solid #3b82f6" : "1px solid #374151",
+		backgroundColor: isSelected ? "#1e3a8a20" : "#111827",
+		padding: "24px",
+		transition: "all 0.2s ease",
+		cursor: "default",
+		backdropFilter: "blur(4px)",
+	};
+
+	const buttonStyle: React.CSSProperties = {
+		position: "relative",
+		zIndex: 10,
+		display: "inline-flex",
+		alignItems: "center",
+		padding: "8px 16px",
+		backgroundColor: "#2563eb",
+		color: "#ffffff",
+		border: "none",
+		borderRadius: "8px",
+		fontSize: "14px",
+		fontWeight: "500",
+		cursor: "pointer",
+		transition: "background-color 0.2s ease",
+		pointerEvents: "auto" as const,
+	};
+
 	return (
-		<div className={`relative overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/5 ${isSelected ? "border-blue-500/50 bg-blue-500/10 ring-2 ring-blue-400/30 shadow-lg shadow-blue-500/20" : "border-gray-800 bg-gray-900/50 hover:border-blue-500/20"} backdrop-blur-sm`}>
-			<div className="p-6">
-				<div className="flex items-start justify-between mb-3">
-					<div className="text-3xl mb-2">{test.icon}</div>
-					<div className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor()}`}>{test.status}</div>
+		<div style={cardStyle}>
+			{/* NO OVERLAYS - COMPLETELY REMOVED */}
+			<div style={{ padding: "0" }}>
+				<div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "12px" }}>
+					<div style={{ fontSize: "24px", marginBottom: "8px" }}>{test.icon}</div>
+					<div
+						style={{
+							padding: "4px 8px",
+							borderRadius: "12px",
+							fontSize: "12px",
+							fontWeight: "500",
+							border: `1px solid ${getStatusColor()}`,
+							backgroundColor: `${getStatusColor()}20`,
+							color: getStatusColor(),
+						}}
+					>
+						{test.status}
+					</div>
 				</div>
 
-				<h3 className="text-lg font-semibold text-white mb-2 hover:text-blue-400 transition-colors">{test.title}</h3>
+				<h3
+					style={{
+						fontSize: "18px",
+						fontWeight: "600",
+						color: "#ffffff",
+						marginBottom: "8px",
+						transition: "color 0.2s ease",
+					}}
+				>
+					{test.title}
+				</h3>
 
-				<p className="text-gray-400 text-sm mb-4 leading-relaxed">{test.description}</p>
+				<p
+					style={{
+						color: "#9ca3af",
+						fontSize: "14px",
+						marginBottom: "16px",
+						lineHeight: "1.5",
+					}}
+				>
+					{test.description}
+				</p>
 
-				<div className="flex items-center justify-between">
-					<span className="text-xs text-gray-500 bg-gray-800/50 px-2 py-1 rounded">{test.category}</span>
+				<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+					<span
+						style={{
+							fontSize: "12px",
+							color: "#6b7280",
+							backgroundColor: "#374151",
+							padding: "4px 8px",
+							borderRadius: "4px",
+						}}
+					>
+						{test.category}
+					</span>
 
-					{/* Simple button with direct navigation */}
 					<button
 						onClick={() => {
 							console.log(`Launching ${test.title} -> ${test.href}`);
 							onLaunch(test.title, test.href);
 						}}
-						className="relative z-10 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium cursor-pointer"
-						style={{ pointerEvents: "auto" }}
+						style={buttonStyle}
+						onMouseEnter={(e) => {
+							e.currentTarget.style.backgroundColor = "#1d4ed8";
+						}}
+						onMouseLeave={(e) => {
+							e.currentTarget.style.backgroundColor = "#2563eb";
+						}}
 					>
 						<Play className="w-4 h-4 mr-2" />
 						Launch
