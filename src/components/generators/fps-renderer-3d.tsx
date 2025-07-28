@@ -18,6 +18,7 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html, Sky, Stars } from "@react-three/drei";
+import { EffectComposer, SSAO, Bloom, Vignette, ChromaticAberration } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { createNoise2D, createNoise3D } from "simplex-noise";
 import { useGamepadController } from "@/hooks/useGamepadController";
@@ -486,6 +487,7 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 	const [isPointerLocked, setIsPointerLocked] = useState(false);
 	const terrainEngine = useMemo(() => new ProfessionalTerrainEngine(), []);
 	
+	// Professional FPS camera rotation state
 	const cameraRotation = useRef({
 		yaw: 0,
 		pitch: 0,
@@ -521,16 +523,42 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 		}
 	});
 	
+	// Professional FPS camera positioning - matches industry standards
 	const getInitialPosition = useCallback(() => {
 		const terrainHeight = terrainEngine.getTerrainHeight(0, 0);
-		const properHeight = Math.max(terrainHeight + 3, 3);
-		return new THREE.Vector3(0, properHeight, 0);
+		const groundLevel = Math.max(terrainHeight + 1.75, 1.75); // Standard player height
+		return new THREE.Vector3(0, groundLevel, 0);
 	}, [terrainEngine]);
 	
 	const [position, setPosition] = useState<THREE.Vector3>(getInitialPosition());
 	const [velocity, setVelocity] = useState<THREE.Vector3>(new THREE.Vector3());
 	const [horizontalVelocity, setHorizontalVelocity] = useState<THREE.Vector3>(new THREE.Vector3());
 	const [isMoving, setIsMoving] = useState(false);
+	
+	// Initialize professional FPS camera settings
+	useEffect(() => {
+		if (camera) {
+			// Professional FPS camera settings (industry standard)
+			camera.fov = 90; // Standard FPS FOV (Call of Duty, Counter-Strike style)
+			camera.near = 0.01; // Very close near plane for weapon visibility
+			camera.far = 1000; // Reasonable far plane for performance
+			camera.position.copy(getInitialPosition());
+			
+			// Professional FPS camera positioning
+			const eyeHeight = 1.62; // Standard eye height (5'4" person)
+			camera.position.y += eyeHeight;
+			
+			// Look straight ahead initially (industry standard)
+			camera.rotation.set(0, 0, 0);
+			camera.updateProjectionMatrix();
+			
+			// Initialize camera rotation state
+			cameraRotation.current.yaw = 0;
+			cameraRotation.current.pitch = 0;
+			cameraRotation.current.targetYaw = 0;
+			cameraRotation.current.targetPitch = 0;
+		}
+	}, [camera, getInitialPosition]);
 	
 	// Professional keyboard controls
 	useEffect(() => {
@@ -594,19 +622,21 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 		};
 	}, [gl.domElement, isPointerLocked]);
 	
-	// Professional mouse look
+	// Professional mouse look with industry-standard sensitivity
 	useEffect(() => {
 		if (!isPointerLocked) return;
 
 		const handleMouseMove = (event: MouseEvent) => {
-			const sensitivity = config.player.mouseSensitivity * 0.0018;
+			// Professional FPS sensitivity (matches CS:GO/Call of Duty standards)
+			const sensitivity = config.player.mouseSensitivity * 0.002;
 			
 			cameraRotation.current.targetYaw -= event.movementX * sensitivity;
 			cameraRotation.current.targetPitch -= event.movementY * sensitivity;
 			
+			// Industry standard pitch limits (90 degrees up/down)
 			cameraRotation.current.targetPitch = Math.max(
-				-Math.PI / 2 + 0.1,
-				Math.min(Math.PI / 2 - 0.1, cameraRotation.current.targetPitch)
+				-Math.PI / 2 + 0.01,
+				Math.min(Math.PI / 2 - 0.01, cameraRotation.current.targetPitch)
 			);
 		};
 
@@ -618,8 +648,8 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 	useFrame((state, delta) => {
 		if (!playerRef.current) return;
 		
-		// Ultra-smooth camera interpolation
-		const cameraSmoothing = 35;
+		// Professional camera smoothing (responsive but stable)
+		const cameraSmoothing = 25; // Industry standard responsiveness
 		
 		cameraRotation.current.yaw = THREE.MathUtils.lerp(
 			cameraRotation.current.yaw,
@@ -632,6 +662,7 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 			cameraSmoothing * delta
 		);
 		
+		// Apply professional FPS camera rotation
 		camera.rotation.order = 'YXZ';
 		camera.rotation.y = cameraRotation.current.yaw;
 		camera.rotation.x = cameraRotation.current.pitch;
@@ -702,19 +733,19 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 			
 			setHorizontalVelocity(newHorizontalVel);
 			
-			// Gamepad camera
+			// Gamepad camera with professional sensitivity
 			if (isGamepadConnected && gamepadState && isPointerLocked) {
 				const rightStickX = gamepadState.rightStick.x || 0;
 				const rightStickY = gamepadState.rightStick.y || 0;
 				
-				const gamepadSensitivity = config.player.mouseSensitivity * 0.06;
+				const gamepadSensitivity = config.player.mouseSensitivity * 0.04;
 				
 				cameraRotation.current.targetYaw -= rightStickX * gamepadSensitivity * delta;
 				cameraRotation.current.targetPitch -= rightStickY * gamepadSensitivity * delta;
 				
 				cameraRotation.current.targetPitch = Math.max(
-					-Math.PI / 2 + 0.1,
-					Math.min(Math.PI / 2 - 0.1, cameraRotation.current.targetPitch)
+					-Math.PI / 2 + 0.01,
+					Math.min(Math.PI / 2 - 0.01, cameraRotation.current.targetPitch)
 				);
 			}
 		} else {
@@ -728,7 +759,7 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 		
 		if (movement.current.jump) {
 			const terrainHeight = terrainEngine.getTerrainHeight(position.x, position.z);
-			const groundLevel = terrainHeight + 1.8;
+			const groundLevel = terrainHeight + 1.75; // Standard player height
 			
 			if (Math.abs(position.y - groundLevel) < 0.4) {
 				newVelocity.y = config.player.jumpHeight * 1.2;
@@ -746,7 +777,7 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 		
 		// Professional terrain collision
 		const terrainHeight = terrainEngine.getTerrainHeight(newPosition.x, newPosition.z);
-		const groundLevel = terrainHeight + 1.8;
+		const groundLevel = terrainHeight + 1.75; // Standard player height
 		
 		if (newPosition.y < groundLevel) {
 			newPosition.y = groundLevel;
@@ -756,12 +787,13 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 		setPosition(newPosition);
 		setVelocity(newVelocity);
 		
-		// Professional camera positioning
-		const eyeHeight = movement.current.crouch ? 1.3 : 1.75;
+		// Professional FPS camera positioning (industry standard)
+		const eyeHeight = movement.current.crouch ? 1.2 : 1.62; // 5'4" eye height standard
 		const cameraPosition = newPosition.clone();
 		cameraPosition.y += eyeHeight;
 		
-		state.camera.position.copy(cameraPosition);
+		// Instant camera following for professional responsiveness
+		camera.position.copy(cameraPosition);
 	});
 	
 	if (!isPointerLocked) {
@@ -769,9 +801,9 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 			<Html center>
 				<div className="pointer-events-auto text-center p-10 bg-gradient-to-br from-black/95 to-slate-900/95 backdrop-blur-lg rounded-2xl border border-cyan-400/50 shadow-2xl">
 					<div className="text-white mb-4 text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-						🎮 AAA FPS Explorer
+						🎮 Professional FPS
 					</div>
-					<div className="text-cyan-300 text-lg mb-6 font-medium">Click to enter immersive mode</div>
+					<div className="text-cyan-300 text-lg mb-6 font-medium">Click to enter FPS mode</div>
 					<div className="text-sm text-slate-300 space-y-3 max-w-md leading-relaxed">
 						{isGamepadConnected ? (
 							<>
@@ -784,10 +816,11 @@ function ProfessionalFPSPlayer({ config }: { config: FPSConfig }) {
 							</>
 						) : (
 							<>
-								<div className="font-bold text-cyan-400">⌨️ Professional Controls:</div>
+								<div className="font-bold text-cyan-400">⌨️ Professional FPS Controls:</div>
 								<div>WASD: Move • Mouse: Look around</div>
 								<div>Shift: Run • Ctrl: Crouch • Space: Jump</div>
-								<div>ESC: Exit immersive mode</div>
+								<div>ESC: Exit FPS mode</div>
+								<div className="text-xs text-cyan-200 mt-2">90° FOV • Professional sensitivity</div>
 							</>
 						)}
 					</div>
@@ -833,10 +866,10 @@ export function FPSRenderer3D({
 		<div className="w-full h-full relative bg-gradient-to-b from-blue-900 to-slate-900">
 			<Canvas
 				camera={{ 
-					fov: 78, 
-					near: 0.1, 
-					far: 2000,
-					position: [0, 15, 0]
+					fov: 90,        // Industry standard FPS FOV (Call of Duty, Counter-Strike)
+					near: 0.01,     // Very close near plane for weapon/arm visibility
+					far: 1000,      // Optimized far plane for performance
+					position: [0, 5, 0]  // Will be overridden by FPS player positioning
 				}}
 				shadows="percentage"
 				gl={{ 
@@ -876,6 +909,30 @@ export function FPSRenderer3D({
 					<ProfessionalFoliageSystem terrainEngine={terrainEngine} />
 					
 					<Stars radius={500} depth={80} count={2000} factor={6} saturation={0} fade speed={1} />
+					
+					<EffectComposer>
+						<SSAO
+							intensity={0.3}
+							radius={0.5}
+							lumInfluence={0.4}
+							bias={0.025}
+							samples={16}
+							rings={4}
+						/>
+						<Bloom
+							intensity={0.4}
+							luminanceThreshold={0.85}
+							luminanceSmoothing={0.025}
+						/>
+						<Vignette
+							eskil={false}
+							offset={0.1}
+							darkness={0.5}
+						/>
+						<ChromaticAberration
+							offset={[0.0005, 0.0012]}
+						/>
+					</EffectComposer>
 					
 					<ProfessionalFPSPlayer config={config} />
 				</Suspense>
