@@ -30,6 +30,16 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 	const directionRef = useRef(new THREE.Vector3(0, 0, -1));
 	const isGroundedRef = useRef(true);
 	const jumpCooldownRef = useRef(0);
+	const airTimeRef = useRef(0);
+	
+	// Advanced movement state
+	const [movementState, setMovementState] = useState({
+		isSliding: false,
+		isWallRunning: false,
+		canMantle: false,
+		slideTimer: 0,
+		lastGroundedTime: 0,
+	});
 	
 	// Player physics state
 	const [playerState, setPlayerState] = useState({
@@ -39,6 +49,15 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		isRunning: false,
 		isCrouching: false,
 		isJumping: false,
+		isAiming: false,
+	});
+
+	// Weapon sway and breathing effects
+	const weaponSwayRef = useRef({
+		time: 0,
+		breathingIntensity: 1.0,
+		movementSway: new THREE.Vector3(),
+		breathingSway: new THREE.Vector3(),
 	});
 
 	// Initialize camera properties
@@ -63,6 +82,87 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		return Math.max(height, 0); // Prevent going below sea level
 	}, []);
 
+	// Advanced movement mechanics
+	const handleAdvancedMovement = useCallback((inputState: any, velocity: THREE.Vector3, delta: number) => {
+		// Sliding mechanics
+		if (inputState.slide && !movementState.isSliding && velocity.length() > 8) {
+			setMovementState(prev => ({ ...prev, isSliding: true, slideTimer: 1.5 }));
+		}
+
+		if (movementState.isSliding) {
+			const slideDeceleration = 15; // Deceleration rate
+			const newSlideTimer = Math.max(0, movementState.slideTimer - delta);
+			
+			if (newSlideTimer <= 0 || velocity.length() < 2) {
+				setMovementState(prev => ({ ...prev, isSliding: false, slideTimer: 0 }));
+			} else {
+				// Apply slide momentum
+				velocity.multiplyScalar(Math.max(0.7, 1 - delta * slideDeceleration));
+				setMovementState(prev => ({ ...prev, slideTimer: newSlideTimer }));
+			}
+		}
+
+		// Air control (reduced effectiveness)
+		if (!isGroundedRef.current) {
+			airTimeRef.current += delta;
+			// Reduce air control effectiveness
+			const airControlFactor = Math.max(0.1, 1 - airTimeRef.current * 0.5);
+			velocity.x *= airControlFactor;
+			velocity.z *= airControlFactor;
+		} else {
+			airTimeRef.current = 0;
+		}
+
+		// Coyote time (grace period for jumping after leaving ground)
+		if (isGroundedRef.current) {
+			setMovementState(prev => ({ ...prev, lastGroundedTime: Date.now() }));
+		}
+
+		const coyoteTime = 150; // milliseconds
+		const canCoyoteJump = (Date.now() - movementState.lastGroundedTime) < coyoteTime;
+
+		// Enhanced jumping with coyote time
+		if (inputState.jump && (isGroundedRef.current || canCoyoteJump) && jumpCooldownRef.current <= 0) {
+			velocity.y = 12;
+			isGroundedRef.current = false;
+			jumpCooldownRef.current = 0.5;
+			setPlayerState(prev => ({ ...prev, isJumping: true }));
+		}
+	}, [movementState]);
+
+	// Weapon sway and breathing system
+	const updateWeaponSway = useCallback((delta: number, isMoving: boolean, isAiming: boolean) => {
+		const sway = weaponSwayRef.current;
+		sway.time += delta;
+
+		// Breathing effect (reduced when aiming)
+		const breathingRate = isAiming ? 0.5 : 1.0;
+		const breathingAmplitude = isAiming ? 0.3 : 1.0;
+		sway.breathingIntensity = THREE.MathUtils.lerp(sway.breathingIntensity, breathingAmplitude, delta * 2);
+		
+		sway.breathingSway.x = Math.sin(sway.time * breathingRate) * 0.001 * sway.breathingIntensity;
+		sway.breathingSway.y = Math.sin(sway.time * breathingRate * 0.5) * 0.0005 * sway.breathingIntensity;
+
+		// Movement sway
+		if (isMoving && !isAiming) {
+			const movementIntensity = playerState.isRunning ? 1.5 : 1.0;
+			sway.movementSway.x = Math.sin(sway.time * 8) * 0.002 * movementIntensity;
+			sway.movementSway.y = Math.sin(sway.time * 16) * 0.001 * movementIntensity;
+			sway.movementSway.z = Math.sin(sway.time * 6) * 0.0015 * movementIntensity;
+		} else {
+			sway.movementSway.lerp(new THREE.Vector3(), delta * 5);
+		}
+
+		// Apply weapon sway to camera
+		const totalSway = new THREE.Vector3()
+			.add(sway.breathingSway)
+			.add(sway.movementSway);
+
+		camera.rotation.x += totalSway.x;
+		camera.rotation.y += totalSway.y;
+		camera.rotation.z += totalSway.z;
+	}, [camera, playerState.isRunning]);
+
 	// Professional movement physics
 	useFrame((state, delta) => {
 		if (!inputManager?.getInputState || !controlsRef.current) return;
@@ -81,6 +181,7 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 
 		// Calculate movement input
 		const moveDirection = new THREE.Vector3(0, 0, 0);
+		const isMoving = inputState.forward || inputState.backward || inputState.left || inputState.right;
 		
 		if (inputState.forward) moveDirection.add(direction);
 		if (inputState.backward) moveDirection.sub(direction);
@@ -97,35 +198,35 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		let currentSpeed = config.player.walkSpeed;
 		let staminaDrain = 0;
 
-		if (inputState.run && playerState.stamina > 0 && isGroundedRef.current) {
+		// Enhanced speed calculations
+		if (movementState.isSliding) {
+			currentSpeed = config.player.runSpeed * 1.3; // Sliding is faster
+		} else if (inputState.run && playerState.stamina > 0 && isGroundedRef.current) {
 			currentSpeed = config.player.runSpeed;
-			staminaDrain = 25; // stamina per second
+			staminaDrain = 25;
 			setPlayerState(prev => ({ ...prev, isRunning: true }));
 		} else {
 			setPlayerState(prev => ({ ...prev, isRunning: false }));
 		}
 
-		if (inputState.crouch) {
+		if (inputState.crouch && !movementState.isSliding) {
 			currentSpeed = config.player.crouchSpeed;
 			setPlayerState(prev => ({ ...prev, isCrouching: true }));
 		} else {
 			setPlayerState(prev => ({ ...prev, isCrouching: false }));
 		}
 
-		// Apply horizontal movement with physics-based acceleration
+		// Advanced movement physics with proper acceleration curves
 		const targetVelocity = moveDirection.multiplyScalar(currentSpeed);
 		const acceleration = isGroundedRef.current ? 20 : 5; // Less air control
 		
-		velocity.x = THREE.MathUtils.lerp(velocity.x, targetVelocity.x, acceleration * delta);
-		velocity.z = THREE.MathUtils.lerp(velocity.z, targetVelocity.z, acceleration * delta);
+		// Smooth acceleration with easing
+		const accelFactor = 1 - Math.pow(0.001, delta);
+		velocity.x = THREE.MathUtils.lerp(velocity.x, targetVelocity.x, acceleration * delta * accelFactor);
+		velocity.z = THREE.MathUtils.lerp(velocity.z, targetVelocity.z, acceleration * delta * accelFactor);
 
-		// Jumping physics
-		if (inputState.jump && isGroundedRef.current && jumpCooldownRef.current <= 0) {
-			velocity.y = 12; // Jump velocity
-			isGroundedRef.current = false;
-			jumpCooldownRef.current = 0.5; // Jump cooldown
-			setPlayerState(prev => ({ ...prev, isJumping: true }));
-		}
+		// Handle advanced movement mechanics
+		handleAdvancedMovement(inputState, velocity, delta);
 
 		// Gravity and vertical physics
 		if (!isGroundedRef.current) {
@@ -136,9 +237,9 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		const newPosition = camera.position.clone();
 		newPosition.add(velocity.clone().multiplyScalar(delta));
 
-		// Terrain collision
+		// Terrain collision with enhanced detection
 		const terrainHeight = getTerrainHeight(newPosition.x, newPosition.z);
-		const playerHeight = playerState.isCrouching ? 1.2 : 1.8;
+		const playerHeight = movementState.isSliding ? 1.0 : (playerState.isCrouching ? 1.2 : 1.8);
 
 		if (newPosition.y <= terrainHeight + playerHeight) {
 			newPosition.y = terrainHeight + playerHeight;
@@ -152,10 +253,15 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		// Update camera position
 		camera.position.copy(newPosition);
 
-		// Update stamina
+		// Update weapon sway and breathing
+		updateWeaponSway(delta, isMoving, inputState.aim || false);
+
+		// Update stamina with enhanced recovery
+		const staminaRecovery = playerState.isRunning ? 0 : (isMoving ? 10 : 20);
 		setPlayerState(prev => ({
 			...prev,
-			stamina: Math.max(0, Math.min(100, prev.stamina - staminaDrain * delta + (staminaDrain > 0 ? 0 : 15 * delta)))
+			stamina: Math.max(0, Math.min(100, prev.stamina - staminaDrain * delta + staminaRecovery * delta)),
+			isAiming: inputState.aim || false,
 		}));
 	});
 
