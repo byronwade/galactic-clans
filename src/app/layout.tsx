@@ -7,7 +7,7 @@ import { GlobalInputAlert } from "@/components/GlobalInputAlert";
 const inter = Inter({
 	subsets: ["latin"],
 	display: "swap",
-	preload: true,
+	variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -49,31 +49,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 				<link rel="icon" type="image/png" href="/favicon.png" />
 				<link rel="apple-touch-icon" href="/favicon.png" />
-
-				{/* JSON-LD Structured Data */}
-				<script
-					type="application/ld+json"
-					dangerouslySetInnerHTML={{
-						__html: JSON.stringify({
-							"@context": "https://schema.org",
-							"@type": "WebApplication",
-							name: "Cosmic - Galactic Clans Universe Explorer",
-							description: "Explore procedurally generated galaxies, planets, and cosmic phenomena in this immersive 3D universe.",
-							url: "https://cosmic.galacticclans.com",
-							applicationCategory: "Game",
-							operatingSystem: "Web Browser",
-							offers: {
-								"@type": "Offer",
-								price: "0",
-								priceCurrency: "USD",
-							},
-							creator: {
-								"@type": "Organization",
-								name: "Galactic Clans Development Team",
-							},
-						}),
-					}}
-				/>
 			</head>
 			<body className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}>
 				<div id="game-ui">
