@@ -158,6 +158,11 @@ export default function TestSuitePage() {
 	const [selectedCategory, setSelectedCategory] = useState("All");
 	const [selectedTestIndex, setSelectedTestIndex] = useState(0);
 	const [showControllerHelp, setShowControllerHelp] = useState(false);
+	const [isClient, setIsClient] = useState(false);
+
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
 
 	const categories = ["All", ...Array.from(new Set(testPages.map((test) => test.category)))];
 
@@ -228,59 +233,61 @@ export default function TestSuitePage() {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900">
-			{/* Debug Section - Simple buttons with inline styles */}
-			<div
-				style={{
-					position: "fixed",
-					top: "10px",
-					right: "10px",
-					backgroundColor: "#1a1a1a",
-					padding: "15px",
-					borderRadius: "8px",
-					border: "1px solid #333",
-					zIndex: 1000,
-				}}
-			>
-				<div style={{ color: "#fff", marginBottom: "10px", fontSize: "14px" }}>Debug Navigation:</div>
-				<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-					<button
-						onClick={() => {
-							console.log("Debug: Going to Audio Test");
-							router.push("/test/audio");
-						}}
-						style={{
-							padding: "8px 12px",
-							backgroundColor: "#0066cc",
-							color: "#fff",
-							border: "none",
-							borderRadius: "4px",
-							cursor: "pointer",
-							fontSize: "12px",
-							pointerEvents: "auto",
-						}}
-					>
-						Audio Test
-					</button>
-					<button
-						onClick={() => {
-							console.log("Debug: Going to Debug Page");
-							router.push("/test/debug");
-						}}
-						style={{
-							padding: "8px 12px",
-							backgroundColor: "#cc6600",
-							color: "#fff",
-							border: "none",
-							borderRadius: "4px",
-							cursor: "pointer",
-							fontSize: "12px",
-							pointerEvents: "auto",
-						}}
-					>
-						Debug Page
-					</button>
+			{/* Debug Section - Client-only to prevent hydration mismatch */}
+			{isClient && (
+				<div
+					style={{
+						position: "fixed",
+						top: "10px",
+						right: "10px",
+						backgroundColor: "#1a1a1a",
+						padding: "15px",
+						borderRadius: "8px",
+						border: "1px solid #333",
+						zIndex: 1000,
+					}}
+				>
+					<div style={{ color: "#fff", marginBottom: "10px", fontSize: "14px" }}>Debug Navigation:</div>
+					<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+						<button
+							onClick={() => {
+								console.log("Debug: Going to Audio Test");
+								router.push("/test/audio");
+							}}
+							style={{
+								padding: "8px 12px",
+								backgroundColor: "#0066cc",
+								color: "#fff",
+								border: "none",
+								borderRadius: "4px",
+								cursor: "pointer",
+								fontSize: "12px",
+								pointerEvents: "auto",
+							}}
+						>
+							Audio Test
+						</button>
+						<button
+							onClick={() => {
+								console.log("Debug: Going to Debug Page");
+								router.push("/test/debug");
+							}}
+							style={{
+								padding: "8px 12px",
+								backgroundColor: "#cc6600",
+								color: "#fff",
+								border: "none",
+								borderRadius: "4px",
+								cursor: "pointer",
+								fontSize: "12px",
+								pointerEvents: "auto",
+							}}
+						>
+							Debug Page
+						</button>
+					</div>
 				</div>
-			</div>
+			)}
 
 			{/* Fixed Header */}
 			<header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-slate-700/30 bg-slate-900/95 backdrop-blur-sm">
