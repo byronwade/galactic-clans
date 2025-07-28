@@ -11,8 +11,8 @@
   "/test/galaxy/page": "app/test/galaxy/page.js",
   "/test/menu/page": "app/test/menu/page.js",
   "/test/page": "app/test/page.js",
-  "/test/planet/page": "app/test/planet/page.js",
   "/test/settings/page": "app/test/settings/page.js",
   "/test/solar-system/page": "app/test/solar-system/page.js",
+  "/test/planet/page": "app/test/planet/page.js",
   "/test/star/page": "app/test/star/page.js"
 }

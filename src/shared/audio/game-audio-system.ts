@@ -1040,7 +1040,8 @@ export class GameAudioSystem {
 				this.preloadedSounds.add(soundId);
 				console.log(`🔊 [AUDIO] Preloaded: ${soundId}`);
 			} catch (error) {
-				console.error(`🔊 [AUDIO] Failed to preload ${soundId}:`, error);
+				console.warn(`🔊 [AUDIO] Failed to preload ${soundId} (${soundEffect?.path || "unknown path"}):`, error instanceof Error ? error.message : "Unknown error");
+				// Continue without crashing - the sound just won't be available
 			}
 		});
 
@@ -1102,7 +1103,7 @@ export class GameAudioSystem {
 	 * Play a random sound from a category
 	 */
 	public async playRandom(category: AudioCategory, options: Partial<AudioConfig> = {}): Promise<void> {
-		const categorySounds = Object.keys(SOUND_EFFECTS).filter((id) => SOUND_EFFECTS[id].category === category);
+		const categorySounds = Object.keys(SOUND_EFFECTS).filter((id) => SOUND_EFFECTS[id]?.category === category);
 
 		if (categorySounds.length === 0) {
 			console.warn(`🔊 [AUDIO] No sounds found in category: ${category}`);
@@ -1110,7 +1111,9 @@ export class GameAudioSystem {
 		}
 
 		const randomSound = categorySounds[Math.floor(Math.random() * categorySounds.length)];
-		await this.play(randomSound, options);
+		if (randomSound) {
+			await this.play(randomSound, options);
+		}
 	}
 
 	/**
