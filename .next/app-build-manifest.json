@@ -11,20 +11,26 @@
       "static/chunks/main-app.js",
       "static/chunks/app/test/page.js"
     ],
-    "/test/fps-explorer/page": [
+    "/test/planet/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/test/fps-explorer/page.js"
+      "static/chunks/app/test/planet/page.js"
     ],
     "/test/blackhole/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/test/blackhole/page.js"
     ],
-    "/_not-found/page": [
+    "/test/controller/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/css/app/test/controller/page.css",
+      "static/chunks/app/test/controller/page.js"
+    ],
+    "/test/fps-explorer/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/test/fps-explorer/page.js"
     ]
   }
 }

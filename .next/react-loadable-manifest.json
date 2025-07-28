@@ -18,5 +18,17 @@
     "files": [
       "static/chunks/_app-pages-browser_src_components_generators_fps-explorer-generator_tsx.js"
     ]
+  },
+  "app/test/planet/page.tsx -> @/components/generators/planet-generator": {
+    "id": "app/test/planet/page.tsx -> @/components/generators/planet-generator",
+    "files": [
+      "static/chunks/_app-pages-browser_src_components_generators_planet-generator_tsx.js"
+    ]
+  },
+  "components/generators/planet-renderer-3d.tsx -> @/shared/procgen/planet/planet-renderer": {
+    "id": "components/generators/planet-renderer-3d.tsx -> @/shared/procgen/planet/planet-renderer",
+    "files": [
+      "static/chunks/_app-pages-browser_src_shared_procgen_planet_planet-renderer_ts.js"
+    ]
   }
 }

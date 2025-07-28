@@ -21,16 +21,17 @@ import { Sky, PointerLockControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
 import type { FPSConfig, FPSPerformanceMetrics } from "./fps-explorer-generator";
+import { Html } from "@react-three/drei";
 
 // Professional FPS Camera Controller
 function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: any }) {
 	const { camera, gl } = useThree();
-	const controlsRef = useRef<any>(null);
 	const velocityRef = useRef(new THREE.Vector3(0, 0, 0));
 	const directionRef = useRef(new THREE.Vector3(0, 0, -1));
 	const isGroundedRef = useRef(true);
 	const jumpCooldownRef = useRef(0);
 	const airTimeRef = useRef(0);
+	const [isPointerLocked, setIsPointerLocked] = useState(false);
 	
 	// Advanced movement state
 	const [movementState, setMovementState] = useState({
@@ -95,6 +96,68 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 			console.log(`🎮 [FPS] Camera initialized at position: (${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)})`);
 		}
 	}, [camera, config.player.fov, getTerrainHeight]);
+
+	// Handle pointer lock events
+	useEffect(() => {
+		const handlePointerLockChange = () => {
+			setIsPointerLocked(document.pointerLockElement === gl.domElement);
+		};
+
+		const handlePointerLockError = () => {
+			console.warn('🎮 [FPS] Pointer lock failed');
+			setIsPointerLocked(false);
+		};
+
+		const handleClick = () => {
+			if (!isPointerLocked) {
+				gl.domElement.requestPointerLock();
+			}
+		};
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.code === 'Escape' && isPointerLocked) {
+				document.exitPointerLock();
+			}
+		};
+
+		document.addEventListener('pointerlockchange', handlePointerLockChange);
+		document.addEventListener('pointerlockerror', handlePointerLockError);
+		document.addEventListener('keydown', handleKeyDown);
+		gl.domElement.addEventListener('click', handleClick);
+
+		return () => {
+			document.removeEventListener('pointerlockchange', handlePointerLockChange);
+			document.removeEventListener('pointerlockerror', handlePointerLockError);
+			document.removeEventListener('keydown', handleKeyDown);
+			gl.domElement.removeEventListener('click', handleClick);
+		};
+	}, [gl.domElement, isPointerLocked]);
+
+	// Manual mouse handling for FPS camera
+	useEffect(() => {
+		const handleMouseMove = (event: MouseEvent) => {
+			if (!isPointerLocked) return;
+
+			const sensitivity = config.player.mouseSensitivity * 0.002;
+			const deltaX = event.movementX * sensitivity;
+			const deltaY = event.movementY * sensitivity;
+
+			// Update camera rotation
+			camera.rotation.y -= deltaX;
+			camera.rotation.x -= deltaY;
+
+			// Clamp vertical rotation
+			camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+		};
+
+		if (isPointerLocked) {
+			document.addEventListener('mousemove', handleMouseMove);
+		}
+
+		return () => {
+			document.removeEventListener('mousemove', handleMouseMove);
+		};
+	}, [isPointerLocked, camera, config.player.mouseSensitivity]);
 
 	// Advanced movement mechanics
 	const handleAdvancedMovement = useCallback((inputState: any, velocity: THREE.Vector3, delta: number) => {
@@ -179,7 +242,7 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 
 	// Professional movement physics
 	useFrame((state, delta) => {
-		if (!inputManager?.getInputState || !controlsRef.current) return;
+		if (!inputManager?.getInputState) return;
 
 		const inputState = inputManager.getInputState();
 		const velocity = velocityRef.current;
@@ -279,16 +342,24 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		}));
 	});
 
-	return (
-		<PointerLockControls
-			ref={controlsRef}
-			camera={camera}
-			domElement={gl.domElement}
-			minPolarAngle={0}
-			maxPolarAngle={Math.PI}
-			pointerSpeed={config.player.mouseSensitivity}
-		/>
-	);
+	// Render click-to-activate overlay if pointer not locked
+	if (!isPointerLocked) {
+		return (
+			<>
+				<Html center>
+					<div className="pointer-events-auto text-center p-6 bg-black/80 backdrop-blur-sm rounded-lg border border-green-400/30">
+						<div className="text-white mb-2 text-lg font-semibold">🎮 FPS Controls</div>
+						<div className="text-green-400 text-sm mb-3">Click anywhere to activate mouse look</div>
+						<div className="text-xs text-slate-300">
+							Use WASD to move • Mouse to look around • Shift to run
+						</div>
+					</div>
+				</Html>
+			</>
+		);
+	}
+
+	return null; // Camera controls are handled by useFrame
 }
 
 // Professional Terrain System with LOD
