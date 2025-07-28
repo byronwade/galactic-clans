@@ -60,17 +60,6 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		breathingSway: new THREE.Vector3(),
 	});
 
-	// Initialize camera properties
-	useEffect(() => {
-		if (camera instanceof THREE.PerspectiveCamera) {
-			camera.fov = config.player.fov;
-			camera.near = 0.1;
-			camera.far = 1000;
-			camera.position.set(0, 15, 0); // Start higher to ensure we're above any terrain
-			camera.updateProjectionMatrix();
-		}
-	}, [camera, config.player.fov]);
-
 	// Terrain collision detection
 	const getTerrainHeight = useCallback((x: number, z: number) => {
 		// Simplified terrain height calculation - matches terrain generation
@@ -81,6 +70,31 @@ function FPSCamera({ config, inputManager }: { config: FPSConfig; inputManager: 
 		height += noise(x * 0.3, z * 0.3) * 1;   // Fine details
 		return Math.max(height, 0); // Prevent going below sea level
 	}, []);
+
+	// Initialize camera properties
+	useEffect(() => {
+		if (camera instanceof THREE.PerspectiveCamera) {
+			camera.fov = config.player.fov;
+			camera.near = 0.1;
+			camera.far = 1000;
+			
+			// Set initial position on ground level
+			const initialX = 0;
+			const initialZ = 0;
+			const terrainHeight = getTerrainHeight(initialX, initialZ);
+			const playerHeight = 1.8;
+			
+			camera.position.set(initialX, terrainHeight + playerHeight, initialZ);
+			
+			// Set initial rotation to look forward (along negative Z axis)
+			camera.rotation.set(0, 0, 0);
+			camera.lookAt(initialX, terrainHeight + playerHeight, initialZ - 1);
+			
+			camera.updateProjectionMatrix();
+			
+			console.log(`🎮 [FPS] Camera initialized at position: (${camera.position.x.toFixed(1)}, ${camera.position.y.toFixed(1)}, ${camera.position.z.toFixed(1)})`);
+		}
+	}, [camera, config.player.fov, getTerrainHeight]);
 
 	// Advanced movement mechanics
 	const handleAdvancedMovement = useCallback((inputState: any, velocity: THREE.Vector3, delta: number) => {
@@ -430,47 +444,54 @@ function TerrainSystem({ config }: { config: FPSConfig }) {
 
 // Professional Lighting and Environment
 function Environment({ config }: { config: FPSConfig }) {
-	const [timeOfDay, setTimeOfDay] = useState(0.3); // 0 = night, 0.5 = noon, 1 = night
+	const [timeOfDay, setTimeOfDay] = useState(0.3); // Start at daytime
 
-	// Animated day/night cycle
 	useFrame((state, delta) => {
-		setTimeOfDay(prev => (prev + delta * 0.01) % 1); // 100 second day cycle
+		// Slower day/night cycle for testing
+		setTimeOfDay(prev => (prev + delta * 0.005) % 1);
 	});
 
-	// Calculate sun position and colors
 	const sunAngle = timeOfDay * Math.PI * 2;
 	const sunHeight = Math.sin(sunAngle);
 	const sunIntensity = Math.max(0.1, sunHeight * 1.2);
 	
 	const sunPosition = new THREE.Vector3(
 		Math.cos(sunAngle) * 100,
-		Math.max(5, sunHeight * 50),
+		Math.max(10, sunHeight * 80), // Keep sun higher for better lighting
 		Math.sin(sunAngle) * 100
 	);
 
-	// Dynamic sky colors
-	const skyColor = new THREE.Color().lerpColors(
-		new THREE.Color(0x001122), // Night
-		new THREE.Color(0x87CEEB), // Day
-		Math.max(0, sunHeight)
-	);
+	// More realistic sky colors based on time of day
+	const skyColor = new THREE.Color();
+	if (sunHeight > 0.1) {
+		// Daytime: Blue sky
+		skyColor.setHex(0x87CEEB);
+	} else if (sunHeight > -0.1) {
+		// Sunset/sunrise: Orange/red
+		skyColor.setHex(0xFFB366);
+	} else {
+		// Night: Dark blue
+		skyColor.setHex(0x001122);
+	}
 
 	return (
 		<group>
-			{/* Advanced Sky System */}
+			{/* Professional Skybox */}
 			<Sky
 				distance={450000}
 				sunPosition={sunPosition}
 				inclination={0}
 				azimuth={0.25}
-				turbidity={10}
-				rayleigh={3}
+				turbidity={8} // Less hazy
+				rayleigh={2} // More blue scattering
+				mieCoefficient={0.005}
+				mieDirectionalG={0.8}
 			/>
 
 			{/* Professional Lighting Setup */}
 			<ambientLight 
-				intensity={Math.max(0.1, sunHeight * 0.4)} 
-				color={new THREE.Color(0.5, 0.6, 1.0)} 
+				intensity={Math.max(0.2, sunHeight * 0.5)} 
+				color={new THREE.Color(0.6, 0.7, 1.0)} 
 			/>
 			
 			<directionalLight
@@ -478,18 +499,18 @@ function Environment({ config }: { config: FPSConfig }) {
 				intensity={sunIntensity}
 				color={new THREE.Color(1, 0.95, 0.8)}
 				castShadow
-				shadow-mapSize-width={4096}
-				shadow-mapSize-height={4096}
+				shadow-mapSize-width={2048}
+				shadow-mapSize-height={2048}
 				shadow-camera-far={200}
-				shadow-camera-left={-100}
-				shadow-camera-right={100}
-				shadow-camera-top={100}
-				shadow-camera-bottom={-100}
+				shadow-camera-left={-50}
+				shadow-camera-right={50}
+				shadow-camera-top={50}
+				shadow-camera-bottom={-50}
 				shadow-bias={-0.0001}
 			/>
 
 			{/* Night time stars */}
-			{sunHeight < 0.2 && (
+			{sunHeight < 0.1 && (
 				<Stars
 					radius={300}
 					depth={50}
@@ -500,8 +521,8 @@ function Environment({ config }: { config: FPSConfig }) {
 				/>
 			)}
 
-			{/* Atmospheric fog */}
-			<fog attach="fog" args={[skyColor, 10, 400]} />
+			{/* Atmospheric fog for depth */}
+			<fog attach="fog" args={[skyColor, 20, 300]} />
 		</group>
 	);
 }
@@ -586,15 +607,20 @@ export const FPSRenderer3D = forwardRef<any, FPSRenderer3DProps>(({ config, onPe
 					fov: config.player.fov,
 					near: 0.1,
 					far: 1000,
-					position: [0, 10, 0],
+					position: [0, 5, 0], // Start closer to ground level
+					rotation: [0, 0, 0], // Look forward initially
 				}}
 				shadows
 				gl={{
 					antialias: true,
+					alpha: false, // Disable alpha for better performance
 				}}
-				onCreated={({ gl }) => {
+				onCreated={({ gl, scene }) => {
 					gl.shadowMap.enabled = true;
 					gl.shadowMap.type = THREE.PCFSoftShadowMap;
+					
+					// Set realistic background color
+					scene.background = new THREE.Color(0x87CEEB); // Sky blue
 				}}
 				style={{ width: "100%", height: "100%" }}
 			>
