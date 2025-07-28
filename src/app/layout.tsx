@@ -6,7 +6,9 @@ import { CriticalErrorBoundary } from "@/components/ErrorBoundary";
 const inter = Inter({ 
 	subsets: ["latin"],
 	display: 'swap',
-	preload: true
+	preload: true,
+	fallback: ['system-ui', 'arial'],
+	adjustFontFallback: false
 });
 
 export const metadata: Metadata = {

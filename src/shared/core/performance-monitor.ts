@@ -250,9 +250,9 @@ export class RealTimePerformanceMonitor {
 			renderTime: this.getRenderTime(),
 
 			// System Performance
-			cpuUsage: this.getCurrentCPUUsage(),
-			batteryLevel: this.getBatteryLevel(),
-			thermalState: this.getThermalState(),
+			cpuUsage: systemInfo.cpuUsage,
+			batteryLevel: systemInfo.batteryLevel,
+			thermalState: systemInfo.thermalState,
 
 			// Three.js Specific
 			programs: renderStats.programs,
@@ -338,6 +338,14 @@ export class RealTimePerformanceMonitor {
 	private getRenderTime(): number {
 		// Estimate render time as a percentage of frame time
 		return Math.round(this.currentFrameTime * 0.7); // Assume 70% of frame time is rendering
+	}
+
+	private getSystemInfo() {
+		return {
+			cpuUsage: this.getCurrentCPUUsage(),
+			batteryLevel: this.getBatteryLevel(),
+			thermalState: this.getThermalState(),
+		};
 	}
 
 	private getCurrentCPUUsage(): number {

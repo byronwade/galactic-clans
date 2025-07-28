@@ -70,8 +70,24 @@ function PerformanceTracker({ onMetricsUpdate }: { onMetricsUpdate: (metrics: an
 // Simplified FPS Player Controller - No Physics Library
 function FPSPlayer({ config }: { config: FPSConfig }) {
 	const playerRef = useRef<THREE.Group>(null);
-	const [position, setPosition] = useState<THREE.Vector3>(new THREE.Vector3(0, 15, 0));
+	
+	// Calculate proper initial position based on terrain
+	const getInitialPosition = useCallback(() => {
+		const noise = createNoise2D();
+		const terrainHeight = noise(0 * 0.01, 0 * 0.01) * 10; // Height at spawn point (0,0)
+		const properHeight = terrainHeight + config.player.playerHeight + 2; // Small clearance
+		return new THREE.Vector3(0, properHeight, 0);
+	}, [config.player.playerHeight]);
+	
+	const [position, setPosition] = useState<THREE.Vector3>(getInitialPosition());
 	const [velocity, setVelocity] = useState<THREE.Vector3>(new THREE.Vector3());
+	
+	// Get terrain height at position (simple function for collision)
+	const getTerrainHeight = useCallback((x: number, z: number): number => {
+		// Use same noise function as terrain
+		const noise = createNoise2D();
+		return noise(x * 0.01, z * 0.01) * 10;
+	}, []);
 	
 	// Simple physics simulation
 	useFrame((state, delta) => {
@@ -81,10 +97,16 @@ function FPSPlayer({ config }: { config: FPSConfig }) {
 		const newVelocity = velocity.clone();
 		newVelocity.y -= config.environment.gravity * delta;
 		
-		// Ground collision (simple)
+		// Calculate new position
 		const newPosition = position.clone().add(newVelocity.clone().multiplyScalar(delta));
-		if (newPosition.y < 2) {
-			newPosition.y = 2;
+		
+		// Ground collision with terrain height
+		const terrainHeight = getTerrainHeight(newPosition.x, newPosition.z);
+		const playerHeight = config.player.playerHeight;
+		const groundLevel = terrainHeight + playerHeight / 2;
+		
+		if (newPosition.y < groundLevel) {
+			newPosition.y = groundLevel;
 			newVelocity.y = 0;
 		}
 		
@@ -111,14 +133,14 @@ function SimplifiedTerrain() {
 	const terrainRef = useRef<THREE.Mesh>(null);
 	const noise = useMemo(() => createNoise2D(), []);
 	
-	// Generate simple terrain geometry
+	// Generate proper terrain geometry with heightmap
 	const terrainGeometry = useMemo(() => {
 		const geometry = new THREE.PlaneGeometry(200, 200, 64, 64);
 		const positionAttribute = geometry.attributes.position;
 		
 		if (!positionAttribute) return geometry;
 		
-		// Apply noise to vertices
+		// Apply noise to vertices for heightmap
 		for (let i = 0; i < positionAttribute.count; i++) {
 			const x = positionAttribute.getX(i);
 			const z = positionAttribute.getZ(i);
@@ -126,15 +148,26 @@ function SimplifiedTerrain() {
 			positionAttribute.setY(i, height);
 		}
 		
+		// IMPORTANT: Notify Three.js that the geometry has changed
+		positionAttribute.needsUpdate = true;
 		geometry.computeVertexNormals();
 		return geometry;
 	}, [noise]);
 	
 	return (
-		<mesh ref={terrainRef} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-			<primitive object={terrainGeometry} />
-			<meshLambertMaterial color="#2d5a2d" side={THREE.DoubleSide} />
-		</mesh>
+		<>
+			{/* Main terrain */}
+			<mesh ref={terrainRef} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+				<primitive object={terrainGeometry} />
+				<meshLambertMaterial color="#2d5a2d" side={THREE.DoubleSide} />
+			</mesh>
+			
+			{/* Backup ground plane at y=0 to ensure there's always a floor */}
+			<mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
+				<planeGeometry args={[500, 500]} />
+				<meshLambertMaterial color="#1a3d1a" />
+			</mesh>
+		</>
 	);
 }
 
@@ -156,7 +189,7 @@ function SimpleTree({ position }: { position: [number, number, number] }) {
 	);
 }
 
-// Simplified Environment
+// Simplified Environment with proper skybox
 function SimplifiedEnvironment() {
 	// Generate random tree positions
 	const treePositions = useMemo(() => {
@@ -171,33 +204,37 @@ function SimplifiedEnvironment() {
 
 	return (
 		<>
-			{/* Sky */}
+			{/* Sky with proper configuration */}
 			<Sky
 				distance={450000}
-				sunPosition={[0.2, 1, 0.2]}
+				sunPosition={[100, 20, 100]}
 				inclination={0}
 				azimuth={0.25}
+				mieCoefficient={0.005}
+				mieDirectionalG={0.7}
+				rayleigh={3}
+				turbidity={10}
 			/>
 			
-			{/* Stars */}
+			{/* Stars for nighttime */}
 			<Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
 			
-			{/* Lighting */}
-			<ambientLight intensity={0.4} />
+			{/* Lighting setup */}
+			<ambientLight intensity={0.3} />
 			<directionalLight
-				position={[50, 50, 50]}
+				position={[100, 100, 50]}
 				intensity={1}
 				castShadow
 				shadow-mapSize={[2048, 2048]}
 				shadow-camera-far={500}
-				shadow-camera-left={-50}
-				shadow-camera-right={50}
-				shadow-camera-top={50}
-				shadow-camera-bottom={-50}
+				shadow-camera-left={-100}
+				shadow-camera-right={100}
+				shadow-camera-top={100}
+				shadow-camera-bottom={-100}
 			/>
 			
-			{/* Fog */}
-			<fog attach="fog" args={["#87CEEB", 10, 200]} />
+			{/* Fog for atmosphere */}
+			<fog attach="fog" args={["#87CEEB", 50, 200]} />
 			
 			{/* Trees */}
 			{treePositions.map((pos, index) => (
@@ -217,6 +254,13 @@ export interface FPSRenderer3DProps {
 export const FPSRenderer3D = forwardRef<any, FPSRenderer3DProps>(({ config, onPerformanceUpdate }, ref) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const inputManagerRef = useRef<any>(null);
+
+	// Calculate initial camera height based on terrain
+	const getInitialHeight = useCallback(() => {
+		const noise = createNoise2D();
+		const terrainHeight = noise(0 * 0.01, 0 * 0.01) * 10; // Height at spawn point (0,0)
+		return terrainHeight + config.player.playerHeight + 5; // Add some clearance
+	}, [config.player.playerHeight]);
 
 	// Handle performance metrics updates
 	const handlePerformanceUpdate = useCallback((metrics: any) => {
@@ -242,6 +286,8 @@ export const FPSRenderer3D = forwardRef<any, FPSRenderer3DProps>(({ config, onPe
 		getCanvas: () => canvasRef.current,
 	}));
 
+	const initialHeight = getInitialHeight();
+
 	return (
 		<div className="absolute inset-0 w-full h-full">
 			<Canvas
@@ -249,8 +295,8 @@ export const FPSRenderer3D = forwardRef<any, FPSRenderer3DProps>(({ config, onPe
 				camera={{
 					fov: config.player.fov,
 					near: 0.1,
-					far: 500,
-					position: [0, 15, 0],
+					far: 1000,
+					position: [0, initialHeight, 0],
 				}}
 				shadows
 				gl={{ 
@@ -262,6 +308,9 @@ export const FPSRenderer3D = forwardRef<any, FPSRenderer3DProps>(({ config, onPe
 					// Configure shadow mapping
 					gl.shadowMap.enabled = true;
 					gl.shadowMap.type = THREE.PCFSoftShadowMap;
+					
+					// Set clear color to sky blue to help with skybox
+					gl.setClearColor(new THREE.Color('#87CEEB'), 1);
 				}}
 			>
 				{/* Performance Monitor - INSIDE Canvas */}
