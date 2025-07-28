@@ -28,20 +28,25 @@
   "dependencies": {
     "@react-three/drei": "^10.6.1",
     "@react-three/fiber": "^9.2.0",
+    "@react-three/rapier": "^2.1.0",
     "@tailwindcss/postcss": "^4.1.11",
     "@tauri-apps/api": "^2.7.0",
     "bitecs": "^0.3.40",
+    "cannon-es": "^0.20.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.9",
     "gamepad.css": "^0.0.4",
     "lucide-react": "^0.525.0",
     "next": "^15.4.4",
+    "nipplejs": "^0.10.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "simplex-noise": "^4.0.3",
     "tailwind-merge": "^3.3.1",
     "three": "^0.166.1",
+    "three-stdlib": "^2.36.0",
+    "use-cannon": "^0.5.3",
     "zustand": "^5.0.6"
   }
 }
