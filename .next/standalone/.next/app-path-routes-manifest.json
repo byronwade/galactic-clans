@@ -1,0 +1,18 @@
+{
+  "/api/websocket/route": "/api/websocket",
+  "/_not-found/page": "/_not-found",
+  "/credits/page": "/credits",
+  "/test/blackhole/page": "/test/blackhole",
+  "/test/fps-explorer/page": "/test/fps-explorer",
+  "/page": "/",
+  "/test-suite/page": "/test-suite",
+  "/test/galaxy/page": "/test/galaxy",
+  "/test/controller/page": "/test/controller",
+  "/test/planet/page": "/test/planet",
+  "/test/page": "/test",
+  "/test/menu/page": "/test/menu",
+  "/test/settings/page": "/test/settings",
+  "/test/star/page": "/test/star",
+  "/test/audio/page": "/test/audio",
+  "/test/solar-system/page": "/test/solar-system"
+}

@@ -137,20 +137,23 @@ const AVAILABLE_ATTACHMENTS: WeaponAttachment[] = [
 
 // Weapon System Hook
 export function useWeaponSystem(initialWeapon?: WeaponConfig) {
-	const [weaponState, setWeaponState] = useState<WeaponState>(() => ({
-		currentWeapon: initialWeapon || DEFAULT_WEAPONS[0],
-		currentAmmo: initialWeapon?.magazineSize || DEFAULT_WEAPONS[0].magazineSize,
-		totalAmmo: initialWeapon?.totalAmmo || DEFAULT_WEAPONS[0].totalAmmo,
-		isReloading: false,
-		reloadProgress: 0,
-		isFiring: false,
-		lastShotTime: 0,
-		recoilOffset: new THREE.Vector2(0, 0),
-		weaponTemperature: 0,
-	}));
+	const [weaponState, setWeaponState] = useState<WeaponState>(() => {
+		const weapon = initialWeapon || DEFAULT_WEAPONS[0]!;
+		return {
+			currentWeapon: weapon,
+			currentAmmo: weapon.magazineSize,
+			totalAmmo: weapon.totalAmmo,
+			isReloading: false,
+			reloadProgress: 0,
+			isFiring: false,
+			lastShotTime: 0,
+			recoilOffset: new THREE.Vector2(0, 0),
+			weaponTemperature: 0,
+		};
+	});
 
-	const reloadTimeoutRef = useRef<NodeJS.Timeout>();
-	const recoilRecoveryRef = useRef<NodeJS.Timeout>();
+	const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const recoilRecoveryRef = useRef<NodeJS.Timeout | null>(null);
 
 	// Calculate effective weapon stats with attachments
 	const effectiveWeaponStats = useMemo(() => {

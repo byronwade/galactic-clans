@@ -155,8 +155,9 @@ export function useOptimizedThreeJS(canvas: HTMLCanvasElement | null, config: Op
 
 			// Adjust shadow map size
 			if (config.enableShadows) {
-				const shadowMapSizes = [256, 512, 1024, 1024, 2048, 2048, 4096, 4096, 4096, 4096];
-				renderer.shadowMap.mapSize.setScalar(shadowMapSizes[Math.floor(level - 1)] || 512);
+				// Shadow map size is set on individual lights, not the renderer
+				// const shadowMapSizes = [256, 512, 1024, 1024, 2048, 2048, 4096, 4096, 4096, 4096];
+				// Shadow map size should be configured on DirectionalLight.shadow.mapSize
 			}
 
 			// Adjust render target scale
@@ -354,12 +355,13 @@ export function useOptimizedThreeJS(canvas: HTMLCanvasElement | null, config: Op
 			renderer.dispose();
 			lodObjectsRef.current.forEach((lod) => {
 				lod.levels.forEach((level) => {
-					if (level.object.geometry) level.object.geometry.dispose();
-					if (level.object.material) {
-						if (Array.isArray(level.object.material)) {
-							level.object.material.forEach((mat) => mat.dispose());
+					const mesh = level.object as any; // Cast to access geometry/material
+					if (mesh.geometry) mesh.geometry.dispose();
+					if (mesh.material) {
+						if (Array.isArray(mesh.material)) {
+							mesh.material.forEach((mat: any) => mat.dispose());
 						} else {
-							level.object.material.dispose();
+							mesh.material.dispose();
 						}
 					}
 				});

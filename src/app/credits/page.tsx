@@ -23,7 +23,7 @@ export default function CreditsPage() {
 	const [showControls, setShowControls] = useState(true);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
-	const animationRef = useRef<number>();
+	const animationRef = useRef<number | undefined>(undefined);
 	const lastTimeRef = useRef<number>(0);
 
 	// Cinematic credit sections like real AAA games

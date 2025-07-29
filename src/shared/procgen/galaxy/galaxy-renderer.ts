@@ -524,8 +524,10 @@ export class GalaxyRenderer {
 		while (mesh.children.length > maxEffects) {
 			const randomIndex = Math.floor(Math.random() * mesh.children.length);
 			const child = mesh.children[randomIndex];
-			mesh.remove(child);
-			this.disposeMesh(child);
+			if (child) {
+				mesh.remove(child);
+				this.disposeMesh(child);
+			}
 		}
 	}
 
@@ -1078,17 +1080,20 @@ export class GalaxyRenderer {
 
 	private reduceParticleSystem(system: THREE.Points, factor: number): void {
 		const positions = system.geometry.attributes.position;
-		if (!positions) return;
+		if (!positions || !positions.array) return;
 
 		const oldCount = positions.count;
 		const newCount = Math.floor(oldCount * factor);
 		const newPositions = new Float32Array(newCount * 3);
+		const positionsArray = positions.array as Float32Array;
 
 		for (let i = 0; i < newCount; i++) {
 			const oldIndex = Math.floor(i / factor);
-			newPositions[i * 3] = positions.array[oldIndex * 3];
-			newPositions[i * 3 + 1] = positions.array[oldIndex * 3 + 1];
-			newPositions[i * 3 + 2] = positions.array[oldIndex * 3 + 2];
+			if (oldIndex * 3 + 2 < positionsArray.length) {
+				newPositions[i * 3] = positionsArray[oldIndex * 3] || 0;
+				newPositions[i * 3 + 1] = positionsArray[oldIndex * 3 + 1] || 0;
+				newPositions[i * 3 + 2] = positionsArray[oldIndex * 3 + 2] || 0;
+			}
 		}
 
 		system.geometry.setAttribute("position", new THREE.BufferAttribute(newPositions, 3));
@@ -1300,7 +1305,10 @@ export class GalaxyRenderer {
 		const distortionGeometry = new THREE.SphereGeometry(config.effectiveRadius * 1.5, 16, 16);
 
 		// Distort the geometry
-		const vertices = distortionGeometry.attributes.position.array;
+		const positionAttribute = distortionGeometry.attributes.position;
+		if (!positionAttribute || !positionAttribute.array) return;
+
+		const vertices = positionAttribute.array as Float32Array;
 		for (let i = 0; i < vertices.length; i += 3) {
 			const x = vertices[i];
 			const y = vertices[i + 1];
@@ -1308,12 +1316,12 @@ export class GalaxyRenderer {
 
 			// Apply asymmetric distortion
 			const distortion = 1 + config.morphology.asymmetryIndex * (Math.random() - 0.5);
-			vertices[i] *= distortion;
-			vertices[i + 1] *= distortion;
-			vertices[i + 2] *= distortion;
+			vertices[i] = (vertices[i] || 0) * distortion;
+			vertices[i + 1] = (vertices[i + 1] || 0) * distortion;
+			vertices[i + 2] = (vertices[i + 2] || 0) * distortion;
 		}
 
-		distortionGeometry.attributes.position.needsUpdate = true;
+		positionAttribute.needsUpdate = true;
 		distortionGeometry.computeVertexNormals();
 
 		const distortionMaterial = new THREE.MeshBasicMaterial({

@@ -511,6 +511,8 @@ export class AISystemManager {
 
 		// Move along path (simplified movement)
 		const nextWaypoint = path[1] || path[0];
+		if (!nextWaypoint) return "failure";
+		
 		const direction = nextWaypoint.clone().sub(agent.position).normalize();
 
 		agent.position.add(direction.multiplyScalar(agent.movementSpeed * context.deltaTime));
@@ -529,6 +531,8 @@ export class AISystemManager {
 		// Simple patrol behavior - move to random points
 		if (!agent.behaviorState.includes("patrol_target")) {
 			const randomNode = context.navmesh.nodes[Math.floor(Math.random() * context.navmesh.nodes.length)];
+			if (!randomNode) return "failure";
+			
 			agent.behaviorState = `patrol_target_${randomNode.id}`;
 		}
 

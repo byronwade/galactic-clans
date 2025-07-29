@@ -13,7 +13,7 @@
 
 "use client";
 
-import React, { ReactNode, useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, type ReactNode } from "react";
 import { Smartphone, Tablet, Monitor, RotateCcw } from "lucide-react";
 
 interface ScreenInfo {
@@ -129,7 +129,7 @@ export function ResponsiveLayout({ children, mobileBreakpoint = 768, tabletBreak
 			body.style.touchAction = "manipulation";
 			body.style.userSelect = "none";
 			body.style.webkitUserSelect = "none";
-			body.style.webkitTouchCallout = "none";
+			(body.style as any).webkitTouchCallout = "none";
 			html.style.overscrollBehavior = "none";
 
 			document.addEventListener("touchend", preventZoom, { passive: false });
@@ -141,7 +141,7 @@ export function ResponsiveLayout({ children, mobileBreakpoint = 768, tabletBreak
 				body.style.touchAction = "";
 				body.style.userSelect = "";
 				body.style.webkitUserSelect = "";
-				body.style.webkitTouchCallout = "";
+				(body.style as any).webkitTouchCallout = "";
 				html.style.overscrollBehavior = "";
 			};
 		}

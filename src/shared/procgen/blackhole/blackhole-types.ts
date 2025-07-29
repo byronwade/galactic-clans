@@ -1210,7 +1210,7 @@ export const BLACKHOLE_TYPES: Map<BlackHoleClass, BlackHoleTypeDefinition> = new
 
 			fundamentalPhysics: ["spacetime topology", "exotic matter", "quantum gravity"],
 			cosmologicalImplications: ["universe connectivity", "time travel", "causality"],
-			technologyApplicationations: ["interstellar travel", "time machines", "exotic matter engineering"],
+			technologyApplications: ["interstellar travel", "time machines", "exotic matter engineering"],
 		},
 	],
 
@@ -1377,7 +1377,14 @@ export function getBlackHoleTypeByClass(blackHoleClass: BlackHoleClass): BlackHo
 export function getRandomBlackHoleType(): BlackHoleTypeDefinition {
 	const types = Array.from(BLACKHOLE_TYPES.values());
 	const weightedTypes = types.filter((type) => Math.random() < type.discoverability);
-	return weightedTypes.length > 0 ? weightedTypes[Math.floor(Math.random() * weightedTypes.length)] : types[Math.floor(Math.random() * types.length)];
+
+	if (weightedTypes.length > 0) {
+		const selectedType = weightedTypes[Math.floor(Math.random() * weightedTypes.length)];
+		return selectedType!; // We know this exists since array length > 0
+	}
+
+	const selectedType = types[Math.floor(Math.random() * types.length)];
+	return selectedType!; // We know BLACKHOLE_TYPES is never empty
 }
 
 export function getBlackHoleTypesByObservationalStatus(status: "confirmed" | "probable" | "theoretical" | "speculative"): BlackHoleTypeDefinition[] {

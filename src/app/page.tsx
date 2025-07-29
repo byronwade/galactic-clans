@@ -373,7 +373,7 @@ export default function Home() {
 
 	return (
 		<div className="relative h-screen overflow-hidden bg-black">
-			<MainMenu onSettings={handleSettings} onCredits={handleCredits} />
+			<MainMenu />
 		</div>
 	);
 }

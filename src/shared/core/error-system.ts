@@ -53,9 +53,42 @@ export class ErrorLogger {
 		return ErrorLogger.instance;
 	}
 
-	logError(error: GameError): void {
-		this.errors.push(error);
-		console.error(`[${error.category}:${error.severity}] ${error.message}`, error);
+	logError(error: GameError): void;
+	logError(category: string, message: string, errorData?: any): void;
+	logError(errorOrCategory: GameError | string, message?: string, errorData?: any): void {
+		if (typeof errorOrCategory === "string") {
+			// Handle string-based error logging
+			const gameError: GameError = {
+				id: Date.now().toString(),
+				category: ErrorCategory.SYSTEM,
+				severity: ErrorSeverity.HIGH,
+				message: `[${errorOrCategory}] ${message}`,
+				timestamp: Date.now(),
+				context: errorData,
+			};
+			this.errors.push(gameError);
+			console.error(`[${gameError.category}:${gameError.severity}] ${gameError.message}`, errorData);
+		} else {
+			// Handle GameError object
+			this.errors.push(errorOrCategory);
+			console.error(`[${errorOrCategory.category}:${errorOrCategory.severity}] ${errorOrCategory.message}`, errorOrCategory);
+		}
+	}
+
+	logInfo(category: string, message: string): void {
+		console.log(`[${category}:INFO] ${message}`);
+	}
+
+	logWarning(category: string, message: string): void {
+		const gameError: GameError = {
+			id: Date.now().toString(),
+			category: ErrorCategory.SYSTEM,
+			severity: ErrorSeverity.MEDIUM,
+			message: `[${category}] ${message}`,
+			timestamp: Date.now(),
+		};
+		this.errors.push(gameError);
+		console.warn(`[${category}:WARNING] ${message}`);
 	}
 
 	getErrors(): GameError[] {

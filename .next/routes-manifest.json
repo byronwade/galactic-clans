@@ -1,0 +1,194 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    },
+    {
+      "source": "/test.html",
+      "destination": "/test",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/test\\.html(?:/)?$"
+    },
+    {
+      "source": "/controller-test.html",
+      "destination": "/test/controller",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/controller-test\\.html(?:/)?$"
+    },
+    {
+      "source": "/planet-test.html",
+      "destination": "/test/planet",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/planet-test\\.html(?:/)?$"
+    },
+    {
+      "source": "/solar-system-test.html",
+      "destination": "/test/solar-system",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/solar-system-test\\.html(?:/)?$"
+    },
+    {
+      "source": "/galaxy-test.html",
+      "destination": "/test/galaxy",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/galaxy-test\\.html(?:/)?$"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "credentialless"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ],
+      "regex": "^(?:/(.*))(?:/)?$"
+    }
+  ],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [
+      {
+        "source": "/ws",
+        "destination": "/api/websocket",
+        "regex": "^/ws(?:/)?$"
+      }
+    ],
+    "fallback": []
+  },
+  "dynamicRoutes": [],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/credits",
+      "regex": "^/credits(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/credits(?:/)?$"
+    },
+    {
+      "page": "/test",
+      "regex": "^/test(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test(?:/)?$"
+    },
+    {
+      "page": "/test/audio",
+      "regex": "^/test/audio(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/audio(?:/)?$"
+    },
+    {
+      "page": "/test/blackhole",
+      "regex": "^/test/blackhole(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/blackhole(?:/)?$"
+    },
+    {
+      "page": "/test/controller",
+      "regex": "^/test/controller(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/controller(?:/)?$"
+    },
+    {
+      "page": "/test/fps-explorer",
+      "regex": "^/test/fps\\-explorer(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/fps\\-explorer(?:/)?$"
+    },
+    {
+      "page": "/test/galaxy",
+      "regex": "^/test/galaxy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/galaxy(?:/)?$"
+    },
+    {
+      "page": "/test/menu",
+      "regex": "^/test/menu(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/menu(?:/)?$"
+    },
+    {
+      "page": "/test/planet",
+      "regex": "^/test/planet(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/planet(?:/)?$"
+    },
+    {
+      "page": "/test/settings",
+      "regex": "^/test/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/settings(?:/)?$"
+    },
+    {
+      "page": "/test/solar-system",
+      "regex": "^/test/solar\\-system(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/solar\\-system(?:/)?$"
+    },
+    {
+      "page": "/test/star",
+      "regex": "^/test/star(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test/star(?:/)?$"
+    },
+    {
+      "page": "/test-suite",
+      "regex": "^/test\\-suite(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/test\\-suite(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "RSC",
+    "varyHeader": "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Next-Router-Segment-Prefetch",
+    "prefetchHeader": "Next-Router-Prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "Next-Router-Segment-Prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments"
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

@@ -135,11 +135,11 @@ const ENVIRONMENT_AUDIO = {
 class FPSAudioEngine {
 	private audioContext: AudioContext;
 	private listener: AudioListener;
-	private reverbNode: ConvolverNode;
-	private masterGain: GainNode;
-	private musicGain: GainNode;
-	private sfxGain: GainNode;
-	private voiceGain: GainNode;
+	private reverbNode!: ConvolverNode;
+	private masterGain!: GainNode;
+	private musicGain!: GainNode;
+	private sfxGain!: GainNode;
+	private voiceGain!: GainNode;
 	private audioSources: Map<string, AudioBufferSourceNode>;
 	private config: AudioConfig;
 	private impulseResponses: Map<string, AudioBuffer>;
@@ -395,7 +395,10 @@ export function useFPSAudio(initialConfig: Partial<AudioConfig> = {}) {
 		if (!audioEngineRef.current) return;
 
 		const materialData = MATERIAL_AUDIO[material] || MATERIAL_AUDIO.grass;
+		if (!materialData || !materialData.footstep || materialData.footstep.length === 0) return;
+
 		const soundUrl = materialData.footstep[Math.floor(Math.random() * materialData.footstep.length)];
+		if (!soundUrl) return;
 
 		audioEngineRef.current.playSound({
 			id: `footstep_${Date.now()}`,

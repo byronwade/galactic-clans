@@ -11,7 +11,29 @@ const nextConfig = {
 	},
 
 	// Configure for game assets and WebGL
-	webpack: (config, { isServer }) => {
+	webpack: (config, { isServer, dev }) => {
+		// Fix webpack cache issues with large dependency trees
+		if (config.cache && !dev) {
+			// Keep memory cache but disable problematic snapshot caching
+			config.cache = {
+				type: "memory",
+			};
+
+			// Disable dependency snapshot caching that causes hanging
+			config.snapshot = {
+				immutablePaths: [],
+				managedPaths: [],
+				module: {
+					timestamp: false,
+					hash: false,
+				},
+				resolve: {
+					timestamp: false,
+					hash: false,
+				},
+			};
+		}
+
 		// Handle Three.js and WebGL dependencies
 		if (!isServer) {
 			config.resolve.fallback = {
@@ -97,7 +119,7 @@ const nextConfig = {
 
 	// Configure TypeScript
 	typescript: {
-		ignoreBuildErrors: false,
+		ignoreBuildErrors: false, // Re-enabled for type safety
 	},
 
 	// SWC minification is enabled by default in Next.js 15+

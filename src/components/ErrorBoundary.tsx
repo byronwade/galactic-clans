@@ -14,7 +14,7 @@
 
 "use client";
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import React, { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw, Home, Bug, Clock, Monitor, Cpu, MemoryStick } from "lucide-react";
 
 interface ErrorBoundaryProps {
@@ -95,7 +95,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 		};
 	}
 
-	componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+	override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
 		// Log error details
 		console.group("🚨 Error Boundary Caught Error");
 		console.error("Error:", error);
@@ -234,13 +234,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 		}
 	};
 
-	componentWillUnmount() {
+	override componentWillUnmount() {
 		if (this.retryTimeoutId) {
 			clearTimeout(this.retryTimeoutId);
 		}
 	}
 
-	render() {
+	override render() {
 		if (this.state.hasError) {
 			// Use custom fallback if provided
 			if (this.props.fallback) {

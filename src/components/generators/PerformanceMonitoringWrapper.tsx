@@ -70,7 +70,7 @@ export function PerformanceMonitoringWrapper({
 	const lastTimeRef = useRef(performance.now());
 	const fpsBufferRef = useRef<number[]>([]);
 	const frameTimeBufferRef = useRef<number[]>([]);
-	const animationFrameRef = useRef<number>();
+	 const animationFrameRef = useRef<number | undefined>(undefined);
 
 	// Calculate FPS and frame time
 	const updatePerformanceMetrics = useCallback(() => {
